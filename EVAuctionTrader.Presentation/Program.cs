@@ -1,5 +1,6 @@
 using EVAuctionTrader.DataAccess;
 using EVAuctionTrader.Presentation.Architecture;
+using EVAuctionTrader.Presentation.Helper;
 using EVDealerSales.Presentation.Configuration;
 using Microsoft.AspNetCore.DataProtection;
 using Stripe;
@@ -117,6 +118,7 @@ try
     using (var scope = app.Services.CreateScope())
     {
         var dbContext = scope.ServiceProvider.GetRequiredService<EVAuctionTraderDbContext>();
+        await DbSeeder.SeedUsersAsync(dbContext);
     }
 }
 catch (Exception e)

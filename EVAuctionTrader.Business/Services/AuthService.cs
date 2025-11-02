@@ -105,6 +105,7 @@ namespace EVAuctionTrader.Business.Services
                     Email = userRegistrationDto.Email,
                     Phone = userRegistrationDto.Phone,
                     Role = RoleType.Customer,
+                    Status = "Active",
                     PasswordHash = hashedPassword ?? throw new Exception("Password hashing failed."),
                 };
 
