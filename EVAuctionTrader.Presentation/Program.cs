@@ -23,7 +23,7 @@ var stripePublishableKey = builder.Configuration["Stripe:PublishableKey"];
 StripeConfiguration.ApiKey = stripeSecretKey;
 
 // Set up Stripe app info
-var appInfo = new AppInfo { Name = "MovieTheater", Version = "v1" };
+var appInfo = new AppInfo { Name = "EVAuctionTrader", Version = "v1" };
 StripeConfiguration.AppInfo = appInfo;
 
 // Register HTTP client for Stripe
@@ -77,7 +77,7 @@ try
 
     builder.Services.AddDataProtection()
         .PersistKeysToFileSystem(new DirectoryInfo(dataProtectionPath))
-        .SetApplicationName("EVDealerSales");
+        .SetApplicationName("EVAuctionTrader");
 }
 catch (Exception ex)
 {

@@ -1,0 +1,152 @@
+﻿@page
+@model EVAuctionTrader.Presentation.Pages.Home.LandingPageModel
+@{
+    ViewData["Title"] = "Home";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/landingPage.css" />
+}
+
+<section class="hero-section">
+    <div class="container-fluid px-0">
+        <div class="row g-0 min-vh-100">
+            <div class="col-lg-6 d-flex align-items-center">
+                <div class="hero-content p-5">
+                    <div class="hero-badge mb-4">
+                        <i class="bi bi-lightning-charge-fill me-2"></i>
+                        Pre-Owned EV Marketplace
+                    </div>
+                    <h1 class="hero-title mb-4">
+                        Buy & Sell
+                        <span class="text-primary">Used Electric Vehicles & Batteries</span>
+                    </h1>
+                    <p class="hero-description mb-5">
+                        Join the largest marketplace for pre-owned electric vehicles and batteries.
+                        Discover great deals through auctions or buy directly from verified sellers.
+                        Sustainable mobility made affordable.
+                    </p>
+                    <div class="hero-actions">
+                        <a asp-page="/Vehicle/BrowseVehicles" class="btn btn-primary btn-lg me-3">
+                            <i class="bi bi-search me-2"></i>
+                            Browse Listings
+                        </a>
+                        <a asp-page="/Auction/Index" class="btn btn-outline-primary btn-lg">
+                            <i class="bi bi-hammer me-2"></i>
+                            Live Auctions
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="hero-image-full">
+                    <img src="https://images.unsplash.com/photo-1560958089-b8a1929cea89?q=80&w=1171&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                         alt="Used Electric Vehicle Marketplace" class="hero-image">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="stats-section py-5">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card text-center">
+                    <div class="stat-number">1,500+</div>
+                    <div class="stat-label">Active Listings</div>
+                    <div class="stat-description">vehicles & batteries available</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card text-center">
+                    <div class="stat-number">30%</div>
+                    <div class="stat-label">Average Savings</div>
+                    <div class="stat-description">vs. buying new</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card text-center">
+                    <div class="stat-number">98%</div>
+                    <div class="stat-label">Customer Satisfaction</div>
+                    <div class="stat-description">rated by our traders</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card text-center">
+                    <div class="stat-number">24/7</div>
+                    <div class="stat-label">Support</div>
+                    <div class="stat-description">always here to help</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="benefits-section py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <div class="benefits-content">
+                    <h2 class="section-title mb-4">Why Trade Pre-Owned EVs?</h2>
+                    <p class="section-description mb-5">
+                        Make sustainable choices more accessible. Our marketplace connects buyers and sellers
+                        of quality used electric vehicles and batteries, extending their lifecycle and reducing waste.
+                    </p>
+
+                    <div class="benefit-list">
+                        <div class="benefit-item">
+                            <div class="benefit-icon">
+                                <i class="bi bi-piggy-bank"></i>
+                            </div>
+                            <div class="benefit-content">
+                                <h5>Affordable Prices</h5>
+                                <p>Save 30-50% compared to new EVs while going electric</p>
+                            </div>
+                        </div>
+
+                        <div class="benefit-item">
+                            <div class="benefit-icon">
+                                <i class="bi bi-hammer"></i>
+                            </div>
+                            <div class="benefit-content">
+                                <h5>Auction System</h5>
+                                <p>Bid on vehicles and batteries to get the best deals</p>
+                            </div>
+                        </div>
+
+                        <div class="benefit-item">
+                            <div class="benefit-icon">
+                                <i class="bi bi-shield-check"></i>
+                            </div>
+                            <div class="benefit-content">
+                                <h5>Verified Sellers</h5>
+                                <p>All listings inspected and certified for quality assurance</p>
+                            </div>
+                        </div>
+
+                        <div class="benefit-item">
+                            <div class="benefit-icon">
+                                <i class="bi bi-recycle"></i>
+                            </div>
+                            <div class="benefit-content">
+                                <h5>Sustainable Impact</h5>
+                                <p>Extend EV lifecycle and reduce environmental footprint</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="benefits-image">
+                    <img src="https://images.unsplash.com/photo-1593941707882-a5bba14938c7?q=80&w=1172&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                         alt="Used Electric Vehicle Benefits" class="img-fluid rounded-3">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script src="~/js/landingPage.js" asp-append-version="true"></script>
+}

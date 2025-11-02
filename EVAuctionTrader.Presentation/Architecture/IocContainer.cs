@@ -1,4 +1,6 @@
-﻿using EVAuctionTrader.DataAccess;
+﻿using EVAuctionTrader.Business.Interfaces;
+using EVAuctionTrader.Business.Services;
+using EVAuctionTrader.DataAccess;
 using EVAuctionTrader.DataAccess.Commons;
 using EVAuctionTrader.DataAccess.Interfaces;
 using EVAuctionTrader.DataAccess.Repository;
@@ -53,6 +55,7 @@ namespace EVAuctionTrader.Presentation.Architecture
             services.AddScoped<ICurrentTime, CurrentTime>();
             services.AddScoped<IClaimsService, ClaimsService>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IAuthService, AuthService>();
             services.AddHttpContextAccessor();
 
             return services;
