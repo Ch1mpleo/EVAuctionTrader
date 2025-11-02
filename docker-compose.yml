@@ -14,8 +14,6 @@ services:
       - "JWT__Audience=EVAuctionTrader_Audience"
     ports:
       - "5000:5000"
-    volumes:
-      - ./data/keys:/keys
 
   evauctiontrader.database:
     image: postgres:15
