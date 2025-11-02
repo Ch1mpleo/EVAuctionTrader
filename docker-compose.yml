@@ -8,7 +8,7 @@ services:
       - evauctiontrader.database
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - "ConnectionStrings__DefaultConnection=Server=evauctiontrader.database,1433;Database=EVAuctionTraderDb;User Id=sa;Password=StrongPassw0rd123;TrustServerCertificate=True;Encrypt=False;MultipleActiveResultSets=True"
+      - "ConnectionStrings__DefaultConnection=Host=evauctiontrader.database;Port=5432;Database=EVAuctionTraderDb;Username=postgres;Password=postgres;Pooling=true"
       - "JWT__SecretKey=EVDealerSales_SECRETKEY_SIEUCAPBAOMAT_VAYMACHUADU16KYTU"
       - "JWT__Issuer=EVAuctionTrader_Issuer"
       - "JWT__Audience=EVAuctionTrader_Audience"
@@ -18,16 +18,17 @@ services:
       - ./data/keys:/keys
 
   evauctiontrader.database:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: evauctiontrader-sqlserver
-    ports:
-      - "11433:1433"
+    image: postgres:15
+    container_name: evauctiontrader-postgres
     environment:
-      - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=StrongPassw0rd123
+      - POSTGRES_DB=EVAuctionTraderDb
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5433:5432"
     volumes:
-      - sqlserver-data:/var/opt/mssql
+      - postgres-data:/var/lib/postgresql/data
 
 volumes:
-  sqlserver-data:
+  postgres-data:
    driver: local
