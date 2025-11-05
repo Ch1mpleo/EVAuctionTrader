@@ -1,8 +1,8 @@
 ﻿namespace EVAuctionTrader.BusinessObject.Enums
 {
-    public enum OrderType
+    public enum PostType
     {
-        BuyNow,
-        AuctionWin
+        Vehicle,
+        Battery
     }
 }

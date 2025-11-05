@@ -3,11 +3,10 @@
     public class Bid : BaseEntity
     {
         public Guid AuctionId { get; set; }
-        public Auction Auction { get; set; }
-
         public Guid BidderId { get; set; }
-        public User Bidder { get; set; }
-
         public decimal Amount { get; set; }
+
+        public Auction Auction { get; set; }
+        public User Bidder { get; set; }
     }
 }

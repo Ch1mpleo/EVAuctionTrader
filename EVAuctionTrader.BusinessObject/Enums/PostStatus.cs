@@ -1,9 +1,10 @@
 ﻿namespace EVAuctionTrader.BusinessObject.Enums
 {
-    public enum ListingStatus
+    public enum PostStatus
     {
+        Draft,
         Active,
-        Sold,
-        Closed
+        Closed,
+        Removed
     }
 }

@@ -1,8 +1,8 @@
 ﻿namespace EVAuctionTrader.BusinessObject.Enums
 {
-    public enum InvoiceStatus
+    public enum PostVersion
     {
-        Paid,
-        Refunded
+        Free,
+        Vip
     }
 }

@@ -2,7 +2,6 @@
 using EVAuctionTrader.Business.Utils;
 using EVAuctionTrader.BusinessObject.DTOs.AuthDTOs;
 using EVAuctionTrader.BusinessObject.Enums;
-using EVAuctionTrader.DataAccess;
 using EVAuctionTrader.DataAccess.Entities;
 using EVAuctionTrader.DataAccess.Interfaces;
 using Microsoft.Extensions.Configuration;
@@ -104,7 +103,7 @@ namespace EVAuctionTrader.Business.Services
                     FullName = userRegistrationDto.FullName,
                     Email = userRegistrationDto.Email,
                     Phone = userRegistrationDto.Phone,
-                    Role = RoleType.Customer,
+                    Role = RoleType.Member,
                     Status = "Active",
                     PasswordHash = hashedPassword ?? throw new Exception("Password hashing failed."),
                 };

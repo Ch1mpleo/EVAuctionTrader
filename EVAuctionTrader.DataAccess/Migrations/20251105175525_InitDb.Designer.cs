@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EVAuctionTrader.DataAccess.Migrations
 {
     [DbContext(typeof(EVAuctionTraderDbContext))]
-    [Migration("20251101153834_InitDb")]
+    [Migration("20251105175525_InitDb")]
     partial class InitDb
     {
         /// <inheritdoc />
@@ -37,10 +37,6 @@ namespace EVAuctionTrader.DataAccess.Migrations
 
                     b.Property<Guid?>("BatteryId")
                         .HasColumnType("uuid");
-
-                    b.Property<string>("ConditionNote")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -75,9 +71,6 @@ namespace EVAuctionTrader.DataAccess.Migrations
                     b.Property<decimal>("MinIncrement")
                         .HasColumnType("numeric");
 
-                    b.Property<Guid>("SellerId")
-                        .HasColumnType("uuid");
-
                     b.Property<decimal>("StartPrice")
                         .HasColumnType("numeric");
 
@@ -105,7 +98,7 @@ namespace EVAuctionTrader.DataAccess.Migrations
 
                     b.HasIndex("BatteryId");
 
-                    b.HasIndex("SellerId");
+                    b.HasIndex("CreatedBy");
 
                     b.HasIndex("VehicleId");
 
@@ -146,14 +139,6 @@ namespace EVAuctionTrader.DataAccess.Migrations
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
-
-                    b.Property<string>("LocationCity")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("LocationCountry")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<string>("Manufacturer")
                         .IsRequired()
@@ -226,62 +211,7 @@ namespace EVAuctionTrader.DataAccess.Migrations
                     b.ToTable("Bids");
                 });
 
-            modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Dispute", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("HandledBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<Guid>("OrderId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("RaisedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Reason")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Resolution")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrderId");
-
-                    b.ToTable("Disputes");
-                });
-
-            modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Invoice", b =>
+            modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Conversation", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -302,24 +232,11 @@ namespace EVAuctionTrader.DataAccess.Migrations
                     b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("InvoiceNumber")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
-                    b.Property<DateTime>("IssuedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("OrderId")
+                    b.Property<Guid>("PostId")
                         .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("PaidAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<decimal>("PlatformFee")
-                        .HasColumnType("numeric");
 
                     b.Property<Guid>("SellerId")
                         .HasColumnType("uuid");
@@ -327,15 +244,6 @@ namespace EVAuctionTrader.DataAccess.Migrations
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<decimal>("Subtotal")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal>("TaxAmount")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal>("TotalAmount")
-                        .HasColumnType("numeric");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -345,26 +253,28 @@ namespace EVAuctionTrader.DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OrderId");
+                    b.HasIndex("BuyerId");
 
-                    b.ToTable("Invoices");
+                    b.HasIndex("SellerId");
+
+                    b.HasIndex("PostId", "BuyerId", "SellerId")
+                        .IsUnique();
+
+                    b.ToTable("Conversations");
                 });
 
-            modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Listing", b =>
+            modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Message", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("BatteryId")
-                        .HasColumnType("uuid");
-
-                    b.Property<decimal>("BuyNowPrice")
-                        .HasColumnType("numeric");
-
-                    b.Property<string>("ConditionNote")
+                    b.Property<string>("Body")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<Guid>("ConversationId")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -372,9 +282,53 @@ namespace EVAuctionTrader.DataAccess.Migrations
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Currency")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("ReadAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("SenderId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ConversationId");
+
+                    b.HasIndex("SenderId");
+
+                    b.ToTable("Messages");
+                });
+
+            modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Post", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AuthorId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("BatteryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("timestamp with time zone");
@@ -386,23 +340,47 @@ namespace EVAuctionTrader.DataAccess.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("GalleryJson")
+                    b.Property<string>("Detail")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<DateTime?>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("ListingType")
+                    b.Property<string>("LocationAddress")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("MainPhotoUrl")
+                    b.Property<string>("LocationCity")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid>("SellerId")
+                    b.Property<string>("LocationDistrict")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PhotoUrl")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal?>("PostFeeAmount")
+                        .HasColumnType("numeric");
+
+                    b.Property<Guid?>("PostFeeTxId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("PostType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal?>("Price")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateTime?>("PublishedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -421,158 +399,31 @@ namespace EVAuctionTrader.DataAccess.Migrations
                     b.Property<Guid?>("VehicleId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("Version")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("AuthorId");
 
                     b.HasIndex("BatteryId");
 
-                    b.HasIndex("SellerId");
-
                     b.HasIndex("VehicleId");
 
-                    b.ToTable("Listings");
+                    b.ToTable("Posts");
                 });
 
-            modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Order", b =>
+            modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.PostComment", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("AuctionId")
+                    b.Property<Guid>("AuthorId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("BuyerId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<Guid?>("ListingId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("OrderType")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<decimal>("PlatformFee")
-                        .HasColumnType("numeric");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid>("SellerId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<decimal>("UnitPrice")
-                        .HasColumnType("numeric");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AuctionId");
-
-                    b.HasIndex("BuyerId");
-
-                    b.HasIndex("ListingId");
-
-                    b.HasIndex("SellerId");
-
-                    b.ToTable("Orders");
-                });
-
-            modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Payment", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("numeric");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Currency")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("InvoiceId")
-                        .HasColumnType("uuid");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTime?>("PaidAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("PayeeId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("PayerId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Provider")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("ProviderRef")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("InvoiceId");
-
-                    b.ToTable("Payments");
-                });
-
-            modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Review", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Comment")
+                    b.Property<string>("Body")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -591,16 +442,7 @@ namespace EVAuctionTrader.DataAccess.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
-                    b.Property<Guid>("OrderId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("Rating")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid>("RevieweeId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("ReviewerId")
+                    b.Property<Guid>("PostId")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime?>("UpdatedAt")
@@ -611,9 +453,11 @@ namespace EVAuctionTrader.DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OrderId");
+                    b.HasIndex("AuthorId");
 
-                    b.ToTable("Reviews");
+                    b.HasIndex("PostId");
+
+                    b.ToTable("PostComments");
                 });
 
             modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.User", b =>
@@ -701,14 +545,6 @@ namespace EVAuctionTrader.DataAccess.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("LocationCity")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("LocationCountry")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<string>("Model")
                         .IsRequired()
                         .HasColumnType("text");
@@ -735,11 +571,64 @@ namespace EVAuctionTrader.DataAccess.Migrations
                     b.ToTable("Vehicles");
                 });
 
-            modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Verification", b =>
+            modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Wallet", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
+
+                    b.Property<decimal>("Balance")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Wallets");
+                });
+
+            modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.WalletTransaction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric");
+
+                    b.Property<Guid?>("AuctionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal?>("BalanceAfter")
+                        .HasColumnType("numeric");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -753,25 +642,21 @@ namespace EVAuctionTrader.DataAccess.Migrations
                     b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("FacilityName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("FacilityReportUrl")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("FacilityVerifiedAt")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("Method")
+                    b.Property<string>("Note")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Note")
+                    b.Property<Guid?>("PostId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Provider")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ProviderRef")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -779,10 +664,7 @@ namespace EVAuctionTrader.DataAccess.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid>("SubjectId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("SubjectType")
+                    b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -792,38 +674,39 @@ namespace EVAuctionTrader.DataAccess.Migrations
                     b.Property<Guid?>("UpdatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime?>("VerifiedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("VerifiedBy")
+                    b.Property<Guid>("WalletId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("VerifiedBy");
+                    b.HasIndex("AuctionId");
 
-                    b.ToTable("Verifications");
+                    b.HasIndex("PostId");
+
+                    b.HasIndex("WalletId");
+
+                    b.ToTable("WalletTransactions");
                 });
 
             modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Auction", b =>
                 {
                     b.HasOne("EVAuctionTrader.DataAccess.Entities.Battery", "Battery")
-                        .WithMany("Auctions")
+                        .WithMany()
                         .HasForeignKey("BatteryId");
 
-                    b.HasOne("EVAuctionTrader.DataAccess.Entities.User", "Seller")
-                        .WithMany("Auctions")
-                        .HasForeignKey("SellerId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                    b.HasOne("EVAuctionTrader.DataAccess.Entities.User", "Creator")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("EVAuctionTrader.DataAccess.Entities.Vehicle", "Vehicle")
-                        .WithMany("Auctions")
+                        .WithMany()
                         .HasForeignKey("VehicleId");
 
                     b.Navigation("Battery");
 
-                    b.Navigation("Seller");
+                    b.Navigation("Creator");
 
                     b.Navigation("Vehicle");
                 });
@@ -833,7 +716,7 @@ namespace EVAuctionTrader.DataAccess.Migrations
                     b.HasOne("EVAuctionTrader.DataAccess.Entities.User", "Owner")
                         .WithMany("Batteries")
                         .HasForeignKey("OwnerId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Owner");
@@ -858,68 +741,19 @@ namespace EVAuctionTrader.DataAccess.Migrations
                     b.Navigation("Bidder");
                 });
 
-            modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Dispute", b =>
+            modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Conversation", b =>
                 {
-                    b.HasOne("EVAuctionTrader.DataAccess.Entities.Order", "Order")
-                        .WithMany("Disputes")
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Order");
-                });
-
-            modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Invoice", b =>
-                {
-                    b.HasOne("EVAuctionTrader.DataAccess.Entities.Order", "Order")
-                        .WithMany("Invoices")
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Order");
-                });
-
-            modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Listing", b =>
-                {
-                    b.HasOne("EVAuctionTrader.DataAccess.Entities.Battery", "Battery")
-                        .WithMany("Listings")
-                        .HasForeignKey("BatteryId");
-
-                    b.HasOne("EVAuctionTrader.DataAccess.Entities.User", "Seller")
-                        .WithMany("Listings")
-                        .HasForeignKey("SellerId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("EVAuctionTrader.DataAccess.Entities.Vehicle", "Vehicle")
-                        .WithMany("Listings")
-                        .HasForeignKey("VehicleId");
-
-                    b.Navigation("Battery");
-
-                    b.Navigation("Seller");
-
-                    b.Navigation("Vehicle");
-                });
-
-            modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Order", b =>
-                {
-                    b.HasOne("EVAuctionTrader.DataAccess.Entities.Auction", "Auction")
-                        .WithMany("Orders")
-                        .HasForeignKey("AuctionId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("EVAuctionTrader.DataAccess.Entities.User", "Buyer")
                         .WithMany()
                         .HasForeignKey("BuyerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("EVAuctionTrader.DataAccess.Entities.Listing", "Listing")
-                        .WithMany("Orders")
-                        .HasForeignKey("ListingId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                    b.HasOne("EVAuctionTrader.DataAccess.Entities.Post", "Post")
+                        .WithMany()
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("EVAuctionTrader.DataAccess.Entities.User", "Seller")
                         .WithMany()
@@ -927,35 +761,72 @@ namespace EVAuctionTrader.DataAccess.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Auction");
-
                     b.Navigation("Buyer");
 
-                    b.Navigation("Listing");
+                    b.Navigation("Post");
 
                     b.Navigation("Seller");
                 });
 
-            modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Payment", b =>
+            modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Message", b =>
                 {
-                    b.HasOne("EVAuctionTrader.DataAccess.Entities.Invoice", "Invoice")
-                        .WithMany("Payments")
-                        .HasForeignKey("InvoiceId")
+                    b.HasOne("EVAuctionTrader.DataAccess.Entities.Conversation", "Conversation")
+                        .WithMany("Messages")
+                        .HasForeignKey("ConversationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Invoice");
+                    b.HasOne("EVAuctionTrader.DataAccess.Entities.User", "Sender")
+                        .WithMany()
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Conversation");
+
+                    b.Navigation("Sender");
                 });
 
-            modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Review", b =>
+            modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Post", b =>
                 {
-                    b.HasOne("EVAuctionTrader.DataAccess.Entities.Order", "Order")
-                        .WithMany("Reviews")
-                        .HasForeignKey("OrderId")
+                    b.HasOne("EVAuctionTrader.DataAccess.Entities.User", "Author")
+                        .WithMany("Posts")
+                        .HasForeignKey("AuthorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Order");
+                    b.HasOne("EVAuctionTrader.DataAccess.Entities.Battery", "Battery")
+                        .WithMany()
+                        .HasForeignKey("BatteryId");
+
+                    b.HasOne("EVAuctionTrader.DataAccess.Entities.Vehicle", "Vehicle")
+                        .WithMany()
+                        .HasForeignKey("VehicleId");
+
+                    b.Navigation("Author");
+
+                    b.Navigation("Battery");
+
+                    b.Navigation("Vehicle");
+                });
+
+            modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.PostComment", b =>
+                {
+                    b.HasOne("EVAuctionTrader.DataAccess.Entities.User", "Author")
+                        .WithMany()
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("EVAuctionTrader.DataAccess.Entities.Post", "Post")
+                        .WithMany("Comments")
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Author");
+
+                    b.Navigation("Post");
                 });
 
             modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Vehicle", b =>
@@ -963,71 +834,77 @@ namespace EVAuctionTrader.DataAccess.Migrations
                     b.HasOne("EVAuctionTrader.DataAccess.Entities.User", "Owner")
                         .WithMany("Vehicles")
                         .HasForeignKey("OwnerId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Owner");
                 });
 
-            modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Verification", b =>
+            modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Wallet", b =>
                 {
-                    b.HasOne("EVAuctionTrader.DataAccess.Entities.User", "VerifiedByUser")
+                    b.HasOne("EVAuctionTrader.DataAccess.Entities.User", "User")
+                        .WithMany("Wallets")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.WalletTransaction", b =>
+                {
+                    b.HasOne("EVAuctionTrader.DataAccess.Entities.Auction", "Auction")
                         .WithMany()
-                        .HasForeignKey("VerifiedBy")
+                        .HasForeignKey("AuctionId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.Navigation("VerifiedByUser");
+                    b.HasOne("EVAuctionTrader.DataAccess.Entities.Post", "Post")
+                        .WithMany()
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("EVAuctionTrader.DataAccess.Entities.Wallet", "Wallet")
+                        .WithMany("Transactions")
+                        .HasForeignKey("WalletId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Auction");
+
+                    b.Navigation("Post");
+
+                    b.Navigation("Wallet");
                 });
 
             modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Auction", b =>
                 {
                     b.Navigation("Bids");
-
-                    b.Navigation("Orders");
                 });
 
-            modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Battery", b =>
+            modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Conversation", b =>
                 {
-                    b.Navigation("Auctions");
-
-                    b.Navigation("Listings");
+                    b.Navigation("Messages");
                 });
 
-            modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Invoice", b =>
+            modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Post", b =>
                 {
-                    b.Navigation("Payments");
-                });
-
-            modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Listing", b =>
-                {
-                    b.Navigation("Orders");
-                });
-
-            modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Order", b =>
-                {
-                    b.Navigation("Disputes");
-
-                    b.Navigation("Invoices");
-
-                    b.Navigation("Reviews");
+                    b.Navigation("Comments");
                 });
 
             modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.User", b =>
                 {
-                    b.Navigation("Auctions");
-
                     b.Navigation("Batteries");
 
-                    b.Navigation("Listings");
+                    b.Navigation("Posts");
 
                     b.Navigation("Vehicles");
+
+                    b.Navigation("Wallets");
                 });
 
-            modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Vehicle", b =>
+            modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Wallet", b =>
                 {
-                    b.Navigation("Auctions");
-
-                    b.Navigation("Listings");
+                    b.Navigation("Transactions");
                 });
 #pragma warning restore 612, 618
         }

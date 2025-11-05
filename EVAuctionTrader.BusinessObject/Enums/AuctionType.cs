@@ -1,8 +1,8 @@
 ﻿namespace EVAuctionTrader.BusinessObject.Enums
 {
-    public enum RoleType
+    public enum AuctionType
     {
-        Admin,
-        Member
+        Vehicle,
+        Battery
     }
 }

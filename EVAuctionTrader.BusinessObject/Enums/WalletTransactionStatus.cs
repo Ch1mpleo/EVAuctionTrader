@@ -1,9 +1,9 @@
 ﻿namespace EVAuctionTrader.BusinessObject.Enums
 {
-    public enum PaymentStatus
+    public enum WalletTransactionStatus
     {
         Pending,
         Succeeded,
-        Failed,
+        Failed
     }
 }
