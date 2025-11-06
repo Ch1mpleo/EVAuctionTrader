@@ -51,6 +51,16 @@ namespace EVAuctionTrader.DataAccess
                 .WithMany(u => u.Posts)
                 .HasForeignKey(p => p.AuthorId);
 
+            modelBuilder.Entity<Post>()
+                .HasOne(p => p.Vehicle)
+                .WithMany()
+                .HasForeignKey(p => p.VehicleId);
+
+            modelBuilder.Entity<Post>()
+                .HasOne(p => p.Battery)
+                .WithMany()
+                .HasForeignKey(p => p.BatteryId);
+
             modelBuilder.Entity<PostComment>()
                 .HasOne(pc => pc.Post)
                 .WithMany(p => p.Comments)

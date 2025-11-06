@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <Folder Include="Hubs\" />
+    <Folder Include="Pages\PostPages\" />
   </ItemGroup>
 
   <ItemGroup>

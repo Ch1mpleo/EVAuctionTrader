@@ -11,7 +11,14 @@ namespace EVAuctionTrader.DataAccess
             IGenericRepository<User> userRepository,
             IGenericRepository<Vehicle> vehicleRepository,
             IGenericRepository<Battery> batteryRepository,
-            IGenericRepository<Wallet> walletRepository
+            IGenericRepository<Wallet> walletRepository,
+            IGenericRepository<WalletTransaction> walletTransactionRepository,
+            IGenericRepository<Post> postRepository,
+            IGenericRepository<PostComment> postCommentRepository,
+            IGenericRepository<Auction> auctionRepository,
+            IGenericRepository<Bid> bidRepository,
+            IGenericRepository<Conversation> conversationRepository,
+            IGenericRepository<Message> messageRepository
             )
         {
             _dbContext = dbContext;
@@ -19,12 +26,26 @@ namespace EVAuctionTrader.DataAccess
             Vehicles = vehicleRepository;
             Batteries = batteryRepository;
             Wallets = walletRepository;
+            WalletTransactions = walletTransactionRepository;
+            Posts = postRepository;
+            PostComments = postCommentRepository;
+            Auctions = auctionRepository;
+            Bids = bidRepository;
+            Conversations = conversationRepository;
+            Messages = messageRepository;
         }
 
         public IGenericRepository<User> Users { get; set; }
         public IGenericRepository<Vehicle> Vehicles { get; set; }
         public IGenericRepository<Battery> Batteries { get; set; }
         public IGenericRepository<Wallet> Wallets { get; set; }
+        public IGenericRepository<WalletTransaction> WalletTransactions { get; set; }
+        public IGenericRepository<Post> Posts { get; set; }
+        public IGenericRepository<PostComment> PostComments { get; set; }
+        public IGenericRepository<Auction> Auctions { get; set; }
+        public IGenericRepository<Bid> Bids { get; set; }
+        public IGenericRepository<Conversation> Conversations { get; set; }
+        public IGenericRepository<Message> Messages { get; set; }
 
         public void Dispose()
         {

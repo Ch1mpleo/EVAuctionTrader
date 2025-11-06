@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EVAuctionTrader.DataAccess.Migrations
 {
     [DbContext(typeof(EVAuctionTraderDbContext))]
-    [Migration("20251106063143_InitDb")]
+    [Migration("20251106164540_InitDb")]
     partial class InitDb
     {
         /// <inheritdoc />
@@ -337,10 +337,6 @@ namespace EVAuctionTrader.DataAccess.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Detail")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<DateTime?>("ExpiresAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -348,14 +344,6 @@ namespace EVAuctionTrader.DataAccess.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<string>("LocationAddress")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("LocationCity")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("LocationDistrict")
                         .IsRequired()
                         .HasColumnType("text");
 
