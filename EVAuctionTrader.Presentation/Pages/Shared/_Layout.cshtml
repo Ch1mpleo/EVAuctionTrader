@@ -18,12 +18,49 @@
     @RenderSection("Styles", required: false)
 
     <style>
-        /* [GIỮ NGUYÊN TẤT CẢ CSS CHAT WIDGET - KHÔNG THAY ĐỔI] */
+        .wallet-balance {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            margin-right: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+        }
+
+            .wallet-balance:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            }
+
+            .wallet-balance i {
+                font-size: 18px;
+            }
+
+        .wallet-amount {
+            font-size: 16px;
+            letter-spacing: 0.5px;
+        }
+
+        /* Responsive */
+        @@media (max-width: 768px) {
+            .wallet-balance {
+                padding: 6px 12px;
+                font-size: 14px;
+            }
+
+            .wallet-amount {
+                font-size: 14px;
+            }
+        }
     </style>
 </head>
 <body>
     @{
-        // [GIỮ NGUYÊN TOÀN BỘ LOGIC AUTHENTICATION]
         var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
         var userName = User.Identity?.Name;
         var userEmail = User.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Email)?.Value;
@@ -40,6 +77,21 @@
             : nameParts[0][0].ToString();
             userInitials = userInitials.ToUpper();
         }
+
+        // Lấy số dư wallet
+        decimal walletBalance = 0m;
+        if (isAuthenticated)
+        {
+            try
+            {
+                var walletService = Context.RequestServices.GetService<EVAuctionTrader.Business.Interfaces.IUserService>();
+                walletBalance = await walletService.GetMyBalanceAsync();
+            }
+            catch
+            {
+                walletBalance = 0m;
+            }
+        }
     }
 
     <header class="modern-header">
@@ -50,7 +102,6 @@
                     EV Auction Trader
                 </a>
 
-                <!-- [GIỮ NGUYÊN TOÀN BỘ NAVIGATION VÀ DROPDOWN MENU] -->
                 <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                         aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -71,10 +122,15 @@
                         }
                     </ul>
 
-                    <!-- [GIỮ NGUYÊN TẤT CẢ AUTHENTICATION UI VÀ DROPDOWN] -->
                     <div class="navbar-nav">
                         @if (isAuthenticated)
                         {
+                            <!-- Hiển thị số dư wallet -->
+                            <div class="wallet-balance">
+                                <i class="bi bi-wallet2"></i>
+                                <span class="wallet-amount">@walletBalance.ToString("N0") VND</span>
+                            </div>
+
                             <div class="dropdown user-dropdown">
                                 <a class="nav-link dropdown-toggle user-menu-trigger" href="#" id="userDropdown" role="button"
                                    data-bs-toggle="dropdown" aria-expanded="false">
@@ -101,14 +157,25 @@
                                         </div>
                                     </li>
                                     <li><hr class="dropdown-divider"></li>
+
+                                    <!-- Thêm menu Wallet -->
+                                    <li>
+                                        <a class="dropdown-item" asp-page="/Wallet/Index">
+                                            <i class="bi bi-wallet2 me-2"></i>
+                                            My Wallet
+                                            <span class="badge bg-primary ms-2">@walletBalance.ToString("N0") VND</span>
+                                        </a>
+                                    </li>
+
                                     <li>
                                         <a class="dropdown-item" asp-page="/Profile/Index">
                                             <i class="bi bi-person me-2"></i>
                                             Profile
                                         </a>
+                                    </li>
 
-                                        @if (userRole == "DealerStaff")
-                                        {
+                                    @if (userRole == "Admin")
+                                    {
                                         <li>
                                             <a class="dropdown-item" asp-page="/TestDrive/Index">
                                                 <i class="fa-regular fa-calendar-check"></i>
@@ -134,33 +201,6 @@
                                             </a>
                                         </li>
                                     }
-                                    else if (userRole == "DealerManager")
-                                    {
-                                        <li>
-                                            <a class="dropdown-item" asp-page="/Manager/ManageStaff">
-                                                <i class="bi bi-person-badge me-2"></i>
-                                                Staffs
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item" asp-page="/Vehicle/Index">
-                                                <i class="fa-solid fa-car me-2"></i>
-                                                Vehicles
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item" asp-page="/Manager/ManageFeedback">
-                                                <i class="fa-solid fa-car me-2"></i>
-                                                Feedbacks
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item" asp-page="/Manager/ManageReport">
-                                                <i class="bi bi-bar-chart-line me-2"></i>
-                                                Reports
-                                            </a>
-                                        </li>
-                                    }
                                     else if (userRole == "Customer")
                                     {
                                         <li>
@@ -183,7 +223,6 @@
                                         </li>
                                     }
 
-                                    </li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li>
                                         <form asp-page="/Auth/Login" asp-page-handler="Logout" method="post" class="d-inline">
@@ -194,7 +233,6 @@
                                             </button>
                                         </form>
                                     </li>
-
                                 </ul>
                             </div>
                         }
@@ -217,12 +255,6 @@
     <main class="main-content">
         @RenderBody()
     </main>
-
-    <!-- [GIỮ NGUYÊN TOÀN BỘ CHAT WIDGET VÀ SIGNALR LOGIC] -->
-    @if (isAuthenticated)
-    {
-        <!-- Chat widget code remains exactly the same -->
-    }
 
     <footer class="modern-footer">
         <div class="container">
@@ -264,15 +296,9 @@
         </div>
     </footer>
 
-    <!-- [GIỮ NGUYÊN TẤT CẢ SCRIPTS] -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-
-    @if (isAuthenticated)
-    {
-        <!-- All SignalR chat scripts remain exactly the same -->
-    }
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>
