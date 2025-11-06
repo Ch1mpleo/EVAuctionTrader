@@ -24,7 +24,15 @@ namespace EVAuctionTrader.Presentation.Helper
                     Role = RoleType.Admin,
                     Status = "Active"
                 };
+
+                var wallet = new Wallet
+                {
+                    User = admin,
+                    Balance = 0.0m
+                };
+                
                 await context.Users.AddAsync(admin);
+                await context.Wallets.AddAsync(wallet);
             }
 
             if (!await context.Users.AnyAsync(u => u.Role == RoleType.Member))
@@ -52,6 +60,21 @@ namespace EVAuctionTrader.Presentation.Helper
                     }
                 };
                 await context.Users.AddRangeAsync(customer);
+
+                var wallets = new List<Wallet>
+                {
+                    new Wallet
+                    {
+                        User = customer[0],
+                        Balance = 0.0m
+                    },
+                    new Wallet
+                    {
+                        User = customer[1],
+                        Balance = 0.0m
+                    }
+                };
+                await context.Wallets.AddRangeAsync(wallets);
             }
 
             await context.SaveChangesAsync();
