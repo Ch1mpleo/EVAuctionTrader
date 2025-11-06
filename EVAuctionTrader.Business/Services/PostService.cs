@@ -123,18 +123,23 @@ namespace EVAuctionTrader.Business.Services
                     throw new ArgumentException("Mismatch between PostType and provided details.");
                 }
 
-                var expiresAt = DateTime.Now;
+                // ✅ FIX: Convert all DateTime to UTC
+                DateTime publishedAt = createPostDto.PublishedAt.HasValue
+                    ? DateTime.SpecifyKind(createPostDto.PublishedAt.Value, DateTimeKind.Utc)
+                    : DateTime.UtcNow;
+
+                DateTime expiresAt;
                 if (createPostDto.Version == PostVersion.Free)
                 {
-                    expiresAt = createPostDto.PublishedAt.HasValue
-                        ? createPostDto.PublishedAt.Value.AddDays(15)
-                        : DateTime.Now.AddDays(15);
+                    expiresAt = publishedAt.AddDays(15);
                 }
                 else if (createPostDto.Version == PostVersion.Vip)
                 {
-                    expiresAt = createPostDto.PublishedAt.HasValue
-                        ? createPostDto.PublishedAt.Value.AddDays(30)
-                        : DateTime.Now.AddDays(30);
+                    expiresAt = publishedAt.AddDays(30);
+                }
+                else
+                {
+                    expiresAt = publishedAt.AddDays(15); // Default to Free
                 }
 
                 var postEntity = new Post
@@ -150,8 +155,8 @@ namespace EVAuctionTrader.Business.Services
                     LocationAddress = createPostDto.LocationAddress,
                     PhotoUrls = createPostDto.PhotoUrls,
                     Status = createPostDto.Status,
-                    PublishedAt = createPostDto.PublishedAt,
-                    ExpiresAt = expiresAt
+                    PublishedAt = publishedAt,  // ✅ UTC DateTime
+                    ExpiresAt = expiresAt       // ✅ UTC DateTime
                 };
 
 
@@ -203,6 +208,7 @@ namespace EVAuctionTrader.Business.Services
                 throw;
             }
         }
+
         public async Task<Pagination<PostResponseDto>> GetAllPostsAsync
             (int pageNumber = 1,
             int pageSize = 10,
@@ -216,14 +222,19 @@ namespace EVAuctionTrader.Business.Services
             {
                 _logger.LogInformation("Retrieving paginated list of posts.");
                 var query = _unitOfWork.Posts.GetQueryable().Where(q => !q.IsDeleted);
+
+                // ✅ FIX: Use DateTime.UtcNow for comparisons
+                var utcNow = DateTime.UtcNow;
+
                 foreach (var item in query)
                 {
-                    if (item.PublishedAt >= DateTime.Now && item.Status == PostStatus.Draft)
+                    if (item.PublishedAt <= utcNow && item.Status == PostStatus.Draft)
                         item.Status = PostStatus.Active;
 
-                    if (item.ExpiresAt >= DateTime.Now && item.Status == PostStatus.Active)
+                    if (item.ExpiresAt <= utcNow && item.Status == PostStatus.Active)
                         item.Status = PostStatus.Closed;
                 }
+
                 if (postType.HasValue)
                 {
                     query = query.Where(p => p.PostType == postType.Value);
@@ -327,6 +338,7 @@ namespace EVAuctionTrader.Business.Services
                 throw;
             }
         }
+
         public async Task<PostResponseDto?> GetPostByIdAsync(Guid postId)
         {
             try
@@ -494,10 +506,16 @@ namespace EVAuctionTrader.Business.Services
                                 await _unitOfWork.Vehicles.AddAsync(vehicleEntity);
                                 _logger.LogInformation($"New vehicle entity created with ID: {vehicleEntity.Id}");
 
-                                batteryEntity = await _unitOfWork.Batteries.GetByIdAsync(postEntity.BatteryId.Value);
-                                batteryEntity.IsDeleted = true;
-                                await _unitOfWork.Batteries.Update(batteryEntity);
-                                _logger.LogInformation($"Battery entity marked as deleted with ID: {batteryEntity.Id}");
+                                if (postEntity.BatteryId.HasValue)
+                                {
+                                    batteryEntity = await _unitOfWork.Batteries.GetByIdAsync(postEntity.BatteryId.Value);
+                                    if (batteryEntity != null)
+                                    {
+                                        batteryEntity.IsDeleted = true;
+                                        await _unitOfWork.Batteries.Update(batteryEntity);
+                                        _logger.LogInformation($"Battery entity marked as deleted with ID: {batteryEntity.Id}");
+                                    }
+                                }
                             }
                         }
 
@@ -559,10 +577,16 @@ namespace EVAuctionTrader.Business.Services
                                 await _unitOfWork.Batteries.AddAsync(batteryEntity);
                                 _logger.LogInformation($"New battery entity created with ID: {batteryEntity.Id}");
 
-                                vehicleEntity = await _unitOfWork.Vehicles.GetByIdAsync(postEntity.VehicleId.Value);
-                                vehicleEntity.IsDeleted = true;
-                                await _unitOfWork.Vehicles.Update(vehicleEntity);
-                                _logger.LogInformation($"Vehicle entity marked as deleted with ID: {vehicleEntity.Id}");
+                                if (postEntity.VehicleId.HasValue)
+                                {
+                                    vehicleEntity = await _unitOfWork.Vehicles.GetByIdAsync(postEntity.VehicleId.Value);
+                                    if (vehicleEntity != null)
+                                    {
+                                        vehicleEntity.IsDeleted = true;
+                                        await _unitOfWork.Vehicles.Update(vehicleEntity);
+                                        _logger.LogInformation($"Vehicle entity marked as deleted with ID: {vehicleEntity.Id}");
+                                    }
+                                }
                             }
                         }
 
@@ -608,20 +632,20 @@ namespace EVAuctionTrader.Business.Services
                     postEntity.PhotoUrls = updatePostDto.PhotoUrls;
                 }
 
-
                 postEntity.Status = updatePostDto.Status;
 
-                if (updatePostDto.PublishedAt.HasValue && postEntity.PublishedAt <= DateTime.Now)
+                // ✅ FIX: Convert PublishedAt to UTC and recalculate ExpiresAt
+                if (updatePostDto.PublishedAt.HasValue && postEntity.PublishedAt <= DateTime.UtcNow)
                 {
-                    postEntity.PublishedAt = updatePostDto.PublishedAt;
+                    postEntity.PublishedAt = DateTime.SpecifyKind(updatePostDto.PublishedAt.Value, DateTimeKind.Utc);
 
                     if (postEntity.Version == PostVersion.Free)
                     {
-                        postEntity.ExpiresAt = updatePostDto.PublishedAt.Value.AddDays(15);
+                        postEntity.ExpiresAt = postEntity.PublishedAt.Value.AddDays(15);
                     }
                     else if (postEntity.Version == PostVersion.Vip)
                     {
-                        postEntity.ExpiresAt = updatePostDto.PublishedAt.Value.AddDays(30);
+                        postEntity.ExpiresAt = postEntity.PublishedAt.Value.AddDays(30);
                     }
                 }
 

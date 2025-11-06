@@ -121,8 +121,8 @@ namespace EVAuctionTrader.Presentation.Architecture
                 });
             services.AddAuthorization(options =>
             {
-                options.AddPolicy("CustomerPolicy", policy =>
-                    policy.RequireRole("Customer"));
+                options.AddPolicy("MemberPolicy", policy =>
+                    policy.RequireRole("Member"));
 
                 options.AddPolicy("AdminPolicy", policy =>
                     policy.RequireRole("Admin"));

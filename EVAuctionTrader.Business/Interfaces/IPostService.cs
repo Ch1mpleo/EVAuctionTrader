@@ -8,7 +8,8 @@ namespace EVAuctionTrader.Business.Interfaces
     {
         Task<PostResponseDto?> CreatePostAsync(PostRequestDto createPostDto);
         Task<PostResponseDto?> UpdatePostAsync(Guid postId, PostRequestDto updatePostDto);
-        Task<Pagination<PostResponseDto>> GetAllPostsAsync(int pageNumber = 1,
+        Task<Pagination<PostResponseDto>> GetAllPostsAsync(
+            int pageNumber = 1,
             int pageSize = 10,
             string? search = null,
             PostType? postType = null,

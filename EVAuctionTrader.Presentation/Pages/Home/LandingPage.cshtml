@@ -27,14 +27,24 @@
                         Sustainable mobility made affordable.
                     </p>
                     <div class="hero-actions">
-                        <a asp-page="/Vehicle/BrowseVehicles" class="btn btn-primary btn-lg me-3">
+                        <a asp-page="/PostPages/Index" class="btn btn-primary btn-lg me-3">
                             <i class="bi bi-search me-2"></i>
-                            Browse Listings
+                            Browse Posts
                         </a>
-                        <a asp-page="/Auction/Index" class="btn btn-outline-primary btn-lg">
-                            <i class="bi bi-hammer me-2"></i>
-                            Live Auctions
-                        </a>
+                        @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Member"))
+                        {
+                            <a asp-page="/PostPages/Create" class="btn btn-outline-primary btn-lg">
+                                <i class="bi bi-plus-circle me-2"></i>
+                                Create Listing
+                            </a>
+                        }
+                        else
+                        {
+                            <a asp-page="/Auth/Login" class="btn btn-outline-primary btn-lg">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>
+                                Get Started
+                            </a>
+                        }
                     </div>
                 </div>
             </div>
@@ -83,6 +93,94 @@
     </div>
 </section>
 
+<!-- Featured Posts Section -->
+<section class="featured-vehicles py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="section-title">Featured Listings</h2>
+            <p class="section-description">
+                Check out the latest vehicles and batteries available on our marketplace
+            </p>
+        </div>
+
+        <div class="row g-4">
+            <!-- Sample featured post cards - these would come from your service in real implementation -->
+            <div class="col-lg-4 col-md-6">
+                <div class="vehicle-card">
+                    <div class="vehicle-image">
+                        <img src="https://images.unsplash.com/photo-1593941707882-a5bba14938c7?q=80&w=1172&auto=format&fit=crop"
+                             alt="Electric Vehicle">
+                        <span class="vehicle-badge">Featured</span>
+                    </div>
+                    <div class="vehicle-info">
+                        <h3 class="vehicle-name">Tesla Model 3</h3>
+                        <p class="vehicle-description">Low mileage, excellent condition, one owner</p>
+                        <div class="vehicle-specs">
+                            <span class="spec-item"><i class="bi bi-calendar me-1"></i> 2020</span>
+                            <span class="spec-item"><i class="bi bi-speedometer me-1"></i> 45,000 km</span>
+                        </div>
+                        <div class="vehicle-price">450,000,000 VND</div>
+                        <a asp-page="/PostPages/Index" class="btn btn-outline-primary w-100">
+                            <i class="bi bi-search me-1"></i> View All Posts
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6">
+                <div class="vehicle-card">
+                    <div class="vehicle-image">
+                        <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?q=80&w=1170&auto=format&fit=crop"
+                             alt="Battery Pack">
+                        <span class="vehicle-badge">New</span>
+                    </div>
+                    <div class="vehicle-info">
+                        <h3 class="vehicle-name">EV Battery Pack - 60kWh</h3>
+                        <p class="vehicle-description">95% SOH, LiFePO4 chemistry, tested</p>
+                        <div class="vehicle-specs">
+                            <span class="spec-item"><i class="bi bi-lightning-charge me-1"></i> 60 kWh</span>
+                            <span class="spec-item"><i class="bi bi-heart-pulse me-1"></i> 95% SOH</span>
+                        </div>
+                        <div class="vehicle-price">85,000,000 VND</div>
+                        <a asp-page="/PostPages/Index" asp-route-postType="1" class="btn btn-outline-primary w-100">
+                            <i class="bi bi-battery-charging me-1"></i> View Batteries
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6">
+                <div class="vehicle-card">
+                    <div class="vehicle-image">
+                        <img src="https://images.unsplash.com/photo-1617788138017-80ad40651399?q=80&w=1171&auto=format&fit=crop"
+                             alt="Electric Vehicle">
+                        <span class="vehicle-badge">Popular</span>
+                    </div>
+                    <div class="vehicle-info">
+                        <h3 class="vehicle-name">Nissan Leaf</h3>
+                        <p class="vehicle-description">Reliable city car, well maintained</p>
+                        <div class="vehicle-specs">
+                            <span class="spec-item"><i class="bi bi-calendar me-1"></i> 2019</span>
+                            <span class="spec-item"><i class="bi bi-speedometer me-1"></i> 52,000 km</span>
+                        </div>
+                        <div class="vehicle-price">320,000,000 VND</div>
+                        <a asp-page="/PostPages/Index" asp-route-postType="0" class="btn btn-outline-primary w-100">
+                            <i class="bi bi-car-front me-1"></i> View Vehicles
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-5">
+            <a asp-page="/PostPages/Index" class="btn btn-primary btn-lg">
+                <i class="bi bi-grid-3x3-gap me-2"></i>
+                View All Listings
+            </a>
+        </div>
+    </div>
+</section>
+
 <section class="benefits-section py-5">
     <div class="container">
         <div class="row align-items-center">
@@ -107,11 +205,11 @@
 
                         <div class="benefit-item">
                             <div class="benefit-icon">
-                                <i class="bi bi-hammer"></i>
+                                <i class="bi bi-grid-3x3-gap"></i>
                             </div>
                             <div class="benefit-content">
-                                <h5>Auction System</h5>
-                                <p>Bid on vehicles and batteries to get the best deals</p>
+                                <h5>Easy Listing</h5>
+                                <p>Create posts in minutes to sell your vehicle or battery</p>
                             </div>
                         </div>
 
@@ -142,6 +240,42 @@
                     <img src="https://images.unsplash.com/photo-1593941707882-a5bba14938c7?q=80&w=1172&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
                          alt="Used Electric Vehicle Benefits" class="img-fluid rounded-3">
                 </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section">
+    <div class="container">
+        <div class="text-center">
+            <h2 class="cta-title">Ready to Start Trading?</h2>
+            <p class="cta-description">
+                Join thousands of satisfied customers buying and selling pre-owned EVs
+            </p>
+            <div class="cta-actions">
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <a asp-page="/PostPages/Create" class="btn btn-primary btn-lg me-3">
+                        <i class="bi bi-plus-circle me-2"></i>
+                        Create Your Listing
+                    </a>
+                    <a asp-page="/PostPages/Index" class="btn btn-outline-light btn-lg">
+                        <i class="bi bi-search me-2"></i>
+                        Browse Marketplace
+                    </a>
+                }
+                else
+                {
+                    <a asp-page="/Auth/Register" class="btn btn-primary btn-lg me-3">
+                        <i class="bi bi-person-plus me-2"></i>
+                        Sign Up Now
+                    </a>
+                    <a asp-page="/PostPages/Index" class="btn btn-outline-light btn-lg">
+                        <i class="bi bi-search me-2"></i>
+                        Browse Without Login
+                    </a>
+                }
             </div>
         </div>
     </div>
