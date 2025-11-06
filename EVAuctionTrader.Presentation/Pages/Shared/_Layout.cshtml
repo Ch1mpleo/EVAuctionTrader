@@ -10,7 +10,7 @@
 
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/EVAutionTrader.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/EVAuctionTrader.styles.css" asp-append-version="true" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -110,15 +110,19 @@
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav me-auto">
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-page="/Vehicle/BrowseVehicles">Listings</a>
-                        </li>
-                        @if (isAuthenticated && userRole == "Customer")
+                            <a class="nav-link" asp-area="" asp-page="/PostPages/Index">
+                                <i class="bi bi-grid-3x3-gap me-1"></i>
+                                Browse Posts
+                            </a>
+                        </li>                    
+                        @if (isAuthenticated && userRole == "Member")
                         {
                             <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-page="/TestDrive/Register">
-                                    Test Drive
+                                <a class="nav-link" asp-area="" asp-page="/PostPages/Create">
+                                    <i class="bi bi-plus-circle me-1"></i>
+                                    Create Post
                                 </a>
-                            </li>
+                            </li>                          
                         }
                     </ul>
 
@@ -178,7 +182,7 @@
                                     {
                                         <li>
                                             <a class="dropdown-item" asp-page="/TestDrive/Index">
-                                                <i class="fa-regular fa-calendar-check"></i>
+                                                <i class="fa-regular fa-calendar-check me-2"></i>
                                                 Test Drive Appointments
                                             </a>
                                         </li>
@@ -190,7 +194,7 @@
                                         </li>
                                         <li>
                                             <a class="dropdown-item" asp-page="/Staff/ManageDeliveries">
-                                                <i class="bi bi-bag-check me-2"></i>
+                                                <i class="bi bi-truck me-2"></i>
                                                 Customer Deliveries
                                             </a>
                                         </li>
@@ -201,24 +205,18 @@
                                             </a>
                                         </li>
                                     }
-                                    else if (userRole == "Customer")
+                                    else if (userRole == "Member")
                                     {
                                         <li>
-                                            <a class="dropdown-item" asp-page="/TestDrive/Register">
-                                                <i class="bi bi-calendar-plus me-2"></i>
-                                                Book Test Drive
+                                            <a class="dropdown-item" asp-page="/PostPages/Index">
+                                                <i class="bi bi-grid-3x3-gap me-2"></i>
+                                                Browse Posts
                                             </a>
                                         </li>
                                         <li>
-                                            <a class="dropdown-item" asp-page="/TestDrive/MyTestDrives">
-                                                <i class="bi bi-calendar-check me-2"></i>
-                                                My Test Drives
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item" asp-page="/Order/MyOrders">
-                                                <i class="bi bi-bag-check me-2"></i>
-                                                My Orders
+                                            <a class="dropdown-item" asp-page="/PostPages/Create">
+                                                <i class="bi bi-plus-circle me-2"></i>
+                                                Create New Post
                                             </a>
                                         </li>
                                     }
@@ -259,7 +257,7 @@
     <footer class="modern-footer">
         <div class="container">
             <div class="row gy-4">
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="footer-brand">
                         <h5 class="fw-bold mb-3">
                             <i class="bi bi-lightning-charge-fill me-2"></i>
@@ -271,7 +269,26 @@
                     </div>
                 </div>
 
-                <div class="col-md-6">
+                <div class="col-md-4">
+                    <h6 class="fw-semibold mb-3">Quick Links</h6>
+                    <ul class="list-unstyled footer-links">
+                        <li class="mb-2">
+                            <a asp-page="/PostPages/Index" class="text-muted text-decoration-none">
+                                <i class="bi bi-chevron-right me-1"></i> Browse Posts
+                            </a>
+                        </li>
+                        @if (isAuthenticated && userRole == "Member")
+                        {
+                            <li class="mb-2">
+                                <a asp-page="/PostPages/Create" class="text-muted text-decoration-none">
+                                    <i class="bi bi-chevron-right me-1"></i> Create Post
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+
+                <div class="col-md-4">
                     <h6 class="fw-semibold mb-3">Contact</h6>
                     <ul class="list-unstyled footer-contact">
                         <li class="mb-2">

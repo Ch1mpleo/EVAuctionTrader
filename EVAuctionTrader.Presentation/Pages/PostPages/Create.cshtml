@@ -1,0 +1,352 @@
+﻿@page
+@model EVAuctionTrader.Presentation.Pages.PostPages.CreateModel
+@{
+    ViewData["Title"] = "Create New Post";
+}
+@section Styles {
+    <link rel="stylesheet" href="~/css/posts.css" />
+    <link rel="stylesheet" href="~/css/profile.css" />
+}
+
+<div class="posts-page-clean">
+    <div class="container">
+        <div class="posts-header-clean">
+            <h1 class="posts-title-clean">
+                <i class="bi bi-plus-circle"></i>
+                Create New Post
+            </h1>
+            <p class="posts-subtitle-clean">List your vehicle or battery for sale</p>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                @Model.ErrorMessage
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <form method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+
+            <div class="posts-card-clean">
+                <div class="posts-card-header-clean">
+                    <h3 class="posts-card-title-clean">
+                        <i class="bi bi-info-circle"></i>
+                        Post Information
+                    </h3>
+                </div>
+                <div class="posts-card-body-clean">
+                    <!-- Post Type Selection -->
+                    <div class="form-section-title">
+                        <i class="bi bi-tag"></i>
+                        Select Post Type
+                    </div>
+                    <div class="post-type-toggle">
+                        <div class="post-type-option" id="typeVehicle">
+                            <input type="radio" asp-for="PostRequest.PostType" value="0" id="postTypeVehicle" checked />
+                            <label for="postTypeVehicle">
+                                <i class="bi bi-car-front"></i>
+                                <span>Vehicle</span>
+                            </label>
+                        </div>
+                        <div class="post-type-option" id="typeBattery">
+                            <input type="radio" asp-for="PostRequest.PostType" value="1" id="postTypeBattery" />
+                            <label for="postTypeBattery">
+                                <i class="bi bi-battery-charging"></i>
+                                <span>Battery</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Basic Information -->
+                    <div class="post-form-grid">
+                        <div class="post-form-full">
+                            <div class="filter-group-clean">
+                                <label class="filter-label-clean" asp-for="PostRequest.Title">
+                                    <i class="bi bi-fonts"></i>
+                                    Title <span style="color: #ef4444;">*</span>
+                                </label>
+                                <input type="text" class="filter-input-clean" asp-for="PostRequest.Title" required />
+                                <span asp-validation-for="PostRequest.Title" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="filter-group-clean">
+                            <label class="filter-label-clean" asp-for="PostRequest.Price">
+                                <i class="bi bi-currency-dollar"></i>
+                                Price (VND)
+                            </label>
+                            <input type="number" class="filter-input-clean" asp-for="PostRequest.Price" step="1000" />
+                            <span asp-validation-for="PostRequest.Price" class="text-danger"></span>
+                        </div>
+
+                        <div class="filter-group-clean">
+                            <label class="filter-label-clean" asp-for="PostRequest.LocationAddress">
+                                <i class="bi bi-geo-alt"></i>
+                                Location <span style="color: #ef4444;">*</span>
+                            </label>
+                            <input type="text" class="filter-input-clean" asp-for="PostRequest.LocationAddress" required />
+                            <span asp-validation-for="PostRequest.LocationAddress" class="text-danger"></span>
+                        </div>
+
+                        <div class="post-form-full">
+                            <div class="filter-group-clean">
+                                <label class="filter-label-clean" asp-for="PostRequest.Description">
+                                    <i class="bi bi-text-paragraph"></i>
+                                    Description <span style="color: #ef4444;">*</span>
+                                </label>
+                                <textarea class="filter-input-clean" asp-for="PostRequest.Description" rows="5" required></textarea>
+                                <span asp-validation-for="PostRequest.Description" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="filter-group-clean">
+                            <label class="filter-label-clean" asp-for="PostRequest.Version">
+                                <i class="bi bi-star"></i>
+                                Post Version
+                            </label>
+                            <select class="filter-input-clean" asp-for="PostRequest.Version">
+                                <option value="0">Free (15 days)</option>
+                                <option value="1">VIP (30 days)</option>
+                            </select>
+                        </div>
+
+                        <div class="filter-group-clean">
+                            <label class="filter-label-clean" asp-for="PostRequest.Status">
+                                <i class="bi bi-flag"></i>
+                                Status
+                            </label>
+                            <select class="filter-input-clean" asp-for="PostRequest.Status">
+                                <option value="0">Draft</option>
+                                <option value="1">Active</option>
+                            </select>
+                        </div>
+
+                        <div class="filter-group-clean">
+                            <label class="filter-label-clean" asp-for="PostRequest.PublishedAt">
+                                <i class="bi bi-calendar-event"></i>
+                                Publish Date
+                            </label>
+                            <input type="datetime-local" class="filter-input-clean" asp-for="PostRequest.PublishedAt" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vehicle Details (shown when Vehicle is selected) -->
+            <div class="posts-card-clean" id="vehicleSection">
+                <div class="posts-card-header-clean">
+                    <h3 class="posts-card-title-clean">
+                        <i class="bi bi-car-front"></i>
+                        Vehicle Details
+                    </h3>
+                </div>
+                <div class="posts-card-body-clean">
+                    <div class="post-form-grid">
+                        <div class="filter-group-clean">
+                            <label class="filter-label-clean">
+                                <i class="bi bi-building"></i>
+                                Brand <span style="color: #ef4444;">*</span>
+                            </label>
+                            <input type="text" class="filter-input-clean" asp-for="PostRequest.Vehicle.Brand" />
+                            <span asp-validation-for="PostRequest.Vehicle.Brand" class="text-danger"></span>
+                        </div>
+
+                        <div class="filter-group-clean">
+                            <label class="filter-label-clean">
+                                <i class="bi bi-tag"></i>
+                                Model <span style="color: #ef4444;">*</span>
+                            </label>
+                            <input type="text" class="filter-input-clean" asp-for="PostRequest.Vehicle.Model" />
+                            <span asp-validation-for="PostRequest.Vehicle.Model" class="text-danger"></span>
+                        </div>
+
+                        <div class="filter-group-clean">
+                            <label class="filter-label-clean">
+                                <i class="bi bi-calendar"></i>
+                                Year <span style="color: #ef4444;">*</span>
+                            </label>
+                            <input type="number" class="filter-input-clean" asp-for="PostRequest.Vehicle.Year" min="1900" max="2025" />
+                            <span asp-validation-for="PostRequest.Vehicle.Year" class="text-danger"></span>
+                        </div>
+
+                        <div class="filter-group-clean">
+                            <label class="filter-label-clean">
+                                <i class="bi bi-speedometer"></i>
+                                Odometer (KM) <span style="color: #ef4444;">*</span>
+                            </label>
+                            <input type="number" class="filter-input-clean" asp-for="PostRequest.Vehicle.OdometerKm" min="0" />
+                            <span asp-validation-for="PostRequest.Vehicle.OdometerKm" class="text-danger"></span>
+                        </div>
+
+                        <div class="filter-group-clean">
+                            <label class="filter-label-clean">
+                                <i class="bi bi-award"></i>
+                                Condition Grade <span style="color: #ef4444;">*</span>
+                            </label>
+                            <select class="filter-input-clean" asp-for="PostRequest.Vehicle.ConditionGrade">
+                                <option value="">Select condition</option>
+                                <option value="Excellent">Excellent</option>
+                                <option value="Good">Good</option>
+                                <option value="Fair">Fair</option>
+                                <option value="Poor">Poor</option>
+                            </select>
+                            <span asp-validation-for="PostRequest.Vehicle.ConditionGrade" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Battery Details (shown when Battery is selected) -->
+            <div class="posts-card-clean" id="batterySection" style="display: none;">
+                <div class="posts-card-header-clean">
+                    <h3 class="posts-card-title-clean">
+                        <i class="bi bi-battery-charging"></i>
+                        Battery Details
+                    </h3>
+                </div>
+                <div class="posts-card-body-clean">
+                    <div class="post-form-grid">
+                        <div class="filter-group-clean">
+                            <label class="filter-label-clean">
+                                <i class="bi bi-building"></i>
+                                Manufacturer <span style="color: #ef4444;">*</span>
+                            </label>
+                            <input type="text" class="filter-input-clean" asp-for="PostRequest.Battery.Manufacturer" />
+                            <span asp-validation-for="PostRequest.Battery.Manufacturer" class="text-danger"></span>
+                        </div>
+
+                        <div class="filter-group-clean">
+                            <label class="filter-label-clean">
+                                <i class="bi bi-droplet"></i>
+                                Chemistry <span style="color: #ef4444;">*</span>
+                            </label>
+                            <input type="text" class="filter-input-clean" asp-for="PostRequest.Battery.Chemistry" />
+                            <span asp-validation-for="PostRequest.Battery.Chemistry" class="text-danger"></span>
+                        </div>
+
+                        <div class="filter-group-clean">
+                            <label class="filter-label-clean">
+                                <i class="bi bi-lightning-charge"></i>
+                                Capacity (kWh) <span style="color: #ef4444;">*</span>
+                            </label>
+                            <input type="number" class="filter-input-clean" asp-for="PostRequest.Battery.CapacityKwh" step="0.01" min="0" />
+                            <span asp-validation-for="PostRequest.Battery.CapacityKwh" class="text-danger"></span>
+                        </div>
+
+                        <div class="filter-group-clean">
+                            <label class="filter-label-clean">
+                                <i class="bi bi-arrow-repeat"></i>
+                                Cycle Count <span style="color: #ef4444;">*</span>
+                            </label>
+                            <input type="number" class="filter-input-clean" asp-for="PostRequest.Battery.CycleCount" min="0" />
+                            <span asp-validation-for="PostRequest.Battery.CycleCount" class="text-danger"></span>
+                        </div>
+
+                        <div class="filter-group-clean">
+                            <label class="filter-label-clean">
+                                <i class="bi bi-heart-pulse"></i>
+                                SOH Percent <span style="color: #ef4444;">*</span>
+                            </label>
+                            <input type="number" class="filter-input-clean" asp-for="PostRequest.Battery.SohPercent" step="0.01" min="0" max="100" />
+                            <span asp-validation-for="PostRequest.Battery.SohPercent" class="text-danger"></span>
+                        </div>
+
+                        <div class="filter-group-clean">
+                            <label class="filter-label-clean">
+                                <i class="bi bi-lightning"></i>
+                                Voltage (V) <span style="color: #ef4444;">*</span>
+                            </label>
+                            <input type="number" class="filter-input-clean" asp-for="PostRequest.Battery.VoltageV" step="0.01" min="0" />
+                            <span asp-validation-for="PostRequest.Battery.VoltageV" class="text-danger"></span>
+                        </div>
+
+                        <div class="filter-group-clean">
+                            <label class="filter-label-clean">
+                                <i class="bi bi-plug"></i>
+                                Connector Type <span style="color: #ef4444;">*</span>
+                            </label>
+                            <input type="text" class="filter-input-clean" asp-for="PostRequest.Battery.ConnectorType" />
+                            <span asp-validation-for="PostRequest.Battery.ConnectorType" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Photos -->
+            <div class="posts-card-clean">
+                <div class="posts-card-header-clean">
+                    <h3 class="posts-card-title-clean">
+                        <i class="bi bi-images"></i>
+                        Photos
+                    </h3>
+                </div>
+                <div class="posts-card-body-clean">
+                    <div class="filter-group-clean">
+                        <label class="filter-label-clean">
+                            <i class="bi bi-link-45deg"></i>
+                            Photo URLs (one per line)
+                        </label>
+                        <textarea class="filter-input-clean" asp-for="PhotoUrlsText" rows="5" placeholder="Enter photo URLs, one per line"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="posts-card-clean">
+                <div class="posts-card-body-clean">
+                    <div style="display: flex; gap: 0.75rem;">
+                        <button type="submit" class="btn-clean btn-primary-clean" style="flex: 1;">
+                            <i class="bi bi-check-circle"></i> Create Post
+                        </button>
+                        <a asp-page="/Posts/Index" class="btn-clean btn-secondary-clean">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const typeVehicle = document.getElementById('typeVehicle');
+            const typeBattery = document.getElementById('typeBattery');
+            const vehicleSection = document.getElementById('vehicleSection');
+            const batterySection = document.getElementById('batterySection');
+            const postTypeVehicle = document.getElementById('postTypeVehicle');
+            const postTypeBattery = document.getElementById('postTypeBattery');
+
+            function updateSections() {
+                if (postTypeVehicle.checked) {
+                    typeVehicle.classList.add('active');
+                    typeBattery.classList.remove('active');
+                    vehicleSection.style.display = 'block';
+                    batterySection.style.display = 'none';
+                } else {
+                    typeVehicle.classList.remove('active');
+                    typeBattery.classList.add('active');
+                    vehicleSection.style.display = 'none';
+                    batterySection.style.display = 'block';
+                }
+            }
+
+            typeVehicle.addEventListener('click', function () {
+                postTypeVehicle.checked = true;
+                updateSections();
+            });
+
+            typeBattery.addEventListener('click', function () {
+                postTypeBattery.checked = true;
+                updateSections();
+            });
+
+            updateSections();
+        });
+    </script>
+}

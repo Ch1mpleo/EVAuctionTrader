@@ -1,0 +1,380 @@
+﻿@page "{id:guid}"
+@model EVAuctionTrader.Presentation.Pages.PostPages.DetailsModel
+@{
+    ViewData["Title"] = Model.Post?.Title ?? "Post Details";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/posts.css" />
+    <link rel="stylesheet" href="~/css/profile.css" />
+}
+
+<div class="posts-page-clean">
+    <div class="container">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill"></i>
+                @TempData["SuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        @if (Model.Post == null)
+        {
+            <div class="empty-posts-state">
+                <div class="empty-posts-icon">
+                    <i class="bi bi-exclamation-triangle"></i>
+                </div>
+                <h2 class="empty-posts-title">Post Not Found</h2>
+                <p class="empty-posts-description">The post you're looking for doesn't exist or has been removed.</p>
+                <a asp-page="/PostPages/Index" class="btn-clean btn-primary-clean">
+                    <i class="bi bi-arrow-left"></i> Back to Posts
+                </a>
+            </div>
+        }
+        else
+        {
+            <!-- Breadcrumb -->
+            <nav style="margin-bottom: 1.5rem;">
+                <ol style="display: flex; list-style: none; padding: 0; margin: 0; gap: 0.5rem; font-size: 0.875rem; color: #888;">
+                    <li><a asp-page="/Home/LandingPage" style="color: #0070f3; text-decoration: none;">Home</a></li>
+                    <li><i class="bi bi-chevron-right"></i></li>
+                    <li><a asp-page="/PostPages/Index" style="color: #0070f3; text-decoration: none;">Posts</a></li>
+                    <li><i class="bi bi-chevron-right"></i></li>
+                    <li style="color: #ccc;">@Model.Post.Title</li>
+                </ol>
+            </nav>
+
+            @if (Model.IsAuthor)
+            {
+                <div style="display: flex; justify-content: flex-end; margin-bottom: 1rem;">
+                    <a asp-page="/PostPages/Update" asp-route-id="@Model.Post.Id" class="btn-clean btn-action-clean">
+                        <i class="bi bi-pencil-square"></i> Edit Post
+                    </a>
+                </div>
+            }
+
+            <div class="post-detail-container">
+                <!-- Left Side - Gallery -->
+                <div>
+                    <div class="post-detail-gallery">
+                        @if (Model.Post.PhotoUrls != null && Model.Post.PhotoUrls.Any())
+                        {
+                            <img src="@Model.Post.PhotoUrls.First()" alt="@Model.Post.Title" class="post-main-image" id="mainImage"
+                                 onerror="this.src='https://via.placeholder.com/800x600?text=No+Image'" />
+
+                            @if (Model.Post.PhotoUrls.Count > 1)
+                            {
+                                <div class="post-thumbnail-grid">
+                                    @foreach (var (photo, index) in Model.Post.PhotoUrls.Select((p, i) => (p, i)))
+                                    {
+                                        <div class="post-thumbnail @(index == 0 ? "active" : "")" onclick="changeImage('@photo', this)">
+                                            <img src="@photo" alt="Photo @(index + 1)"
+                                                 onerror="this.src='https://via.placeholder.com/150?text=No+Image'" />
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <img src="https://via.placeholder.com/800x600?text=No+Image" alt="No image" class="post-main-image" />
+                        }
+                    </div>
+
+                    <!-- Description Section -->
+                    <div class="posts-card-clean" style="margin-top: 1.5rem;">
+                        <div class="posts-card-header-clean">
+                            <h3 class="posts-card-title-clean">
+                                <i class="bi bi-text-paragraph"></i>
+                                Description
+                            </h3>
+                        </div>
+                        <div class="posts-card-body-clean">
+                            <p class="post-detail-description">@Model.Post.Description</p>
+                        </div>
+                    </div>
+
+                    <!-- Vehicle/Battery Details -->
+                    @if (Model.Post.Vehicle != null)
+                    {
+                        <div class="posts-card-clean" style="margin-top: 1.5rem;">
+                            <div class="posts-card-header-clean">
+                                <h3 class="posts-card-title-clean">
+                                    <i class="bi bi-car-front"></i>
+                                    Vehicle Specifications
+                                </h3>
+                            </div>
+                            <div class="posts-card-body-clean">
+                                <div class="post-specs-grid">
+                                    <div class="post-spec-item">
+                                        <span class="post-spec-label">
+                                            <i class="bi bi-building"></i> Brand
+                                        </span>
+                                        <span class="post-spec-value">@Model.Post.Vehicle.Brand</span>
+                                    </div>
+                                    <div class="post-spec-item">
+                                        <span class="post-spec-label">
+                                            <i class="bi bi-tag"></i> Model
+                                        </span>
+                                        <span class="post-spec-value">@Model.Post.Vehicle.Model</span>
+                                    </div>
+                                    <div class="post-spec-item">
+                                        <span class="post-spec-label">
+                                            <i class="bi bi-calendar"></i> Year
+                                        </span>
+                                        <span class="post-spec-value">@Model.Post.Vehicle.Year</span>
+                                    </div>
+                                    <div class="post-spec-item">
+                                        <span class="post-spec-label">
+                                            <i class="bi bi-speedometer"></i> Odometer
+                                        </span>
+                                        <span class="post-spec-value">@Model.Post.Vehicle.OdometerKm.ToString("N0") km</span>
+                                    </div>
+                                    <div class="post-spec-item">
+                                        <span class="post-spec-label">
+                                            <i class="bi bi-award"></i> Condition
+                                        </span>
+                                        <span class="post-spec-value">@Model.Post.Vehicle.ConditionGrade</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    @if (Model.Post.Battery != null)
+                    {
+                        <div class="posts-card-clean" style="margin-top: 1.5rem;">
+                            <div class="posts-card-header-clean">
+                                <h3 class="posts-card-title-clean">
+                                    <i class="bi bi-battery-charging"></i>
+                                    Battery Specifications
+                                </h3>
+                            </div>
+                            <div class="posts-card-body-clean">
+                                <div class="post-specs-grid">
+                                    <div class="post-spec-item">
+                                        <span class="post-spec-label">
+                                            <i class="bi bi-building"></i> Manufacturer
+                                        </span>
+                                        <span class="post-spec-value">@Model.Post.Battery.Manufacturer</span>
+                                    </div>
+                                    <div class="post-spec-item">
+                                        <span class="post-spec-label">
+                                            <i class="bi bi-droplet"></i> Chemistry
+                                        </span>
+                                        <span class="post-spec-value">@Model.Post.Battery.Chemistry</span>
+                                    </div>
+                                    <div class="post-spec-item">
+                                        <span class="post-spec-label">
+                                            <i class="bi bi-lightning-charge"></i> Capacity
+                                        </span>
+                                        <span class="post-spec-value">@Model.Post.Battery.CapacityKwh kWh</span>
+                                    </div>
+                                    <div class="post-spec-item">
+                                        <span class="post-spec-label">
+                                            <i class="bi bi-arrow-repeat"></i> Cycle Count
+                                        </span>
+                                        <span class="post-spec-value">@Model.Post.Battery.CycleCount.ToString("N0")</span>
+                                    </div>
+                                    <div class="post-spec-item">
+                                        <span class="post-spec-label">
+                                            <i class="bi bi-heart-pulse"></i> State of Health
+                                        </span>
+                                        <span class="post-spec-value">@Model.Post.Battery.SohPercent%</span>
+                                    </div>
+                                    <div class="post-spec-item">
+                                        <span class="post-spec-label">
+                                            <i class="bi bi-lightning"></i> Voltage
+                                        </span>
+                                        <span class="post-spec-value">@Model.Post.Battery.VoltageV V</span>
+                                    </div>
+                                    <div class="post-spec-item">
+                                        <span class="post-spec-label">
+                                            <i class="bi bi-plug"></i> Connector Type
+                                        </span>
+                                        <span class="post-spec-value">@Model.Post.Battery.ConnectorType</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <!-- Right Side - Info -->
+                <div>
+                    <div class="post-detail-info">
+                        <!-- Price -->
+                        @if (Model.Post.Price.HasValue)
+                        {
+                            <div class="post-detail-price">@Model.Post.Price.Value.ToString("N0") VND</div>
+                        }
+                        else
+                        {
+                            <div class="post-detail-price" style="color: #888; font-size: 1.5rem;">Contact for price</div>
+                        }
+
+                        <!-- Title -->
+                        <h1 class="post-detail-title">@Model.Post.Title</h1>
+
+                        <!-- Badges -->
+                        <div class="post-detail-badges">
+                            <span class="post-card-type @(Model.Post.PostType == EVAuctionTrader.BusinessObject.Enums.PostType.Vehicle ? "vehicle" : "battery")">
+                                <i class="bi bi-@(Model.Post.PostType == EVAuctionTrader.BusinessObject.Enums.PostType.Vehicle ? "car-front" : "battery-charging")"></i>
+                                @Model.Post.PostType
+                            </span>
+                            <span class="badge-clean badge-@(Model.Post.Status == EVAuctionTrader.BusinessObject.Enums.PostStatus.Active ? "success" : Model.Post.Status == EVAuctionTrader.BusinessObject.Enums.PostStatus.Draft ? "pending" : "danger")">
+                                <i class="bi bi-flag"></i>
+                                @Model.Post.Status
+                            </span>
+                            <span class="version-badge @(Model.Post.Version == EVAuctionTrader.BusinessObject.Enums.PostVersion.Vip ? "vip" : "free")">
+                                <i class="bi bi-star@(Model.Post.Version == EVAuctionTrader.BusinessObject.Enums.PostVersion.Vip ? "-fill" : "")"></i>
+                                @Model.Post.Version
+                            </span>
+                        </div>
+
+                        <!-- Seller Information -->
+                        <div class="post-detail-section">
+                            <div class="post-detail-section-title">
+                                <i class="bi bi-person-circle"></i> Seller Information
+                            </div>
+                            <div class="info-item-clean">
+                                <div class="info-label-clean">
+                                    <i class="bi bi-person"></i> Name
+                                </div>
+                                <div class="info-value-clean">@Model.Post.AuthorName</div>
+                            </div>
+                        </div>
+
+                        <!-- Location -->
+                        <div class="post-detail-section">
+                            <div class="post-detail-section-title">
+                                <i class="bi bi-geo-alt"></i> Location
+                            </div>
+                            <div class="info-value-clean">
+                                <i class="bi bi-map"></i> @Model.Post.LocationAddress
+                            </div>
+                        </div>
+
+                        <!-- Dates -->
+                        <div class="post-detail-section">
+                            <div class="post-detail-section-title">
+                                <i class="bi bi-calendar"></i> Dates
+                            </div>
+                            @if (Model.Post.PublishedAt.HasValue)
+                            {
+                                <div class="info-item-clean">
+                                    <div class="info-label-clean">
+                                        <i class="bi bi-calendar-check"></i> Published
+                                    </div>
+                                    <div class="info-value-clean">@Model.Post.PublishedAt.Value.ToString("MMM dd, yyyy")</div>
+                                </div>
+                            }
+                            @if (Model.Post.ExpiresAt.HasValue)
+                            {
+                                <div class="info-item-clean">
+                                    <div class="info-label-clean">
+                                        <i class="bi bi-calendar-x"></i> Expires
+                                    </div>
+                                    <div class="info-value-clean">@Model.Post.ExpiresAt.Value.ToString("MMM dd, yyyy")</div>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="post-detail-section" style="border: none; padding-bottom: 0;">
+                            @if (Model.IsAuthor)
+                            {
+                                <a asp-page="/PostPages/Update" asp-route-id="@Model.Post.Id" class="btn-clean btn-success-clean" style="width: 100%; margin-bottom: 0.75rem;">
+                                    <i class="bi bi-pencil-square"></i> Edit Post
+                                </a>
+                            }
+                            else if (User.Identity?.IsAuthenticated == true)
+                            {
+                                <button class="btn-clean btn-primary-clean" style="width: 100%; margin-bottom: 0.75rem;">
+                                    <i class="bi bi-chat-dots"></i> Contact Seller
+                                </button>
+                                <button class="btn-clean btn-secondary-clean" style="width: 100%;">
+                                    <i class="bi bi-heart"></i> Save Post
+                                </button>
+                            }
+                            else
+                            {
+                                <a asp-page="/Auth/Login" asp-route-returnUrl="@($"/PostPages/Details/{Model.Post.Id}")" class="btn-clean btn-primary-clean" style="width: 100%; margin-bottom: 0.75rem;">
+                                    <i class="bi bi-box-arrow-in-right"></i> Login to Contact
+                                </a>
+                            }
+                        </div>
+
+                        <!-- Share -->
+                        <div class="post-detail-section" style="border: none; padding-bottom: 0;">
+                            <div class="post-detail-section-title">
+                                <i class="bi bi-share"></i> Share
+                            </div>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button class="btn-clean btn-secondary-clean" style="flex: 1;" onclick="shareOnFacebook()">
+                                    <i class="bi bi-facebook"></i>
+                                </button>
+                                <button class="btn-clean btn-secondary-clean" style="flex: 1;" onclick="shareOnTwitter()">
+                                    <i class="bi bi-twitter"></i>
+                                </button>
+                                <button class="btn-clean btn-secondary-clean" style="flex: 1;" onclick="copyLink()">
+                                    <i class="bi bi-link-45deg"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Back Button -->
+            <div style="margin-top: 2rem; text-align: center;">
+                <a asp-page="/PostPages/Index" class="btn-clean btn-secondary-clean">
+                    <i class="bi bi-arrow-left"></i> Back to All Posts
+                </a>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Image gallery functionality
+        function changeImage(imageUrl, thumbnail) {
+            const mainImage = document.getElementById('mainImage');
+            mainImage.src = imageUrl;
+
+            // Update active thumbnail
+            document.querySelectorAll('.post-thumbnail').forEach(t => t.classList.remove('active'));
+            thumbnail.classList.add('active');
+        }
+
+        // Share functionality
+        function shareOnFacebook() {
+            const url = encodeURIComponent(window.location.href);
+            window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank', 'width=600,height=400');
+        }
+
+        function shareOnTwitter() {
+            const url = encodeURIComponent(window.location.href);
+            const text = encodeURIComponent('@Model.Post?.Title ?? ""');
+            window.open(`https://twitter.com/intent/tweet?url=${url}&text=${text}`, '_blank', 'width=600,height=400');
+        }
+
+        function copyLink() {
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                alert('Link copied to clipboard!');
+            });
+        }
+
+        // Auto-hide alerts
+        setTimeout(function () {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 300);
+            });
+        }, 5000);
+    </script>
+}
