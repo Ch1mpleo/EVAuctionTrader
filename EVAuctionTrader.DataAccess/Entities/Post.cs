@@ -15,13 +15,10 @@ namespace EVAuctionTrader.DataAccess.Entities
 
         public string Title { get; set; }
         public string Description { get; set; }
-        public string Detail { get; set; }
 
         public decimal? Price { get; set; }
 
         // Địa chỉ
-        public string LocationCity { get; set; }
-        public string LocationDistrict { get; set; }
         public string LocationAddress { get; set; }
         public List<string> PhotoUrls { get; set; } = new();
 
