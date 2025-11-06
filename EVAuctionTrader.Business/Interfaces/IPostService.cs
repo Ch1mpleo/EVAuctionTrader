@@ -14,7 +14,9 @@ namespace EVAuctionTrader.Business.Interfaces
             PostType? postType = null,
             PostVersion? postVersion = null,
             PostStatus? postStatus = null,
-            bool priceSort = true);
+            bool priceSort = true,
+            bool? filterByCurrentUser = null);
         Task<PostResponseDto?> GetPostByIdAsync(Guid postId);
+        Task<bool> DeletePostAsync(Guid postId);
     }
 }
