@@ -2,6 +2,8 @@
 
 namespace EVAuctionTrader.DataAccess.Entities
 {
+
+    // Buổi đáu giá
     public class Auction : BaseEntity
     {
         public Guid CreatedBy { get; set; }
@@ -16,12 +18,11 @@ namespace EVAuctionTrader.DataAccess.Entities
         public DateTime EndTime { get; set; }
         public AuctionStatus Status { get; set; }
 
-        public string MainPhotoUrl { get; set; }
-        public string GalleryJson { get; set; }
+        public string PhotoUrl { get; set; }
 
         public User Creator { get; set; }
-        public Vehicle Vehicle { get; set; }
-        public Battery Battery { get; set; }
+        public Vehicle? Vehicle { get; set; }
+        public Battery? Battery { get; set; }
         public ICollection<Bid> Bids { get; set; }
     }
 }

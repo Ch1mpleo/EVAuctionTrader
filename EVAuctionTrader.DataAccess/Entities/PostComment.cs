@@ -1,5 +1,7 @@
 ﻿namespace EVAuctionTrader.DataAccess.Entities
 {
+
+    // Comment trong bài post
     public class PostComment : BaseEntity
     {
         public Guid PostId { get; set; }

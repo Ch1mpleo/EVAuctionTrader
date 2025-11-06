@@ -3,7 +3,6 @@
     public class Wallet : BaseEntity
     {
         public Guid UserId { get; set; }
-        public string Currency { get; set; }
         public decimal Balance { get; set; }
 
         public User User { get; set; }

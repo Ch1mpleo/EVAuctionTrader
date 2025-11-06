@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -103,7 +104,6 @@ namespace EVAuctionTrader.DataAccess.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Currency = table.Column<string>(type: "text", nullable: false),
                     Balance = table.Column<decimal>(type: "numeric", nullable: false),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -140,8 +140,7 @@ namespace EVAuctionTrader.DataAccess.Migrations
                     StartTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     EndTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Status = table.Column<string>(type: "text", nullable: false),
-                    MainPhotoUrl = table.Column<string>(type: "text", nullable: false),
-                    GalleryJson = table.Column<string>(type: "text", nullable: false),
+                    PhotoUrl = table.Column<string>(type: "text", nullable: false),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
@@ -187,12 +186,10 @@ namespace EVAuctionTrader.DataAccess.Migrations
                     LocationCity = table.Column<string>(type: "text", nullable: false),
                     LocationDistrict = table.Column<string>(type: "text", nullable: false),
                     LocationAddress = table.Column<string>(type: "text", nullable: false),
-                    PhotoUrl = table.Column<string>(type: "text", nullable: false),
+                    PhotoUrls = table.Column<List<string>>(type: "text[]", nullable: false),
                     Status = table.Column<string>(type: "text", nullable: false),
                     PublishedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     ExpiresAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    PostFeeAmount = table.Column<decimal>(type: "numeric", nullable: true),
-                    PostFeeTxId = table.Column<Guid>(type: "uuid", nullable: true),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
@@ -340,9 +337,6 @@ namespace EVAuctionTrader.DataAccess.Migrations
                     Status = table.Column<string>(type: "text", nullable: false),
                     PostId = table.Column<Guid>(type: "uuid", nullable: true),
                     AuctionId = table.Column<Guid>(type: "uuid", nullable: true),
-                    Provider = table.Column<string>(type: "text", nullable: false),
-                    ProviderRef = table.Column<string>(type: "text", nullable: false),
-                    Note = table.Column<string>(type: "text", nullable: false),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
