@@ -56,6 +56,7 @@ namespace EVAuctionTrader.Presentation.Architecture
             services.AddScoped<IClaimsService, ClaimsService>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IUserService, UserService>();
             services.AddHttpContextAccessor();
 
             return services;
