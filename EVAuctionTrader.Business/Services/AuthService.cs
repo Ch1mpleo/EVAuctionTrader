@@ -6,6 +6,7 @@ using EVAuctionTrader.DataAccess.Entities;
 using EVAuctionTrader.DataAccess.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.VisualBasic;
 
 namespace EVAuctionTrader.Business.Services
 {
@@ -109,8 +110,17 @@ namespace EVAuctionTrader.Business.Services
                 };
 
                 await _unitOfWork.Users.AddAsync(user);
+
+                var wallet = new Wallet
+                {
+                    UserId = user.Id,
+                    Balance = 0m
+                };
+
+                await _unitOfWork.Wallets.AddAsync(wallet);
+
                 await _unitOfWork.SaveChangesAsync();
-                _logger.LogInformation($"User {user.Email} registered successfully");
+                _logger.LogInformation($"User {user.Email} registered successfully and Wallet {wallet.Id} initialized.");
 
                 var userDto = new UserDto
                 {
