@@ -1,4 +1,4 @@
-using EVAuctionTrader.Business.Interfaces;
+﻿using EVAuctionTrader.Business.Interfaces;
 using EVAuctionTrader.Business.Utils;
 using EVAuctionTrader.BusinessObject.DTOs.PostDTOs;
 using EVAuctionTrader.BusinessObject.Enums;
@@ -38,6 +38,24 @@ namespace EVAuctionTrader.Presentation.Pages.PostPages
         [BindProperty(SupportsGet = true)]
         public bool PriceSort { get; set; } = true;
 
+        [BindProperty(SupportsGet = true)]
+        public decimal? MinPrice { get; set; }
+
+        [BindProperty(SupportsGet = true)]
+        public decimal? MaxPrice { get; set; }
+
+        // ✅ MỚI: Danh sách các khoảng giá gợi ý
+        public List<PriceRangeOption> PriceRanges { get; } = new()
+        {
+            new PriceRangeOption { Label = "All Prices", MinPrice = null, MaxPrice = null },
+            new PriceRangeOption { Label = "Under 100M", MinPrice = null, MaxPrice = 100000000 },
+            new PriceRangeOption { Label = "100M - 300M", MinPrice = 100000000, MaxPrice = 300000000 },
+            new PriceRangeOption { Label = "300M - 500M", MinPrice = 300000000, MaxPrice = 500000000 },
+            new PriceRangeOption { Label = "500M - 1B", MinPrice = 500000000, MaxPrice = 1000000000 },
+            new PriceRangeOption { Label = "1B - 2B", MinPrice = 1000000000, MaxPrice = 2000000000 },
+            new PriceRangeOption { Label = "Above 2B", MinPrice = 2000000000, MaxPrice = null }
+        };
+
         public async Task OnGetAsync()
         {
             try
@@ -49,7 +67,9 @@ namespace EVAuctionTrader.Presentation.Pages.PostPages
                     postType: PostType,
                     postVersion: PostVersion,
                     postStatus: PostStatus,
-                    priceSort: PriceSort
+                    priceSort: PriceSort,
+                    minPrice: MinPrice,
+                    maxPrice: MaxPrice
                 );
             }
             catch (Exception ex)
@@ -98,8 +118,18 @@ namespace EVAuctionTrader.Presentation.Pages.PostPages
                 postType = PostType,
                 postVersion = PostVersion,
                 postStatus = PostStatus,
-                priceSort = PriceSort
+                priceSort = PriceSort,
+                minPrice = MinPrice,
+                maxPrice = MaxPrice
             });
         }
+    }
+
+    // ✅ MỚI: Class để định nghĩa khoảng giá
+    public class PriceRangeOption
+    {
+        public string Label { get; set; } = string.Empty;
+        public decimal? MinPrice { get; set; }
+        public decimal? MaxPrice { get; set; }
     }
 }

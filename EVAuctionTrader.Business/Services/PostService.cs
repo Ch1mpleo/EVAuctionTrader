@@ -215,13 +215,14 @@ namespace EVAuctionTrader.Business.Services
     PostType? postType = null,
     PostVersion? postVersion = null,
     PostStatus? postStatus = null,
-    bool priceSort = true)
+    bool priceSort = true,
+    decimal? minPrice = null,
+    decimal? maxPrice = null)
         {
             try
             {
                 _logger.LogInformation("Retrieving paginated list of posts.");
 
-                // ✅ Get current user to check role
                 var currentUserId = _claimsService.GetCurrentUserId;
                 var currentUser = currentUserId != Guid.Empty
                     ? await _unitOfWork.Users.GetByIdAsync(currentUserId)
@@ -229,18 +230,17 @@ namespace EVAuctionTrader.Business.Services
 
                 bool isAdmin = currentUser?.Role == RoleType.Admin;
 
-                // ✅ Base query: Always exclude deleted posts
                 var query = _unitOfWork.Posts.GetQueryable().Where(q => !q.IsDeleted);
 
-                // ✅ If NOT admin: exclude banned posts (Status = Removed)
+                // ✅ THAY ĐỔI: Admin xem tất cả status, Customer chỉ xem Active
                 if (!isAdmin)
                 {
-                    query = query.Where(q => q.Status != PostStatus.Removed);
-                    _logger.LogInformation("Non-admin user: filtering out removed/banned posts.");
+                    query = query.Where(q => q.Status == PostStatus.Active);
+                    _logger.LogInformation("Non-admin user: showing only Active posts.");
                 }
                 else
                 {
-                    _logger.LogInformation("Admin user: showing all posts including banned ones.");
+                    _logger.LogInformation("Admin user: showing all posts.");
                 }
 
                 var utcNow = DateTime.UtcNow;
@@ -269,14 +269,28 @@ namespace EVAuctionTrader.Business.Services
                 {
                     query = query.Where(p => p.PostType == postType.Value);
                 }
-                if (postStatus.HasValue)
+
+                // ✅ THAY ĐỔI: Admin có thể filter theo status, Customer không
+                if (postStatus.HasValue && isAdmin)
                 {
                     query = query.Where(p => p.Status == postStatus.Value);
                 }
+
                 if (postVersion.HasValue)
                 {
                     query = query.Where(p => p.Version == postVersion.Value);
                 }
+
+                // ✅ MỚI: Filter theo khoảng giá
+                if (minPrice.HasValue)
+                {
+                    query = query.Where(p => p.Price >= minPrice.Value);
+                }
+                if (maxPrice.HasValue)
+                {
+                    query = query.Where(p => p.Price <= maxPrice.Value);
+                }
+
                 search = search?.ToLower();
                 if (!string.IsNullOrEmpty(search))
                 {

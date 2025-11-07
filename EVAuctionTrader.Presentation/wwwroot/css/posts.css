@@ -964,3 +964,45 @@
     align-items: center;
     gap: 6px;
 }
+
+/* ✅ Price Range Button Styles */
+.price-range-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.price-range-btn {
+    padding: 0.5rem 1rem;
+    border: 2px solid #2a2a2a;
+    background: #1a1a1a;
+    color: #fff;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+    .price-range-btn:hover {
+        border-color: #0070f3;
+        background: rgba(0, 112, 243, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .price-range-btn.active {
+        background: linear-gradient(135deg, #0070f3 0%, #00c6ff 100%);
+        border-color: #0070f3;
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(0, 112, 243, 0.3);
+    }
+
+@media (max-width: 768px) {
+    .price-range-buttons {
+        flex-direction: column;
+    }
+
+    .price-range-btn {
+        width: 100%;
+    }
+}

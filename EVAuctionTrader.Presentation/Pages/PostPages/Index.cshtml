@@ -52,6 +52,28 @@
                                value="@Model.Search">
                     </div>
 
+                    <!-- ✅ MỚI: Quick Price Range Buttons -->
+                    <div class="mb-3">
+                        <label class="filter-label-clean mb-2">
+                            <i class="bi bi-cash-stack"></i> Quick Price Filter
+                        </label>
+                        <div class="price-range-buttons">
+                            @foreach (var range in Model.PriceRanges)
+                            {
+                                var isActive = (range.MinPrice == Model.MinPrice && range.MaxPrice == Model.MaxPrice);
+                                <button type="button"
+                                        class="price-range-btn @(isActive ? "active" : "")"
+                                        onclick="selectPriceRange(@(range.MinPrice?.ToString() ?? "null"), @(range.MaxPrice?.ToString() ?? "null"))">
+                                    @range.Label
+                                </button>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Hidden inputs for price range -->
+                    <input type="hidden" name="minPrice" id="minPriceInput" value="@Model.MinPrice" />
+                    <input type="hidden" name="maxPrice" id="maxPriceInput" value="@Model.MaxPrice" />
+
                     <!-- Filter Grid -->
                     <div class="filter-grid-clean">
                         <div class="filter-group-clean">
@@ -76,21 +98,21 @@
                             </select>
                         </div>
 
-                        <div class="filter-group-clean">
-                            <label class="filter-label-clean">
-                                <i class="bi bi-circle-fill"></i> Status
-                            </label>
-                            <select name="postStatus" class="filter-input-clean">
-                                <option value="">All Status</option>
-                                <option value="@((int)PostStatus.Draft)" selected="@(Model.PostStatus == PostStatus.Draft)">Draft</option>
-                                <option value="@((int)PostStatus.Active)" selected="@(Model.PostStatus == PostStatus.Active)">Active</option>
-                                <option value="@((int)PostStatus.Closed)" selected="@(Model.PostStatus == PostStatus.Closed)">Closed</option>
-                                @if (User.IsInRole("Admin"))
-                                {
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <div class="filter-group-clean">
+                                <label class="filter-label-clean">
+                                    <i class="bi bi-circle-fill"></i> Status (Admin Only)
+                                </label>
+                                <select name="postStatus" class="filter-input-clean">
+                                    <option value="">All Status</option>
+                                    <option value="@((int)PostStatus.Active)" selected="@(Model.PostStatus == PostStatus.Active)">Active</option>
+                                    <option value="@((int)PostStatus.Closed)" selected="@(Model.PostStatus == PostStatus.Closed)">Closed</option>
+                                    <option value="@((int)PostStatus.Draft)" selected="@(Model.PostStatus == PostStatus.Draft)">Draft</option>
                                     <option value="@((int)PostStatus.Removed)" selected="@(Model.PostStatus == PostStatus.Removed)">Removed (Banned)</option>
-                                }
-                            </select>
-                        </div>
+                                </select>
+                            </div>
+                        }
 
                         <div class="filter-group-clean">
                             <label class="filter-label-clean">
@@ -101,6 +123,34 @@
                                 <option value="false" selected="@(!Model.PriceSort)">High to Low</option>
                             </select>
                         </div>
+                    </div>
+
+                    <!-- ✅ MỚI: Custom Price Range (Optional) -->
+                    <div class="mt-3">
+                        <label class="filter-label-clean mb-2">
+                            <i class="bi bi-sliders"></i> Custom Price Range (Optional)
+                        </label>
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <input type="number"
+                                       class="filter-input-clean"
+                                       placeholder="Min Price (VND)"
+                                       id="customMinPrice"
+                                       step="1000000" />
+                            </div>
+                            <div class="col-md-6">
+                                <input type="number"
+                                       class="filter-input-clean"
+                                       placeholder="Max Price (VND)"
+                                       id="customMaxPrice"
+                                       step="1000000" />
+                            </div>
+                        </div>
+                        <button type="button"
+                                class="btn-clean btn-secondary-clean mt-2"
+                                onclick="applyCustomPrice()">
+                            <i class="bi bi-check-circle"></i> Apply Custom Price
+                        </button>
                     </div>
 
                     <!-- Action Buttons -->
@@ -151,7 +201,7 @@
                                     }
                                 </span>
 
-                                <!-- ✅ UPDATED: Status Badge with Ban indicator -->
+                                <!-- Status Badge -->
                                 <span class="status-badge badge-@post.Status.ToString().ToLower()">
                                     @if (post.Status == PostStatus.Removed)
                                     {
@@ -180,7 +230,6 @@
                                 </span>
                             </div>
 
-                            <!-- ✅ UPDATED: Ban Warning with Admin-specific styling -->
                             @if (post.Status == PostStatus.Removed)
                             {
                                 @if (User.IsInRole("Admin"))
@@ -220,7 +269,6 @@
                                     @(post.Description?.Length > 100 ? post.Description.Substring(0, 100) + "..." : post.Description)
                                 </p>
 
-                                <!-- Vehicle/Battery Info -->
                                 @if (post.Vehicle != null)
                                 {
                                     <div class="post-details-compact">
@@ -248,7 +296,6 @@
                                     </div>
                                 }
 
-                                <!-- Price & Location -->
                                 <div class="post-footer">
                                     <div class="post-price">
                                         @if (post.Price.HasValue)
@@ -267,13 +314,11 @@
                                     </div>
                                 </div>
 
-                                <!-- Author Info -->
                                 <div class="post-author">
                                     <i class="bi bi-person-circle"></i>
                                     <span>@post.AuthorName</span>
                                 </div>
 
-                                <!-- ✅ UPDATED: Action Buttons with better logic -->
                                 <div class="post-actions">
                                     <a asp-page="/PostPages/Details" asp-route-id="@post.Id"
                                        class="btn-action-clean">
@@ -319,6 +364,8 @@
                            asp-route-postVersion="@Model.PostVersion"
                            asp-route-postStatus="@Model.PostStatus"
                            asp-route-priceSort="@Model.PriceSort"
+                           asp-route-minPrice="@Model.MinPrice"
+                           asp-route-maxPrice="@Model.MaxPrice"
                            class="page-btn-clean">
                             <i class="bi bi-chevron-left"></i> Previous
                         </a>
@@ -337,6 +384,8 @@
                            asp-route-postVersion="@Model.PostVersion"
                            asp-route-postStatus="@Model.PostStatus"
                            asp-route-priceSort="@Model.PriceSort"
+                           asp-route-minPrice="@Model.MinPrice"
+                           asp-route-maxPrice="@Model.MaxPrice"
                            class="page-btn-clean">
                             Next <i class="bi bi-chevron-right"></i>
                         </a>
@@ -362,6 +411,30 @@
 
 @section Scripts {
     <script>
+        // ✅ Select Price Range Function
+        function selectPriceRange(min, max) {
+            document.getElementById('minPriceInput').value = min === null ? '' : min;
+            document.getElementById('maxPriceInput').value = max === null ? '' : max;
+            document.getElementById('customMinPrice').value = '';
+            document.getElementById('customMaxPrice').value = '';
+            document.getElementById('filterForm').submit();
+        }
+
+        // ✅ Apply Custom Price Function
+        function applyCustomPrice() {
+            const customMin = document.getElementById('customMinPrice').value;
+            const customMax = document.getElementById('customMaxPrice').value;
+
+            if (customMin || customMax) {
+                document.getElementById('minPriceInput').value = customMin;
+                document.getElementById('maxPriceInput').value = customMax;
+                document.getElementById('filterForm').submit();
+            } else {
+                alert('Please enter at least one price value (min or max)');
+            }
+        }
+
+        // Auto-hide alerts
         setTimeout(() => {
             const alerts = document.querySelectorAll('.alert');
             alerts.forEach(alert => {

@@ -16,7 +16,9 @@ namespace EVAuctionTrader.Business.Interfaces
             PostType? postType = null,
             PostVersion? postVersion = null,
             PostStatus? postStatus = null,
-            bool priceSort = true);
+            bool priceSort = true,
+            decimal? minPrice = null,
+            decimal? maxPrice = null);
         Task<Pagination<PostResponseDto>> GetAllMemberPostsAsync(
             int pageNumber = 1,
             int pageSize = 10,
