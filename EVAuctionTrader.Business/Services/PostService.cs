@@ -600,7 +600,7 @@ namespace EVAuctionTrader.Business.Services
                 }
 
                 var postEntity = await _unitOfWork.Posts.GetByIdAsync(postId);
-                if (postEntity == null)
+                if (postEntity == null || postEntity.IsDeleted || postEntity.Status == PostStatus.Removed)
                 {
                     _logger.LogWarning($"UpdatePostAsync failed: Post with ID {postId} not found.");
                     return null;
@@ -872,7 +872,7 @@ namespace EVAuctionTrader.Business.Services
             {
                 _logger.LogInformation($"Updating status of post with ID: {postId} to {newStatus}");
                 var postEntity = await _unitOfWork.Posts.GetByIdAsync(postId);
-                if (postEntity == null || postEntity.IsDeleted)
+                if (postEntity == null || postEntity.IsDeleted || postEntity.Status == PostStatus.Removed)
                 {
                     _logger.LogWarning($"UpdatePostStatusAsync failed: Post with ID {postId} not found.");
                     return false;
@@ -893,12 +893,13 @@ namespace EVAuctionTrader.Business.Services
                     {
                         postEntity.ExpiresAt = DateTime.UtcNow.AddDays(30);
                     }
+                    postEntity.Status = newStatus;
                 }
-                if (newStatus == PostStatus.Closed)
+                else if (newStatus == PostStatus.Closed)
                 {
                     postEntity.ExpiresAt = DateTime.UtcNow;
+                    postEntity.Status = newStatus;
                 }
-                postEntity.Status = newStatus;
                 await _unitOfWork.Posts.Update(postEntity);
                 await _unitOfWork.SaveChangesAsync();
                 _logger.LogInformation($"Post status updated successfully for post ID: {postId}");
@@ -919,7 +920,7 @@ namespace EVAuctionTrader.Business.Services
 
                 var postEntity = await _unitOfWork.Posts.GetByIdAsync(postId);
 
-                if (postEntity == null || postEntity.IsDeleted)
+                if (postEntity == null || postEntity.IsDeleted || postEntity.Status == PostStatus.Removed)
                 {
                     _logger.LogWarning($"DeletePostAsync failed: Post with ID {postId} not found or already deleted.");
                     return false;
@@ -927,8 +928,34 @@ namespace EVAuctionTrader.Business.Services
 
                 var currentUserId = _claimsService.GetCurrentUserId;
 
+                if (postEntity.AuthorId != currentUserId)
+                {
+                    _logger.LogWarning($"DeletePostAsync failed: User {currentUserId} is not authorized to delete post {postId}.");
+                    throw new UnauthorizedAccessException("You are not authorized to delete this post.");
+                }
+
+                if (postEntity.VehicleId.HasValue)
+                {
+                    var vehicleEntity = await _unitOfWork.Vehicles.GetByIdAsync(postEntity.VehicleId.Value);
+                    if (vehicleEntity != null)
+                    {
+                        vehicleEntity.IsDeleted = true;
+                        await _unitOfWork.Vehicles.Update(vehicleEntity);
+                        _logger.LogInformation($"Vehicle entity marked as deleted with ID: {vehicleEntity.Id}");
+                    }
+                }
+                if (postEntity.BatteryId.HasValue)
+                {
+                    var batteryEntity = await _unitOfWork.Batteries.GetByIdAsync(postEntity.BatteryId.Value);
+                    if (batteryEntity != null)
+                    {
+                        batteryEntity.IsDeleted = true;
+                        await _unitOfWork.Batteries.Update(batteryEntity);
+                        _logger.LogInformation($"Battery entity marked as deleted with ID: {batteryEntity.Id}");
+                    }
+                }
+
                 postEntity.IsDeleted = true;
-                postEntity.Status = PostStatus.Removed;
 
                 await _unitOfWork.Posts.Update(postEntity);
                 await _unitOfWork.SaveChangesAsync();
