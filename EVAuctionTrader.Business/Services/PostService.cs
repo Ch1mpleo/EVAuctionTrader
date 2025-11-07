@@ -123,7 +123,6 @@ namespace EVAuctionTrader.Business.Services
                     throw new ArgumentException("Mismatch between PostType and provided details.");
                 }
 
-                // ✅ FIX: Convert all DateTime to UTC
                 DateTime publishedAt = createPostDto.PublishedAt.HasValue
                     ? DateTime.SpecifyKind(createPostDto.PublishedAt.Value, DateTimeKind.Utc)
                     : DateTime.UtcNow;
@@ -139,7 +138,7 @@ namespace EVAuctionTrader.Business.Services
                 }
                 else
                 {
-                    expiresAt = publishedAt.AddDays(15); // Default to Free
+                    expiresAt = publishedAt.AddDays(15);
                 }
 
                 var postEntity = new Post
@@ -155,8 +154,8 @@ namespace EVAuctionTrader.Business.Services
                     LocationAddress = createPostDto.LocationAddress,
                     PhotoUrls = createPostDto.PhotoUrls,
                     Status = createPostDto.Status,
-                    PublishedAt = publishedAt,  // ✅ UTC DateTime
-                    ExpiresAt = expiresAt       // ✅ UTC DateTime
+                    PublishedAt = publishedAt,
+                    ExpiresAt = expiresAt
                 };
 
 
@@ -803,7 +802,6 @@ namespace EVAuctionTrader.Business.Services
 
                 postEntity.Status = updatePostDto.Status;
 
-                // ✅ FIX: Convert PublishedAt to UTC and recalculate ExpiresAt
                 if (updatePostDto.PublishedAt.HasValue && postEntity.PublishedAt <= DateTime.UtcNow)
                 {
                     postEntity.PublishedAt = DateTime.SpecifyKind(updatePostDto.PublishedAt.Value, DateTimeKind.Utc);
@@ -983,7 +981,6 @@ namespace EVAuctionTrader.Business.Services
                     return false;
                 }
 
-                // ✅ Check if current user is Admin
                 var currentUserId = _claimsService.GetCurrentUserId;
                 var currentUser = await _unitOfWork.Users.GetByIdAsync(currentUserId);
 
