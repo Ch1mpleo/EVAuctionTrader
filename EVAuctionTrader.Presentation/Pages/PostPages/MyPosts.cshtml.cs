@@ -92,5 +92,29 @@ namespace EVAuctionTrader.Presentation.Pages.PostPages
                 priceSort = PriceSort
             });
         }
+        public async Task<IActionResult> OnPostUpdateStatusAsync(Guid id, int newStatus)
+        {
+            try
+            {
+                var success = await _postService.UpdatePostStatusAsync(id, (PostStatus)newStatus);
+
+                if (success)
+                {
+                    var statusName = ((PostStatus)newStatus).ToString();
+                    TempData["SuccessMessage"] = $"Post status updated to {statusName} successfully!";
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Failed to update post status. Post may not exist or is banned.";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating post status");
+                TempData["ErrorMessage"] = "An error occurred while updating post status.";
+            }
+
+            return RedirectToPage();
+        }
     }
 }

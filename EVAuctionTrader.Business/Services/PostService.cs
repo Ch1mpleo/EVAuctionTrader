@@ -243,7 +243,6 @@ namespace EVAuctionTrader.Business.Services
                     _logger.LogInformation("Admin user: showing all posts including banned ones.");
                 }
 
-                // ✅ Auto-update status based on time
                 var utcNow = DateTime.UtcNow;
                 var postsToUpdate = await query
                     .Where(p =>
@@ -266,7 +265,6 @@ namespace EVAuctionTrader.Business.Services
                     _logger.LogInformation($"Updated status for {postsToUpdate.Count} posts.");
                 }
 
-                // ✅ Apply filters
                 if (postType.HasValue)
                 {
                     query = query.Where(p => p.PostType == postType.Value);
@@ -304,7 +302,7 @@ namespace EVAuctionTrader.Business.Services
                     if (author == null)
                     {
                         _logger.LogWarning($"GetAllPostsAsync warning: Author with ID {post.AuthorId} not found for post ID {post.Id}.");
-                        continue; // Skip this post instead of throwing
+                        continue;
                     }
 
                     VehicleResponseDto? vehicleDto = null;
@@ -870,16 +868,19 @@ namespace EVAuctionTrader.Business.Services
             {
                 _logger.LogInformation($"Updating status of post with ID: {postId} to {newStatus}");
                 var postEntity = await _unitOfWork.Posts.GetByIdAsync(postId);
+
                 if (postEntity == null || postEntity.IsDeleted || postEntity.Status == PostStatus.Removed)
                 {
                     _logger.LogWarning($"UpdatePostStatusAsync failed: Post with ID {postId} not found.");
                     return false;
                 }
+
                 if (postEntity.Status == newStatus)
                 {
                     _logger.LogInformation($"Post with ID: {postId} already has status {newStatus}. No update needed.");
                     return true;
                 }
+
                 if (postEntity.Status == PostStatus.Draft && newStatus == PostStatus.Active)
                 {
                     postEntity.PublishedAt = DateTime.UtcNow;
@@ -898,8 +899,10 @@ namespace EVAuctionTrader.Business.Services
                     postEntity.ExpiresAt = DateTime.UtcNow;
                     postEntity.Status = newStatus;
                 }
+
                 await _unitOfWork.Posts.Update(postEntity);
                 await _unitOfWork.SaveChangesAsync();
+
                 _logger.LogInformation($"Post status updated successfully for post ID: {postId}");
                 return true;
             }

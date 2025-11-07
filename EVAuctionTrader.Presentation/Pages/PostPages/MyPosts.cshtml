@@ -144,7 +144,7 @@
                                 <th>Version</th>
                                 <th>Published</th>
                                 <th>Expires</th>
-                                <th>Actions</th>
+                                <th style="width: 200px;">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -264,6 +264,57 @@
                                                     <i class="bi bi-pencil"></i>
                                                 </a>
 
+                                                <!-- ✅ NEW: Status Update Dropdown -->
+                                                <div class="btn-group" role="group">
+                                                    <button type="button" class="btn-action-clean dropdown-toggle"
+                                                            data-bs-toggle="dropdown" aria-expanded="false"
+                                                            title="Change Status"
+                                                            style="border-radius: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                                        <i class="bi bi-arrow-repeat"></i>
+                                                    </button>
+                                                    <ul class="dropdown-menu dropdown-menu-end" style="min-width: 180px; border-radius: 12px; border: 1px solid #1a1a1a; background: #0a0a0a; padding: 0.5rem;">
+                                                        @if (post.Status == PostStatus.Draft)
+                                                        {
+                                                            <li>
+                                                                <form method="post" asp-page-handler="UpdateStatus" asp-route-id="@post.Id" asp-route-newStatus="@((int)PostStatus.Active)" class="d-inline">
+                                                                    @Html.AntiForgeryToken()
+                                                                    <button type="submit" class="dropdown-item"
+                                                                            style="color: #22c55e; padding: 0.5rem 1rem; border-radius: 8px; background: transparent; border: none; width: 100%; text-align: left; cursor: pointer;">
+                                                                        <i class="bi bi-check-circle me-2"></i> Publish
+                                                                    </button>
+                                                                </form>
+                                                            </li>
+                                                        }
+                                                        @if (post.Status == PostStatus.Active)
+                                                        {
+                                                            <li>
+                                                                <form method="post" asp-page-handler="UpdateStatus" asp-route-id="@post.Id" asp-route-newStatus="@((int)PostStatus.Closed)" class="d-inline">
+                                                                    @Html.AntiForgeryToken()
+                                                                    <button type="submit" class="dropdown-item"
+                                                                            style="color: #ef4444; padding: 0.5rem 1rem; border-radius: 8px; background: transparent; border: none; width: 100%; text-align: left; cursor: pointer;"
+                                                                            onclick="return confirm('Are you sure you want to close this post?');">
+                                                                        <i class="bi bi-x-circle me-2"></i> Close Post
+                                                                    </button>
+                                                                </form>
+                                                            </li>
+                                                        }
+                                                        @if (post.Status == PostStatus.Closed || post.Status == PostStatus.Draft)
+                                                        {
+                                                            <li><hr class="dropdown-divider" style="border-color: #1a1a1a; margin: 0.5rem 0;"></li>
+                                                            <li class="px-3 py-2" style="font-size: 0.75rem; color: #666;">
+                                                                @if (post.Status == PostStatus.Closed)
+                                                                {
+                                                                    <span>Post is closed. Edit to reactivate.</span>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <span>More options available</span>
+                                                                }
+                                                            </li>
+                                                        }
+                                                    </ul>
+                                                </div>
+
                                                 <form method="post" asp-page-handler="Delete" asp-route-id="@post.Id" class="d-inline">
                                                     @Html.AntiForgeryToken()
                                                     <button type="submit" class="btn-action-clean btn-action-danger"
@@ -341,6 +392,17 @@
 @section Styles {
     <link rel="stylesheet" href="~/css/profile.css" />
     <link rel="stylesheet" href="~/css/posts.css" />
+    <style>
+        /* ✅ Custom Dropdown Styling */
+        .dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.05) !important;
+            color: #fff !important;
+        }
+
+        .btn-action-clean.dropdown-toggle::after {
+            display: none;
+        }
+    </style>
 }
 
 @section Scripts {

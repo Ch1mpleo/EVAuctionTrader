@@ -119,6 +119,7 @@ try
     {
         var dbContext = scope.ServiceProvider.GetRequiredService<EVAuctionTraderDbContext>();
         await DbSeeder.SeedUsersAsync(dbContext);
+        await DbSeeder.SeedPostsWithVehiclesAndBatteriesAsync(dbContext);
     }
 }
 catch (Exception e)
