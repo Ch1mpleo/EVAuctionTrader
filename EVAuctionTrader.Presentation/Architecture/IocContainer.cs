@@ -56,6 +56,7 @@ namespace EVAuctionTrader.Presentation.Architecture
             services.AddScoped<IClaimsService, ClaimsService>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IUserService, UserService>();
             services.AddScoped<IPostService, PostService>();
             services.AddHttpContextAccessor();
 
@@ -120,8 +121,8 @@ namespace EVAuctionTrader.Presentation.Architecture
                 });
             services.AddAuthorization(options =>
             {
-                options.AddPolicy("CustomerPolicy", policy =>
-                    policy.RequireRole("Customer"));
+                options.AddPolicy("MemberPolicy", policy =>
+                    policy.RequireRole("Member"));
 
                 options.AddPolicy("AdminPolicy", policy =>
                     policy.RequireRole("Admin"));

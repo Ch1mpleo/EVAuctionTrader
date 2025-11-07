@@ -1,0 +1,301 @@
+﻿@page
+@model EVAuctionTrader.Presentation.Pages.PostPages.IndexModel
+@{
+    ViewData["Title"] = "Browse Posts";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/posts.css" />
+    <link rel="stylesheet" href="~/css/profile.css" />
+}
+
+<div class="posts-page-clean">
+    <div class="container">
+        <!-- Header -->
+        <div class="posts-header-clean">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h1 class="posts-title-clean">
+                        <i class="bi bi-grid-3x3-gap"></i>
+                        Browse Posts
+                    </h1>
+                    <p class="posts-subtitle-clean">Discover vehicles and batteries for sale</p>
+                </div>
+                @if (User.IsInRole("Customer"))
+                {
+                    <a asp-page="/PostPages/Create" class="btn-clean btn-primary-clean">
+                        <i class="bi bi-plus-circle"></i> Create New Post
+                    </a>
+                }
+            </div>
+        </div>
+
+        <!-- Success Message -->
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill"></i>
+                @TempData["SuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <!-- Filters -->
+        <div class="filters-section">
+            <form method="get" id="filterForm">
+                <div class="filters-grid">
+                    <div class="filter-group-clean">
+                        <label class="filter-label-clean">
+                            <i class="bi bi-search"></i>
+                            Search
+                        </label>
+                        <input type="text" class="filter-input-clean" name="search" value="@Model.Search"
+                               placeholder="Search by title or location..." />
+                    </div>
+
+                    <div class="filter-group-clean">
+                        <label class="filter-label-clean">
+                            <i class="bi bi-tag"></i>
+                            Post Type
+                        </label>
+                        <select class="filter-input-clean" name="postType">
+                            <option value="">All Types</option>
+                            <option value="0" selected="@(Model.PostType == BusinessObject.Enums.PostType.Vehicle)">Vehicle</option>
+                            <option value="1" selected="@(Model.PostType == BusinessObject.Enums.PostType.Battery)">Battery</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group-clean">
+                        <label class="filter-label-clean">
+                            <i class="bi bi-flag"></i>
+                            Status
+                        </label>
+                        <select class="filter-input-clean" name="postStatus">
+                            <option value="">All Status</option>
+                            <option value="0" selected="@(Model.PostStatus == BusinessObject.Enums.PostStatus.Draft)">Draft</option>
+                            <option value="1" selected="@(Model.PostStatus == BusinessObject.Enums.PostStatus.Active)">Active</option>
+                            <option value="2" selected="@(Model.PostStatus == BusinessObject.Enums.PostStatus.Closed)">Closed</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group-clean">
+                        <label class="filter-label-clean">
+                            <i class="bi bi-star"></i>
+                            Version
+                        </label>
+                        <select class="filter-input-clean" name="postVersion">
+                            <option value="">All Versions</option>
+                            <option value="0" selected="@(Model.PostVersion == BusinessObject.Enums.PostVersion.Free)">Free</option>
+                            <option value="1" selected="@(Model.PostVersion == BusinessObject.Enums.PostVersion.Vip)">VIP</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group-clean">
+                        <label class="filter-label-clean">
+                            <i class="bi bi-sort-numeric-down"></i>
+                            Sort by Price
+                        </label>
+                        <select class="filter-input-clean" name="priceSort">
+                            <option value="true" selected="@Model.PriceSort">Low to High</option>
+                            <option value="false" selected="@(!Model.PriceSort)">High to Low</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group-clean" style="display: flex; align-items: flex-end;">
+                        <button type="submit" class="btn-clean btn-primary-clean" style="width: 100%;">
+                            <i class="bi bi-funnel"></i> Apply Filters
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Posts Grid -->
+        @if (Model.Posts != null && Model.Posts.Any())
+        {
+            <div style="margin-bottom: 1rem; color: #888;">
+                <i class="bi bi-info-circle"></i>
+                Showing @Model.Posts.Count of @Model.Posts.TotalCount posts
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                @foreach (var post in Model.Posts)
+                {
+                    <div class="post-card-item">
+                        @if (post.PhotoUrls != null && post.PhotoUrls.Any())
+                        {
+                            <img src="@post.PhotoUrls.First()" alt="@post.Title" class="post-card-image"
+                                 onerror="this.src='https://via.placeholder.com/400x200?text=No+Image'" />
+                        }
+                        else
+                        {
+                            <img src="https://via.placeholder.com/400x200?text=No+Image" alt="No image" class="post-card-image" />
+                        }
+
+                        <div class="post-card-content">
+                            <div class="post-card-header">
+                                <h3 class="post-card-title">@post.Title</h3>
+                                <span class="post-card-type @(post.PostType == EVAuctionTrader.BusinessObject.Enums.PostType.Vehicle ? "vehicle" : "battery")">
+                                    <i class="bi bi-@(post.PostType == EVAuctionTrader.BusinessObject.Enums.PostType.Vehicle ? "car-front" : "battery-charging")"></i>
+                                    @post.PostType
+                                </span>
+                            </div>
+
+                            <p class="post-card-description">@post.Description</p>
+
+                            <div class="post-card-meta">
+                                <div class="post-meta-item">
+                                    <i class="bi bi-geo-alt"></i>
+                                    @post.LocationAddress
+                                </div>
+                                <div class="post-meta-item">
+                                    <i class="bi bi-person"></i>
+                                    @post.AuthorName
+                                </div>
+                                @if (post.PostType == EVAuctionTrader.BusinessObject.Enums.PostType.Vehicle && post.Vehicle != null)
+                                {
+                                    <div class="post-meta-item">
+                                        <i class="bi bi-calendar"></i>
+                                        <strong>@post.Vehicle.Year</strong>
+                                    </div>
+                                    <div class="post-meta-item">
+                                        <i class="bi bi-speedometer"></i>
+                                        <strong>@post.Vehicle.OdometerKm.ToString("N0") km</strong>
+                                    </div>
+                                }
+                                @if (post.PostType == EVAuctionTrader.BusinessObject.Enums.PostType.Battery && post.Battery != null)
+                                {
+                                    <div class="post-meta-item">
+                                        <i class="bi bi-lightning-charge"></i>
+                                        <strong>@post.Battery.CapacityKwh kWh</strong>
+                                    </div>
+                                    <div class="post-meta-item">
+                                        <i class="bi bi-heart-pulse"></i>
+                                        <strong>@post.Battery.SohPercent% SOH</strong>
+                                    </div>
+                                }
+                            </div>
+
+                            <div class="post-card-footer">
+                                <div>
+                                    @if (post.Price.HasValue)
+                                    {
+                                        <div class="post-card-price">@post.Price.Value.ToString("N0") VND</div>
+                                    }
+                                    else
+                                    {
+                                        <div class="post-card-price" style="color: #888;">Contact for price</div>
+                                    }
+                                    <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                                        <span class="badge-clean badge-@(post.Status == EVAuctionTrader.BusinessObject.Enums.PostStatus.Active ? "success" : post.Status == EVAuctionTrader.BusinessObject.Enums.PostStatus.Draft ? "pending" : "danger")">
+                                            @post.Status
+                                        </span>
+                                        <span class="version-badge @(post.Version == EVAuctionTrader.BusinessObject.Enums.PostVersion.Vip ? "vip" : "free")">
+                                            <i class="bi bi-star@(post.Version == EVAuctionTrader.BusinessObject.Enums.PostVersion.Vip ? "-fill" : "")"></i>
+                                            @post.Version
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="post-card-actions">
+                                    <a asp-page="/PostPages/Details" asp-route-id="@post.Id" class="btn-action-clean">
+                                        <i class="bi bi-eye"></i> View
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Pagination -->
+            @if (Model.Posts.TotalPages > 1)
+            {
+                <div class="pagination-clean">
+                    @if (Model.Posts.HasPrevious)
+                    {
+                        <a asp-page="/PostPages/Index"
+                           asp-route-pageNumber="@(Model.Posts.CurrentPage - 1)"
+                           asp-route-search="@Model.Search"
+                           asp-route-postType="@Model.PostType"
+                           asp-route-postStatus="@Model.PostStatus"
+                           asp-route-postVersion="@Model.PostVersion"
+                           asp-route-priceSort="@Model.PriceSort"
+                           class="page-btn-clean">
+                            <i class="bi bi-chevron-left"></i> Previous
+                        </a>
+                    }
+
+                    @for (int i = 1; i <= Model.Posts.TotalPages; i++)
+                    {
+                        <a asp-page="/PostPages/Index"
+                           asp-route-pageNumber="@i"
+                           asp-route-search="@Model.Search"
+                           asp-route-postType="@Model.PostType"
+                           asp-route-postStatus="@Model.PostStatus"
+                           asp-route-postVersion="@Model.PostVersion"
+                           asp-route-priceSort="@Model.PriceSort"
+                           class="page-btn-clean @(i == Model.Posts.CurrentPage ? "active" : "")">
+                            @i
+                        </a>
+                    }
+
+                    @if (Model.Posts.HasNext)
+                    {
+                        <a asp-page="/PostPages/Index"
+                           asp-route-pageNumber="@(Model.Posts.CurrentPage + 1)"
+                           asp-route-search="@Model.Search"
+                           asp-route-postType="@Model.PostType"
+                           asp-route-postStatus="@Model.PostStatus"
+                           asp-route-postVersion="@Model.PostVersion"
+                           asp-route-priceSort="@Model.PriceSort"
+                           class="page-btn-clean">
+                            Next <i class="bi bi-chevron-right"></i>
+                        </a>
+                    }
+                </div>
+
+                <div class="pagination-info-clean">
+                    Page @Model.Posts.CurrentPage of @Model.Posts.TotalPages
+                </div>
+            }
+        }
+        else
+        {
+            <div class="empty-posts-state">
+                <div class="empty-posts-icon">
+                    <i class="bi bi-inbox"></i>
+                </div>
+                <h2 class="empty-posts-title">No Posts Found</h2>
+                <p class="empty-posts-description">
+                    @if (!string.IsNullOrEmpty(Model.Search))
+                    {
+                        <text>No posts match your search criteria. Try adjusting your filters.</text>
+                    }
+                    else
+                    {
+                        <text>There are no posts available at the moment.</text>
+                    }
+                </p>
+                @if (User.IsInRole("Customer"))
+                {
+                    <a asp-page="/PostPages/Create" class="btn-clean btn-primary-clean">
+                        <i class="bi bi-plus-circle"></i> Create Your First Post
+                    </a>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Auto-hide alerts
+        setTimeout(function () {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 300);
+            });
+        }, 5000);
+    </script>
+}
