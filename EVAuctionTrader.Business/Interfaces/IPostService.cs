@@ -8,6 +8,7 @@ namespace EVAuctionTrader.Business.Interfaces
     {
         Task<PostResponseDto?> CreatePostAsync(PostRequestDto createPostDto);
         Task<PostResponseDto?> UpdatePostAsync(Guid postId, PostRequestDto updatePostDto);
+        Task<bool> UpdatePostStatusAsync(Guid postId, PostStatus newStatus);
         Task<Pagination<PostResponseDto>> GetAllPostsAsync(
             int pageNumber = 1,
             int pageSize = 10,
@@ -16,6 +17,15 @@ namespace EVAuctionTrader.Business.Interfaces
             PostVersion? postVersion = null,
             PostStatus? postStatus = null,
             bool priceSort = true);
+        Task<Pagination<PostResponseDto>> GetAllMemberPostsAsync(
+            int pageNumber = 1,
+            int pageSize = 10,
+            string? search = null,
+            PostType? postType = null,
+            PostVersion? postVersion = null,
+            PostStatus? postStatus = null,
+            bool priceSort = true);
         Task<PostResponseDto?> GetPostByIdAsync(Guid postId);
+        Task<bool> DeletePostAsync(Guid postId);
     }
 }

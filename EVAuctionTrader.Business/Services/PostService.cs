@@ -338,6 +338,136 @@ namespace EVAuctionTrader.Business.Services
                 throw;
             }
         }
+        public async Task<Pagination<PostResponseDto>> GetAllMemberPostsAsync(
+            int pageNumber = 1,
+            int pageSize = 10,
+            string? search = null,
+            PostType? postType = null,
+            PostVersion? postVersion = null,
+            PostStatus? postStatus = null,
+            bool priceSort = true)
+        {
+            try
+            {
+                _logger.LogInformation("Retrieving paginated list of posts for member.");
+                var query = _unitOfWork.Posts.GetQueryable().Where(q => !q.IsDeleted);
+
+                var currentUserId = _claimsService.GetCurrentUserId;
+                query = query.Where(p => p.AuthorId == currentUserId);
+                _logger.LogInformation($"Filtering posts by current user ID: {currentUserId}");
+
+                foreach (var item in query)
+                {
+                    if (item.PublishedAt <= DateTime.Now && item.Status == PostStatus.Draft)
+                        item.Status = PostStatus.Active;
+
+                    if (item.ExpiresAt <= DateTime.Now && item.Status == PostStatus.Active)
+                        item.Status = PostStatus.Closed;
+                }
+
+                if (postType.HasValue)
+                {
+                    query = query.Where(p => p.PostType == postType.Value);
+                }
+                if (postStatus.HasValue)
+                {
+                    query = query.Where(p => p.Status == postStatus.Value);
+                }
+                if (postVersion.HasValue)
+                {
+                    query = query.Where(p => p.Version == postVersion.Value);
+                }
+                search = search?.ToLower();
+                if (!string.IsNullOrEmpty(search))
+                {
+                    query = query.Where(p => p.Title.ToLower().Contains(search) || p.LocationAddress.ToLower().Contains(search));
+                }
+
+                query = priceSort
+                    ? query.OrderBy(p => p.Price)
+                    : query.OrderByDescending(p => p.Price);
+
+                var totalCount = await query.CountAsync();
+
+                var posts = await query
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                var postDtos = new List<PostResponseDto>();
+
+                foreach (var post in posts)
+                {
+                    var author = await _unitOfWork.Users.GetByIdAsync(post.AuthorId);
+                    if (author == null)
+                    {
+                        _logger.LogWarning($"GetAllMemberPostsAsync warning: Author with ID {post.AuthorId} not found for post ID {post.Id}.");
+                        throw new InvalidOperationException("Author not found.");
+                    }
+
+                    VehicleResponseDto? vehicleDto = null;
+                    BatteryResponseDto? batteryDto = null;
+                    if (post.VehicleId.HasValue)
+                    {
+                        var vehicleEntity = await _unitOfWork.Vehicles.GetByIdAsync(post.VehicleId.Value);
+                        if (vehicleEntity != null)
+                        {
+                            vehicleDto = new VehicleResponseDto
+                            {
+                                Id = vehicleEntity.Id,
+                                Brand = vehicleEntity.Brand,
+                                Model = vehicleEntity.Model,
+                                Year = vehicleEntity.Year,
+                                OdometerKm = vehicleEntity.OdometerKm,
+                                ConditionGrade = vehicleEntity.ConditionGrade
+                            };
+                        }
+                    }
+                    if (post.BatteryId.HasValue)
+                    {
+                        var batteryEntity = await _unitOfWork.Batteries.GetByIdAsync(post.BatteryId.Value);
+                        if (batteryEntity != null)
+                        {
+                            batteryDto = new BatteryResponseDto
+                            {
+                                Id = batteryEntity.Id,
+                                Manufacturer = batteryEntity.Manufacturer,
+                                Chemistry = batteryEntity.Chemistry,
+                                CapacityKwh = batteryEntity.CapacityKwh,
+                                CycleCount = batteryEntity.CycleCount,
+                                SohPercent = batteryEntity.SohPercent,
+                                VoltageV = batteryEntity.VoltageV,
+                                ConnectorType = batteryEntity.ConnectorType
+                            };
+                        }
+                    }
+                    postDtos.Add(new PostResponseDto
+                    {
+                        Id = post.Id,
+                        AuthorId = post.AuthorId,
+                        AuthorName = author.FullName,
+                        PostType = post.PostType,
+                        Vehicle = vehicleDto,
+                        Battery = batteryDto,
+                        Version = post.Version,
+                        Title = post.Title,
+                        Description = post.Description,
+                        Price = post.Price,
+                        LocationAddress = post.LocationAddress,
+                        PhotoUrls = post.PhotoUrls,
+                        Status = post.Status,
+                        PublishedAt = post.PublishedAt,
+                        ExpiresAt = post.ExpiresAt
+                    });
+                }
+                return new Pagination<PostResponseDto>(postDtos, totalCount, pageNumber, pageSize);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while retrieving paginated list of posts.");
+                throw;
+            }
+        }
 
         public async Task<PostResponseDto?> GetPostByIdAsync(Guid postId)
         {
@@ -693,6 +823,83 @@ namespace EVAuctionTrader.Business.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"An error occurred while updating post with ID: {postId}");
+                throw;
+            }
+        }
+
+        public async Task<bool> UpdatePostStatusAsync(Guid postId, PostStatus newStatus)
+        {
+            try
+            {
+                _logger.LogInformation($"Updating status of post with ID: {postId} to {newStatus}");
+                var postEntity = await _unitOfWork.Posts.GetByIdAsync(postId);
+                if (postEntity == null || postEntity.IsDeleted)
+                {
+                    _logger.LogWarning($"UpdatePostStatusAsync failed: Post with ID {postId} not found.");
+                    return false;
+                }
+                if (postEntity.Status == newStatus)
+                {
+                    _logger.LogInformation($"Post with ID: {postId} already has status {newStatus}. No update needed.");
+                    return true;
+                }
+                if (postEntity.Status == PostStatus.Draft && newStatus == PostStatus.Active)
+                {
+                    postEntity.PublishedAt = DateTime.Now;
+                    if (postEntity.Version == PostVersion.Free)
+                    {
+                        postEntity.ExpiresAt = DateTime.Now.AddDays(15);
+                    }
+                    else if (postEntity.Version == PostVersion.Vip)
+                    {
+                        postEntity.ExpiresAt = DateTime.Now.AddDays(30);
+                    }
+                }
+                if (newStatus == PostStatus.Closed)
+                {
+                    postEntity.ExpiresAt = DateTime.Now;
+                }
+                postEntity.Status = newStatus;
+                await _unitOfWork.Posts.Update(postEntity);
+                await _unitOfWork.SaveChangesAsync();
+                _logger.LogInformation($"Post status updated successfully for post ID: {postId}");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An error occurred while updating status of post with ID: {postId}");
+                throw;
+            }
+        }
+
+        public async Task<bool> DeletePostAsync(Guid postId)
+        {
+            try
+            {
+                _logger.LogInformation($"Deleting post with ID: {postId}");
+
+                var postEntity = await _unitOfWork.Posts.GetByIdAsync(postId);
+
+                if (postEntity == null || postEntity.IsDeleted)
+                {
+                    _logger.LogWarning($"DeletePostAsync failed: Post with ID {postId} not found or already deleted.");
+                    return false;
+                }
+
+                var currentUserId = _claimsService.GetCurrentUserId;
+
+                postEntity.IsDeleted = true;
+                postEntity.Status = PostStatus.Removed;
+
+                await _unitOfWork.Posts.Update(postEntity);
+                await _unitOfWork.SaveChangesAsync();
+
+                _logger.LogInformation($"Post with ID {postId} successfully deleted (soft delete).");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An error occurred while deleting post with ID: {postId}");
                 throw;
             }
         }
