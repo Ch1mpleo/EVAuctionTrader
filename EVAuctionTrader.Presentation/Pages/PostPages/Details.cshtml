@@ -20,6 +20,15 @@
             </div>
         }
 
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                @TempData["ErrorMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
         @if (Model.Post == null)
         {
             <div class="empty-posts-state">
@@ -46,13 +55,51 @@
                 </ol>
             </nav>
 
+            <!-- ✅ UPDATED: Top Edit Button with Ban Check -->
             @if (Model.IsAuthor)
             {
                 <div style="display: flex; justify-content: flex-end; margin-bottom: 1rem;">
-                    <a asp-page="/PostPages/Update" asp-route-id="@Model.Post.Id" class="btn-clean btn-action-clean">
-                        <i class="bi bi-pencil-square"></i> Edit Post
-                    </a>
+                    @if (Model.Post.Status != EVAuctionTrader.BusinessObject.Enums.PostStatus.Removed)
+                    {
+                        <a asp-page="/PostPages/Update" asp-route-id="@Model.Post.Id" class="btn-clean btn-action-clean">
+                            <i class="bi bi-pencil-square"></i> Edit Post
+                        </a>
+                    }
+                    else
+                    {
+                        <div class="alert alert-danger" style="margin-bottom: 0; padding: 0.75rem 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="bi bi-lock-fill"></i>
+                            <span>This post has been banned by admin and cannot be edited</span>
+                        </div>
+                    }
                 </div>
+            }
+
+            <!-- ✅ NEW: Ban Warning Banner (if banned) -->
+            @if (Model.Post.Status == EVAuctionTrader.BusinessObject.Enums.PostStatus.Removed)
+            {
+                @if (User.IsInRole("Admin"))
+                {
+                    <div class="alert alert-warning" style="margin-bottom: 1.5rem; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border: 1px solid #fbbf24; color: #fff;">
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                            <i class="bi bi-shield-exclamation" style="font-size: 1.5rem;"></i>
+                            <div>
+                                <strong>Admin Notice:</strong> This post has been banned and is hidden from public view. Only you and the post owner can see it.
+                            </div>
+                        </div>
+                    </div>
+                }
+                else if (Model.IsAuthor)
+                {
+                    <div class="alert alert-danger" style="margin-bottom: 1.5rem;">
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                            <i class="bi bi-exclamation-triangle-fill" style="font-size: 1.5rem;"></i>
+                            <div>
+                                <strong>Post Banned:</strong> Your post has been removed by an administrator and is no longer visible to other users. You cannot edit or republish this post.
+                            </div>
+                        </div>
+                    </div>
+                }
             }
 
             <div class="post-detail-container">
@@ -218,16 +265,26 @@
                         <!-- Title -->
                         <h1 class="post-detail-title">@Model.Post.Title</h1>
 
-                        <!-- Badges -->
+                        <!-- ✅ UPDATED: Badges with Removed Status -->
                         <div class="post-detail-badges">
                             <span class="post-card-type @(Model.Post.PostType == EVAuctionTrader.BusinessObject.Enums.PostType.Vehicle ? "vehicle" : "battery")">
                                 <i class="bi bi-@(Model.Post.PostType == EVAuctionTrader.BusinessObject.Enums.PostType.Vehicle ? "car-front" : "battery-charging")"></i>
                                 @Model.Post.PostType
                             </span>
-                            <span class="badge-clean badge-@(Model.Post.Status == EVAuctionTrader.BusinessObject.Enums.PostStatus.Active ? "success" : Model.Post.Status == EVAuctionTrader.BusinessObject.Enums.PostStatus.Draft ? "pending" : "danger")">
-                                <i class="bi bi-flag"></i>
-                                @Model.Post.Status
-                            </span>
+                            @if (Model.Post.Status == EVAuctionTrader.BusinessObject.Enums.PostStatus.Removed)
+                            {
+                                <span class="badge-clean badge-danger" style="background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); animation: pulse-red 2s infinite;">
+                                    <i class="bi bi-slash-circle"></i>
+                                    Banned
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge-clean badge-@(Model.Post.Status == EVAuctionTrader.BusinessObject.Enums.PostStatus.Active ? "success" : Model.Post.Status == EVAuctionTrader.BusinessObject.Enums.PostStatus.Draft ? "pending" : "danger")">
+                                    <i class="bi bi-flag"></i>
+                                    @Model.Post.Status
+                                </span>
+                            }
                             <span class="version-badge @(Model.Post.Version == EVAuctionTrader.BusinessObject.Enums.PostVersion.Vip ? "vip" : "free")">
                                 <i class="bi bi-star@(Model.Post.Version == EVAuctionTrader.BusinessObject.Enums.PostVersion.Vip ? "-fill" : "")"></i>
                                 @Model.Post.Version
@@ -282,48 +339,75 @@
                             }
                         </div>
 
-                        <!-- Actions -->
+                        <!-- ✅ UPDATED: Actions with Ban Protection -->
                         <div class="post-detail-section" style="border: none; padding-bottom: 0;">
                             @if (Model.IsAuthor)
                             {
-                                <a asp-page="/PostPages/Update" asp-route-id="@Model.Post.Id" class="btn-clean btn-success-clean" style="width: 100%; margin-bottom: 0.75rem;">
-                                    <i class="bi bi-pencil-square"></i> Edit Post
-                                </a>
+                                @if (Model.Post.Status != EVAuctionTrader.BusinessObject.Enums.PostStatus.Removed)
+                                {
+                                    <a asp-page="/PostPages/Update" asp-route-id="@Model.Post.Id" class="btn-clean btn-success-clean" style="width: 100%; margin-bottom: 0.75rem;">
+                                        <i class="bi bi-pencil-square"></i> Edit Post
+                                    </a>
+                                }
+                                else
+                                {
+                                    <div class="alert alert-danger" style="margin-bottom: 0.75rem; font-size: 0.875rem; padding: 0.75rem; text-align: center;">
+                                        <i class="bi bi-lock-fill"></i>
+                                        <strong>Post Banned</strong><br />
+                                        <small>Editing is disabled</small>
+                                    </div>
+                                }
                             }
                             else if (User.Identity?.IsAuthenticated == true)
                             {
-                                <button class="btn-clean btn-primary-clean" style="width: 100%; margin-bottom: 0.75rem;">
-                                    <i class="bi bi-chat-dots"></i> Contact Seller
-                                </button>
-                                <button class="btn-clean btn-secondary-clean" style="width: 100%;">
-                                    <i class="bi bi-heart"></i> Save Post
-                                </button>
+                                @if (Model.Post.Status != EVAuctionTrader.BusinessObject.Enums.PostStatus.Removed)
+                                {
+                                    <button class="btn-clean btn-primary-clean" style="width: 100%; margin-bottom: 0.75rem;">
+                                        <i class="bi bi-chat-dots"></i> Contact Seller
+                                    </button>
+                                    <button class="btn-clean btn-secondary-clean" style="width: 100%;">
+                                        <i class="bi bi-heart"></i> Save Post
+                                    </button>
+                                }
+                                else
+                                {
+                                    <div class="alert alert-warning" style="margin-bottom: 0; font-size: 0.875rem; padding: 0.75rem; text-align: center;">
+                                        <i class="bi bi-info-circle"></i>
+                                        This post is no longer available
+                                    </div>
+                                }
                             }
                             else
                             {
-                                <a asp-page="/Auth/Login" asp-route-returnUrl="@($"/PostPages/Details/{Model.Post.Id}")" class="btn-clean btn-primary-clean" style="width: 100%; margin-bottom: 0.75rem;">
-                                    <i class="bi bi-box-arrow-in-right"></i> Login to Contact
-                                </a>
+                                @if (Model.Post.Status != EVAuctionTrader.BusinessObject.Enums.PostStatus.Removed)
+                                {
+                                    <a asp-page="/Auth/Login" asp-route-returnUrl="@($"/PostPages/Details/{Model.Post.Id}")" class="btn-clean btn-primary-clean" style="width: 100%; margin-bottom: 0.75rem;">
+                                        <i class="bi bi-box-arrow-in-right"></i> Login to Contact
+                                    </a>
+                                }
                             }
                         </div>
 
                         <!-- Share -->
-                        <div class="post-detail-section" style="border: none; padding-bottom: 0;">
-                            <div class="post-detail-section-title">
-                                <i class="bi bi-share"></i> Share
+                        @if (Model.Post.Status != EVAuctionTrader.BusinessObject.Enums.PostStatus.Removed || User.IsInRole("Admin") || Model.IsAuthor)
+                        {
+                            <div class="post-detail-section" style="border: none; padding-bottom: 0;">
+                                <div class="post-detail-section-title">
+                                    <i class="bi bi-share"></i> Share
+                                </div>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <button class="btn-clean btn-secondary-clean" style="flex: 1;" onclick="shareOnFacebook()">
+                                        <i class="bi bi-facebook"></i>
+                                    </button>
+                                    <button class="btn-clean btn-secondary-clean" style="flex: 1;" onclick="shareOnTwitter()">
+                                        <i class="bi bi-twitter"></i>
+                                    </button>
+                                    <button class="btn-clean btn-secondary-clean" style="flex: 1;" onclick="copyLink()">
+                                        <i class="bi bi-link-45deg"></i>
+                                    </button>
+                                </div>
                             </div>
-                            <div style="display: flex; gap: 0.5rem;">
-                                <button class="btn-clean btn-secondary-clean" style="flex: 1;" onclick="shareOnFacebook()">
-                                    <i class="bi bi-facebook"></i>
-                                </button>
-                                <button class="btn-clean btn-secondary-clean" style="flex: 1;" onclick="shareOnTwitter()">
-                                    <i class="bi bi-twitter"></i>
-                                </button>
-                                <button class="btn-clean btn-secondary-clean" style="flex: 1;" onclick="copyLink()">
-                                    <i class="bi bi-link-45deg"></i>
-                                </button>
-                            </div>
-                        </div>
+                        }
                     </div>
                 </div>
             </div>

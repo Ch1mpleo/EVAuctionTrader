@@ -2,17 +2,19 @@ using EVAuctionTrader.Business.Interfaces;
 using EVAuctionTrader.Business.Utils;
 using EVAuctionTrader.BusinessObject.DTOs.PostDTOs;
 using EVAuctionTrader.BusinessObject.Enums;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace EVAuctionTrader.Presentation.Pages.PostPages
 {
-    public class IndexModel : PageModel
+    [Authorize(Roles = "Member")]
+    public class MyPostsModel : PageModel
     {
         private readonly IPostService _postService;
-        private readonly ILogger<IndexModel> _logger;
+        private readonly ILogger<MyPostsModel> _logger;
 
-        public IndexModel(IPostService postService, ILogger<IndexModel> logger)
+        public MyPostsModel(IPostService postService, ILogger<MyPostsModel> logger)
         {
             _postService = postService;
             _logger = logger;
@@ -30,9 +32,6 @@ namespace EVAuctionTrader.Presentation.Pages.PostPages
         public PostType? PostType { get; set; }
 
         [BindProperty(SupportsGet = true)]
-        public PostVersion? PostVersion { get; set; }
-
-        [BindProperty(SupportsGet = true)]
         public PostStatus? PostStatus { get; set; }
 
         [BindProperty(SupportsGet = true)]
@@ -42,53 +41,46 @@ namespace EVAuctionTrader.Presentation.Pages.PostPages
         {
             try
             {
-                Posts = await _postService.GetAllPostsAsync(
+                Posts = await _postService.GetAllMemberPostsAsync(
                     pageNumber: PageNumber,
-                    pageSize: 12,
+                    pageSize: 10,
                     search: Search,
                     postType: PostType,
-                    postVersion: PostVersion,
                     postStatus: PostStatus,
                     priceSort: PriceSort
                 );
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error loading posts");
-                TempData["ErrorMessage"] = "An error occurred while loading posts.";
-                Posts = new Pagination<PostResponseDto>(new List<PostResponseDto>(), 0, 1, 12);
+                _logger.LogError(ex, "Error loading member posts");
+                TempData["ErrorMessage"] = "An error occurred while loading your posts.";
+                Posts = new Pagination<PostResponseDto>(new List<PostResponseDto>(), 0, 1, 10);
             }
         }
 
-        public async Task<IActionResult> OnPostBanAsync(Guid id)
+        public async Task<IActionResult> OnPostDeleteAsync(Guid id)
         {
             try
             {
-                if (!User.IsInRole("Admin"))
-                {
-                    TempData["ErrorMessage"] = "You don't have permission to ban posts.";
-                    return RedirectToPage();
-                }
-
-                var result = await _postService.BanPostAsync(id);
+                var result = await _postService.DeletePostAsync(id);
 
                 if (result)
                 {
-                    TempData["SuccessMessage"] = "Post has been banned successfully.";
+                    TempData["SuccessMessage"] = "Post deleted successfully.";
                 }
                 else
                 {
-                    TempData["ErrorMessage"] = "Failed to ban post. Post may not exist.";
+                    TempData["ErrorMessage"] = "Failed to delete post. Post may not exist.";
                 }
             }
             catch (UnauthorizedAccessException)
             {
-                TempData["ErrorMessage"] = "You don't have permission to ban posts.";
+                TempData["ErrorMessage"] = "You can only delete your own posts.";
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error banning post {id}");
-                TempData["ErrorMessage"] = "An error occurred while banning the post.";
+                _logger.LogError(ex, $"Error deleting post {id}");
+                TempData["ErrorMessage"] = "An error occurred while deleting the post.";
             }
 
             return RedirectToPage(new
@@ -96,7 +88,6 @@ namespace EVAuctionTrader.Presentation.Pages.PostPages
                 pageNumber = PageNumber,
                 search = Search,
                 postType = PostType,
-                postVersion = PostVersion,
                 postStatus = PostStatus,
                 priceSort = PriceSort
             });

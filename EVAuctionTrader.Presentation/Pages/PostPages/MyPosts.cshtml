@@ -1,0 +1,356 @@
+﻿@page
+@using EVAuctionTrader.BusinessObject.Enums
+@model EVAuctionTrader.Presentation.Pages.PostPages.MyPostsModel
+@{
+    ViewData["Title"] = "My Posts";
+}
+
+<div class="staff-page-clean">
+    <div class="container">
+        <!-- Header -->
+        <div class="staff-header-clean">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h1 class="staff-title-clean">
+                        <i class="bi bi-file-earmark-text"></i>
+                        My Posts
+                    </h1>
+                    <p class="staff-subtitle-clean">Manage your vehicle and battery listings</p>
+                </div>
+                <a asp-page="/PostPages/Create" class="btn-clean btn-success-clean">
+                    <i class="bi bi-plus-circle"></i> Create New Post
+                </a>
+            </div>
+        </div>
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill"></i>
+                @TempData["SuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                @TempData["ErrorMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <!-- Quick Stats -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="stat-card stat-active">
+                    <div class="stat-icon">
+                        <i class="bi bi-check-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-value">@Model.Posts?.Count(p => p.Status == PostStatus.Active)</div>
+                        <div class="stat-label">Active</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card stat-draft">
+                    <div class="stat-icon">
+                        <i class="bi bi-pencil-square"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-value">@Model.Posts?.Count(p => p.Status == PostStatus.Draft)</div>
+                        <div class="stat-label">Drafts</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card stat-closed">
+                    <div class="stat-icon">
+                        <i class="bi bi-x-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-value">@Model.Posts?.Count(p => p.Status == PostStatus.Closed)</div>
+                        <div class="stat-label">Closed</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card stat-removed">
+                    <div class="stat-icon">
+                        <i class="bi bi-slash-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-value">@Model.Posts?.Count(p => p.Status == PostStatus.Removed)</div>
+                        <div class="stat-label">Removed</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="staff-card-clean mb-4">
+            <div class="staff-card-body-clean">
+                <form method="get" class="row g-3">
+                    <div class="col-md-4">
+                        <input type="text" name="search" class="filter-input-clean"
+                               placeholder="Search your posts..."
+                               value="@Model.Search">
+                    </div>
+                    <div class="col-md-2">
+                        <select name="postType" class="filter-input-clean">
+                            <option value="">All Types</option>
+                            <option value="@((int)PostType.Vehicle)" selected="@(Model.PostType == PostType.Vehicle)">Vehicle</option>
+                            <option value="@((int)PostType.Battery)" selected="@(Model.PostType == PostType.Battery)">Battery</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select name="postStatus" class="filter-input-clean">
+                            <option value="">All Status</option>
+                            <option value="@((int)PostStatus.Draft)" selected="@(Model.PostStatus == PostStatus.Draft)">Draft</option>
+                            <option value="@((int)PostStatus.Active)" selected="@(Model.PostStatus == PostStatus.Active)">Active</option>
+                            <option value="@((int)PostStatus.Closed)" selected="@(Model.PostStatus == PostStatus.Closed)">Closed</option>
+                            <option value="@((int)PostStatus.Removed)" selected="@(Model.PostStatus == PostStatus.Removed)">Removed</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select name="priceSort" class="filter-input-clean">
+                            <option value="true" selected="@Model.PriceSort">Low to High</option>
+                            <option value="false" selected="@(!Model.PriceSort)">High to Low</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn-clean btn-primary-clean w-100">
+                            <i class="bi bi-search"></i> Filter
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Posts List -->
+        @if (Model.Posts != null && Model.Posts.Any())
+        {
+            <div class="staff-card-clean">
+                <div class="table-responsive">
+                    <table class="table-clean">
+                        <thead>
+                            <tr>
+                                <th>Post</th>
+                                <th>Type</th>
+                                <th>Price</th>
+                                <th>Status</th>
+                                <th>Version</th>
+                                <th>Published</th>
+                                <th>Expires</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var post in Model.Posts)
+                            {
+                                <tr class="@(post.Status == PostStatus.Removed ? "table-danger-subtle" : "")">
+                                    <td>
+                                        <div class="user-cell-clean">
+                                            @if (post.PhotoUrls != null && post.PhotoUrls.Any())
+                                            {
+                                                <img src="@post.PhotoUrls.First()" alt="@post.Title"
+                                                     style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
+                                            }
+                                            else
+                                            {
+                                                <div class="user-avatar-clean">
+                                                    <i class="bi bi-image"></i>
+                                                </div>
+                                            }
+                                            <div class="user-info-clean">
+                                                <div class="user-name-clean">@post.Title</div>
+                                                <div class="user-role-clean">
+                                                    <i class="bi bi-geo-alt"></i> @post.LocationAddress
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if (post.PostType == PostType.Vehicle)
+                                        {
+                                            <span class="badge-clean badge-info">
+                                                <i class="bi bi-car-front"></i> Vehicle
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge-clean badge-info">
+                                                <i class="bi bi-battery-charging"></i> Battery
+                                            </span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <strong style="color: #22c55e;">
+                                            @(post.Price.HasValue? post.Price.Value.ToString("N0") + " VND" : "Negotiable")
+                                        </strong>
+                                    </td>
+                                    <td>
+                                        @switch (post.Status)
+                                        {
+                                            case PostStatus.Draft:
+                                                <span class="badge-clean badge-pending">
+                                                    <i class="bi bi-pencil"></i> Draft
+                                                </span>
+                                                break;
+                                            case PostStatus.Active:
+                                                <span class="badge-clean badge-success">
+                                                    <i class="bi bi-check-circle"></i> Active
+                                                </span>
+                                                break;
+                                            case PostStatus.Closed:
+                                                <span class="badge-clean badge-danger">
+                                                    <i class="bi bi-x-circle"></i> Closed
+                                                </span>
+                                                break;
+                                            case PostStatus.Removed:
+                                                <span class="badge-clean badge-danger">
+                                                    <i class="bi bi-slash-circle"></i> Banned
+                                                </span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (post.Version == PostVersion.Vip)
+                                        {
+                                            <span class="badge-clean" style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #000;">
+                                                <i class="bi bi-star-fill"></i> VIP
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge-clean badge-info">
+                                                <i class="bi bi-tag"></i> Free
+                                            </span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="date-cell-clean">
+                                            <div class="date-primary-clean">
+                                                @post.PublishedAt?.ToString("MMM dd, yyyy")
+                                            </div>
+                                            <div class="date-secondary-clean">
+                                                @post.PublishedAt?.ToString("hh:mm tt")
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="date-cell-clean">
+                                            <div class="date-primary-clean">
+                                                @post.ExpiresAt?.ToString("MMM dd, yyyy")
+                                            </div>
+                                            <div class="date-secondary-clean">
+                                                @post.ExpiresAt?.ToString("hh:mm tt")
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="action-group-clean">
+                                            <a asp-page="/PostPages/Details" asp-route-id="@post.Id"
+                                               class="btn-action-clean" title="View Details">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+
+                                            @if (post.Status != PostStatus.Removed)
+                                            {
+                                                <a asp-page="/PostPages/Update" asp-route-id="@post.Id"
+                                                   class="btn-action-clean btn-action-success" title="Edit">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+
+                                                <form method="post" asp-page-handler="Delete" asp-route-id="@post.Id" class="d-inline">
+                                                    @Html.AntiForgeryToken()
+                                                    <button type="submit" class="btn-action-clean btn-action-danger"
+                                                            title="Delete"
+                                                            onclick="return confirm('Are you sure you want to delete this post? This action cannot be undone.');">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </form>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted" style="font-size: 0.875rem;">
+                                                    <i class="bi bi-lock"></i> Banned
+                                                </span>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                @if (Model.Posts.TotalPages > 1)
+                {
+                    <div class="pagination-clean">
+                        @if (Model.Posts.HasPrevious)
+                        {
+                            <a asp-page="/PostPages/MyPosts"
+                               asp-route-pageNumber="@(Model.Posts.CurrentPage - 1)"
+                               asp-route-search="@Model.Search"
+                               asp-route-postType="@Model.PostType"
+                               asp-route-postStatus="@Model.PostStatus"
+                               asp-route-priceSort="@Model.PriceSort"
+                               class="page-btn-clean">
+                                <i class="bi bi-chevron-left"></i> Previous
+                            </a>
+                        }
+
+                        <span class="page-info-clean">
+                            Page @Model.Posts.CurrentPage of @Model.Posts.TotalPages
+                        </span>
+
+                        @if (Model.Posts.HasNext)
+                        {
+                            <a asp-page="/PostPages/MyPosts"
+                               asp-route-pageNumber="@(Model.Posts.CurrentPage + 1)"
+                               asp-route-search="@Model.Search"
+                               asp-route-postType="@Model.PostType"
+                               asp-route-postStatus="@Model.PostStatus"
+                               asp-route-priceSort="@Model.PriceSort"
+                               class="page-btn-clean">
+                                Next <i class="bi bi-chevron-right"></i>
+                            </a>
+                        }
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="empty-state-clean">
+                <i class="bi bi-inbox empty-icon-clean"></i>
+                <h3 class="empty-title-clean">No Posts Yet</h3>
+                <p class="empty-description-clean">You haven't created any posts yet. Start by creating your first listing!</p>
+                <a asp-page="/PostPages/Create" class="btn-clean btn-success-clean mt-3">
+                    <i class="bi bi-plus-circle"></i> Create Your First Post
+                </a>
+            </div>
+        }
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/profile.css" />
+    <link rel="stylesheet" href="~/css/posts.css" />
+}
+
+@section Scripts {
+    <script>
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 300);
+            });
+        }, 5000);
+    </script>
+}

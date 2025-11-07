@@ -210,7 +210,173 @@ namespace EVAuctionTrader.Business.Services
         }
 
         public async Task<Pagination<PostResponseDto>> GetAllPostsAsync
-            (int pageNumber = 1,
+    (int pageNumber = 1,
+    int pageSize = 10,
+    string? search = null,
+    PostType? postType = null,
+    PostVersion? postVersion = null,
+    PostStatus? postStatus = null,
+    bool priceSort = true)
+        {
+            try
+            {
+                _logger.LogInformation("Retrieving paginated list of posts.");
+
+                // ✅ Get current user to check role
+                var currentUserId = _claimsService.GetCurrentUserId;
+                var currentUser = currentUserId != Guid.Empty
+                    ? await _unitOfWork.Users.GetByIdAsync(currentUserId)
+                    : null;
+
+                bool isAdmin = currentUser?.Role == RoleType.Admin;
+
+                // ✅ Base query: Always exclude deleted posts
+                var query = _unitOfWork.Posts.GetQueryable().Where(q => !q.IsDeleted);
+
+                // ✅ If NOT admin: exclude banned posts (Status = Removed)
+                if (!isAdmin)
+                {
+                    query = query.Where(q => q.Status != PostStatus.Removed);
+                    _logger.LogInformation("Non-admin user: filtering out removed/banned posts.");
+                }
+                else
+                {
+                    _logger.LogInformation("Admin user: showing all posts including banned ones.");
+                }
+
+                // ✅ Auto-update status based on time
+                var utcNow = DateTime.UtcNow;
+                var postsToUpdate = await query
+                    .Where(p =>
+                        (p.PublishedAt <= utcNow && p.Status == PostStatus.Draft) ||
+                        (p.ExpiresAt <= utcNow && p.Status == PostStatus.Active))
+                    .ToListAsync();
+
+                foreach (var item in postsToUpdate)
+                {
+                    if (item.PublishedAt <= utcNow && item.Status == PostStatus.Draft)
+                        item.Status = PostStatus.Active;
+
+                    if (item.ExpiresAt <= utcNow && item.Status == PostStatus.Active)
+                        item.Status = PostStatus.Closed;
+                }
+
+                if (postsToUpdate.Any())
+                {
+                    await _unitOfWork.SaveChangesAsync();
+                    _logger.LogInformation($"Updated status for {postsToUpdate.Count} posts.");
+                }
+
+                // ✅ Apply filters
+                if (postType.HasValue)
+                {
+                    query = query.Where(p => p.PostType == postType.Value);
+                }
+                if (postStatus.HasValue)
+                {
+                    query = query.Where(p => p.Status == postStatus.Value);
+                }
+                if (postVersion.HasValue)
+                {
+                    query = query.Where(p => p.Version == postVersion.Value);
+                }
+                search = search?.ToLower();
+                if (!string.IsNullOrEmpty(search))
+                {
+                    query = query.Where(p => p.Title.ToLower().Contains(search) || p.LocationAddress.ToLower().Contains(search));
+                }
+
+                query = priceSort
+                    ? query.OrderBy(p => p.Price)
+                    : query.OrderByDescending(p => p.Price);
+
+                var totalCount = await query.CountAsync();
+
+                var posts = await query
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                var postDtos = new List<PostResponseDto>();
+
+                foreach (var post in posts)
+                {
+                    var author = await _unitOfWork.Users.GetByIdAsync(post.AuthorId);
+                    if (author == null)
+                    {
+                        _logger.LogWarning($"GetAllPostsAsync warning: Author with ID {post.AuthorId} not found for post ID {post.Id}.");
+                        continue; // Skip this post instead of throwing
+                    }
+
+                    VehicleResponseDto? vehicleDto = null;
+                    BatteryResponseDto? batteryDto = null;
+
+                    if (post.VehicleId.HasValue)
+                    {
+                        var vehicleEntity = await _unitOfWork.Vehicles.GetByIdAsync(post.VehicleId.Value);
+                        if (vehicleEntity != null)
+                        {
+                            vehicleDto = new VehicleResponseDto
+                            {
+                                Id = vehicleEntity.Id,
+                                Brand = vehicleEntity.Brand,
+                                Model = vehicleEntity.Model,
+                                Year = vehicleEntity.Year,
+                                OdometerKm = vehicleEntity.OdometerKm,
+                                ConditionGrade = vehicleEntity.ConditionGrade
+                            };
+                        }
+                    }
+
+                    if (post.BatteryId.HasValue)
+                    {
+                        var batteryEntity = await _unitOfWork.Batteries.GetByIdAsync(post.BatteryId.Value);
+                        if (batteryEntity != null)
+                        {
+                            batteryDto = new BatteryResponseDto
+                            {
+                                Id = batteryEntity.Id,
+                                Manufacturer = batteryEntity.Manufacturer,
+                                Chemistry = batteryEntity.Chemistry,
+                                CapacityKwh = batteryEntity.CapacityKwh,
+                                CycleCount = batteryEntity.CycleCount,
+                                SohPercent = batteryEntity.SohPercent,
+                                VoltageV = batteryEntity.VoltageV,
+                                ConnectorType = batteryEntity.ConnectorType
+                            };
+                        }
+                    }
+
+                    postDtos.Add(new PostResponseDto
+                    {
+                        Id = post.Id,
+                        AuthorId = post.AuthorId,
+                        AuthorName = author.FullName,
+                        PostType = post.PostType,
+                        Vehicle = vehicleDto,
+                        Battery = batteryDto,
+                        Version = post.Version,
+                        Title = post.Title,
+                        Description = post.Description,
+                        Price = post.Price,
+                        LocationAddress = post.LocationAddress,
+                        PhotoUrls = post.PhotoUrls,
+                        Status = post.Status,
+                        PublishedAt = post.PublishedAt,
+                        ExpiresAt = post.ExpiresAt
+                    });
+                }
+
+                return new Pagination<PostResponseDto>(postDtos, totalCount, pageNumber, pageSize);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while retrieving paginated list of posts.");
+                throw;
+            }
+        }
+        public async Task<Pagination<PostResponseDto>> GetAllMemberPostsAsync(
+            int pageNumber = 1,
             int pageSize = 10,
             string? search = null,
             PostType? postType = null,
@@ -220,10 +386,13 @@ namespace EVAuctionTrader.Business.Services
         {
             try
             {
-                _logger.LogInformation("Retrieving paginated list of posts.");
+                _logger.LogInformation("Retrieving paginated list of posts for member.");
                 var query = _unitOfWork.Posts.GetQueryable().Where(q => !q.IsDeleted);
 
-                // ✅ FIX: Use DateTime.UtcNow for comparisons
+                var currentUserId = _claimsService.GetCurrentUserId;
+                query = query.Where(p => p.AuthorId == currentUserId);
+                _logger.LogInformation($"Filtering posts by current user ID: {currentUserId}");
+
                 var utcNow = DateTime.UtcNow;
 
                 foreach (var item in query)
@@ -271,7 +440,7 @@ namespace EVAuctionTrader.Business.Services
                     var author = await _unitOfWork.Users.GetByIdAsync(post.AuthorId);
                     if (author == null)
                     {
-                        _logger.LogWarning($"GetAllPostsAsync warning: Author with ID {post.AuthorId} not found for post ID {post.Id}.");
+                        _logger.LogWarning($"GetAllMemberPostsAsync warning: Author with ID {post.AuthorId} not found for post ID {post.Id}.");
                         throw new InvalidOperationException("Author not found.");
                     }
 
@@ -693,6 +862,121 @@ namespace EVAuctionTrader.Business.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"An error occurred while updating post with ID: {postId}");
+                throw;
+            }
+        }
+
+        public async Task<bool> UpdatePostStatusAsync(Guid postId, PostStatus newStatus)
+        {
+            try
+            {
+                _logger.LogInformation($"Updating status of post with ID: {postId} to {newStatus}");
+                var postEntity = await _unitOfWork.Posts.GetByIdAsync(postId);
+                if (postEntity == null || postEntity.IsDeleted)
+                {
+                    _logger.LogWarning($"UpdatePostStatusAsync failed: Post with ID {postId} not found.");
+                    return false;
+                }
+                if (postEntity.Status == newStatus)
+                {
+                    _logger.LogInformation($"Post with ID: {postId} already has status {newStatus}. No update needed.");
+                    return true;
+                }
+                if (postEntity.Status == PostStatus.Draft && newStatus == PostStatus.Active)
+                {
+                    postEntity.PublishedAt = DateTime.UtcNow;
+                    if (postEntity.Version == PostVersion.Free)
+                    {
+                        postEntity.ExpiresAt = DateTime.UtcNow.AddDays(15);
+                    }
+                    else if (postEntity.Version == PostVersion.Vip)
+                    {
+                        postEntity.ExpiresAt = DateTime.UtcNow.AddDays(30);
+                    }
+                }
+                if (newStatus == PostStatus.Closed)
+                {
+                    postEntity.ExpiresAt = DateTime.UtcNow;
+                }
+                postEntity.Status = newStatus;
+                await _unitOfWork.Posts.Update(postEntity);
+                await _unitOfWork.SaveChangesAsync();
+                _logger.LogInformation($"Post status updated successfully for post ID: {postId}");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An error occurred while updating status of post with ID: {postId}");
+                throw;
+            }
+        }
+
+        public async Task<bool> DeletePostAsync(Guid postId)
+        {
+            try
+            {
+                _logger.LogInformation($"Deleting post with ID: {postId}");
+
+                var postEntity = await _unitOfWork.Posts.GetByIdAsync(postId);
+
+                if (postEntity == null || postEntity.IsDeleted)
+                {
+                    _logger.LogWarning($"DeletePostAsync failed: Post with ID {postId} not found or already deleted.");
+                    return false;
+                }
+
+                var currentUserId = _claimsService.GetCurrentUserId;
+
+                postEntity.IsDeleted = true;
+                postEntity.Status = PostStatus.Removed;
+
+                await _unitOfWork.Posts.Update(postEntity);
+                await _unitOfWork.SaveChangesAsync();
+
+                _logger.LogInformation($"Post with ID {postId} successfully deleted (soft delete).");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An error occurred while deleting post with ID: {postId}");
+                throw;
+            }
+        }
+        public async Task<bool> BanPostAsync(Guid postId)
+        {
+            try
+            {
+                _logger.LogInformation($"Admin attempting to ban post with ID: {postId}");
+
+                var postEntity = await _unitOfWork.Posts.GetByIdAsync(postId);
+
+                if (postEntity == null || postEntity.IsDeleted)
+                {
+                    _logger.LogWarning($"BanPostAsync failed: Post with ID {postId} not found or already deleted.");
+                    return false;
+                }
+
+                // ✅ Check if current user is Admin
+                var currentUserId = _claimsService.GetCurrentUserId;
+                var currentUser = await _unitOfWork.Users.GetByIdAsync(currentUserId);
+
+                if (currentUser == null || currentUser.Role != RoleType.Admin)
+                {
+                    _logger.LogWarning($"BanPostAsync failed: User {currentUserId} is not an admin.");
+                    throw new UnauthorizedAccessException("Only admins can ban posts.");
+                }
+
+                postEntity.Status = PostStatus.Removed;
+
+                await _unitOfWork.Posts.Update(postEntity);
+                await _unitOfWork.SaveChangesAsync();
+
+                _logger.LogInformation($"Admin {currentUserId} successfully banned post {postId} (Author: {postEntity.AuthorId}).");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An error occurred while admin banning post with ID: {postId}");
                 throw;
             }
         }
