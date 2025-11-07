@@ -23,7 +23,7 @@ namespace EVAuctionTrader.Presentation.Pages.PostPages
         [BindProperty(SupportsGet = true)]
         public Guid Id { get; set; }
 
-        public PostResponseDto? Post { get; set; }
+        public PostWithCommentResponseDto? Post { get; set; }
         public bool IsAuthor { get; set; }
         public bool IsBanned { get; set; }
 
@@ -40,7 +40,6 @@ namespace EVAuctionTrader.Presentation.Pages.PostPages
                     return Page();
                 }
 
-                // ✅ Check if post is banned
                 IsBanned = Post.Status == PostStatus.Removed;
 
                 if (User.Identity?.IsAuthenticated == true)
@@ -48,7 +47,6 @@ namespace EVAuctionTrader.Presentation.Pages.PostPages
                     var currentUserId = _claimsService.GetCurrentUserId;
                     IsAuthor = Post.AuthorId == currentUserId;
 
-                    // ✅ If post is banned and user is NOT the author and NOT admin, redirect
                     if (IsBanned && !IsAuthor && !User.IsInRole("Admin"))
                     {
                         _logger.LogWarning($"Non-authorized user {currentUserId} attempted to view banned post {Id}");
@@ -58,7 +56,6 @@ namespace EVAuctionTrader.Presentation.Pages.PostPages
                 }
                 else
                 {
-                    // ✅ If post is banned and user is not logged in, redirect
                     if (IsBanned)
                     {
                         _logger.LogWarning($"Anonymous user attempted to view banned post {Id}");

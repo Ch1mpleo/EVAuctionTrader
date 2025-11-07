@@ -575,27 +575,24 @@ namespace EVAuctionTrader.Business.Services
                     }
                 }
 
-                // Fetch comments for this post
+                // Fetch comments for this post with Author included
                 var comments = await _unitOfWork.PostComments.GetAllAsync(
-                    predicate: c => c.PostId == postId && !c.IsDeleted
+                    predicate: c => c.PostId == postId && !c.IsDeleted,
+                    c => c.Author
                 );
 
                 var commentDtos = new List<PostCommentResponseDto>();
                 foreach (var comment in comments.OrderBy(c => c.CreatedAt))
                 {
-                    var commentAuthor = await _unitOfWork.Users.GetByIdAsync(comment.AuthorId);
-                    if (commentAuthor != null)
+                    commentDtos.Add(new PostCommentResponseDto
                     {
-                        commentDtos.Add(new PostCommentResponseDto
-                        {
-                            Id = comment.Id,
-                            PostId = comment.PostId,
-                            AuthorId = comment.AuthorId,
-                            AuthorName = commentAuthor.FullName,
-                            Body = comment.Body,
-                            CreatedAt = comment.CreatedAt
-                        });
-                    }
+                        Id = comment.Id,
+                        PostId = comment.PostId,
+                        AuthorId = comment.AuthorId,
+                        AuthorName = comment.Author.FullName,
+                        Body = comment.Body,
+                        CreatedAt = comment.CreatedAt
+                    });
                 }
 
                 _logger.LogInformation($"Retrieved {commentDtos.Count} comments for post {postId}");
