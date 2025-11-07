@@ -27,5 +27,7 @@ namespace EVAuctionTrader.Business.Interfaces
             bool priceSort = true);
         Task<PostResponseDto?> GetPostByIdAsync(Guid postId);
         Task<bool> DeletePostAsync(Guid postId);
+
+        Task<bool> BanPostAsync(Guid postId);
     }
 }

@@ -210,23 +210,49 @@ namespace EVAuctionTrader.Business.Services
         }
 
         public async Task<Pagination<PostResponseDto>> GetAllPostsAsync
-            (int pageNumber = 1,
-            int pageSize = 10,
-            string? search = null,
-            PostType? postType = null,
-            PostVersion? postVersion = null,
-            PostStatus? postStatus = null,
-            bool priceSort = true)
+    (int pageNumber = 1,
+    int pageSize = 10,
+    string? search = null,
+    PostType? postType = null,
+    PostVersion? postVersion = null,
+    PostStatus? postStatus = null,
+    bool priceSort = true)
         {
             try
             {
                 _logger.LogInformation("Retrieving paginated list of posts.");
+
+                // ✅ Get current user to check role
+                var currentUserId = _claimsService.GetCurrentUserId;
+                var currentUser = currentUserId != Guid.Empty
+                    ? await _unitOfWork.Users.GetByIdAsync(currentUserId)
+                    : null;
+
+                bool isAdmin = currentUser?.Role == RoleType.Admin;
+
+                // ✅ Base query: Always exclude deleted posts
                 var query = _unitOfWork.Posts.GetQueryable().Where(q => !q.IsDeleted);
 
-                // ✅ FIX: Use DateTime.UtcNow for comparisons
-                var utcNow = DateTime.UtcNow;
+                // ✅ If NOT admin: exclude banned posts (Status = Removed)
+                if (!isAdmin)
+                {
+                    query = query.Where(q => q.Status != PostStatus.Removed);
+                    _logger.LogInformation("Non-admin user: filtering out removed/banned posts.");
+                }
+                else
+                {
+                    _logger.LogInformation("Admin user: showing all posts including banned ones.");
+                }
 
-                foreach (var item in query)
+                // ✅ Auto-update status based on time
+                var utcNow = DateTime.UtcNow;
+                var postsToUpdate = await query
+                    .Where(p =>
+                        (p.PublishedAt <= utcNow && p.Status == PostStatus.Draft) ||
+                        (p.ExpiresAt <= utcNow && p.Status == PostStatus.Active))
+                    .ToListAsync();
+
+                foreach (var item in postsToUpdate)
                 {
                     if (item.PublishedAt <= utcNow && item.Status == PostStatus.Draft)
                         item.Status = PostStatus.Active;
@@ -235,6 +261,13 @@ namespace EVAuctionTrader.Business.Services
                         item.Status = PostStatus.Closed;
                 }
 
+                if (postsToUpdate.Any())
+                {
+                    await _unitOfWork.SaveChangesAsync();
+                    _logger.LogInformation($"Updated status for {postsToUpdate.Count} posts.");
+                }
+
+                // ✅ Apply filters
                 if (postType.HasValue)
                 {
                     query = query.Where(p => p.PostType == postType.Value);
@@ -272,11 +305,12 @@ namespace EVAuctionTrader.Business.Services
                     if (author == null)
                     {
                         _logger.LogWarning($"GetAllPostsAsync warning: Author with ID {post.AuthorId} not found for post ID {post.Id}.");
-                        throw new InvalidOperationException("Author not found.");
+                        continue; // Skip this post instead of throwing
                     }
 
                     VehicleResponseDto? vehicleDto = null;
                     BatteryResponseDto? batteryDto = null;
+
                     if (post.VehicleId.HasValue)
                     {
                         var vehicleEntity = await _unitOfWork.Vehicles.GetByIdAsync(post.VehicleId.Value);
@@ -293,6 +327,7 @@ namespace EVAuctionTrader.Business.Services
                             };
                         }
                     }
+
                     if (post.BatteryId.HasValue)
                     {
                         var batteryEntity = await _unitOfWork.Batteries.GetByIdAsync(post.BatteryId.Value);
@@ -311,6 +346,7 @@ namespace EVAuctionTrader.Business.Services
                             };
                         }
                     }
+
                     postDtos.Add(new PostResponseDto
                     {
                         Id = post.Id,
@@ -330,6 +366,7 @@ namespace EVAuctionTrader.Business.Services
                         ExpiresAt = post.ExpiresAt
                     });
                 }
+
                 return new Pagination<PostResponseDto>(postDtos, totalCount, pageNumber, pageSize);
             }
             catch (Exception ex)
@@ -356,12 +393,14 @@ namespace EVAuctionTrader.Business.Services
                 query = query.Where(p => p.AuthorId == currentUserId);
                 _logger.LogInformation($"Filtering posts by current user ID: {currentUserId}");
 
+                var utcNow = DateTime.UtcNow;
+
                 foreach (var item in query)
                 {
-                    if (item.PublishedAt <= DateTime.Now && item.Status == PostStatus.Draft)
+                    if (item.PublishedAt <= utcNow && item.Status == PostStatus.Draft)
                         item.Status = PostStatus.Active;
 
-                    if (item.ExpiresAt <= DateTime.Now && item.Status == PostStatus.Active)
+                    if (item.ExpiresAt <= utcNow && item.Status == PostStatus.Active)
                         item.Status = PostStatus.Closed;
                 }
 
@@ -845,19 +884,19 @@ namespace EVAuctionTrader.Business.Services
                 }
                 if (postEntity.Status == PostStatus.Draft && newStatus == PostStatus.Active)
                 {
-                    postEntity.PublishedAt = DateTime.Now;
+                    postEntity.PublishedAt = DateTime.UtcNow;
                     if (postEntity.Version == PostVersion.Free)
                     {
-                        postEntity.ExpiresAt = DateTime.Now.AddDays(15);
+                        postEntity.ExpiresAt = DateTime.UtcNow.AddDays(15);
                     }
                     else if (postEntity.Version == PostVersion.Vip)
                     {
-                        postEntity.ExpiresAt = DateTime.Now.AddDays(30);
+                        postEntity.ExpiresAt = DateTime.UtcNow.AddDays(30);
                     }
                 }
                 if (newStatus == PostStatus.Closed)
                 {
-                    postEntity.ExpiresAt = DateTime.Now;
+                    postEntity.ExpiresAt = DateTime.UtcNow;
                 }
                 postEntity.Status = newStatus;
                 await _unitOfWork.Posts.Update(postEntity);
@@ -900,6 +939,44 @@ namespace EVAuctionTrader.Business.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"An error occurred while deleting post with ID: {postId}");
+                throw;
+            }
+        }
+        public async Task<bool> BanPostAsync(Guid postId)
+        {
+            try
+            {
+                _logger.LogInformation($"Admin attempting to ban post with ID: {postId}");
+
+                var postEntity = await _unitOfWork.Posts.GetByIdAsync(postId);
+
+                if (postEntity == null || postEntity.IsDeleted)
+                {
+                    _logger.LogWarning($"BanPostAsync failed: Post with ID {postId} not found or already deleted.");
+                    return false;
+                }
+
+                // ✅ Check if current user is Admin
+                var currentUserId = _claimsService.GetCurrentUserId;
+                var currentUser = await _unitOfWork.Users.GetByIdAsync(currentUserId);
+
+                if (currentUser == null || currentUser.Role != RoleType.Admin)
+                {
+                    _logger.LogWarning($"BanPostAsync failed: User {currentUserId} is not an admin.");
+                    throw new UnauthorizedAccessException("Only admins can ban posts.");
+                }
+
+                postEntity.Status = PostStatus.Removed;
+
+                await _unitOfWork.Posts.Update(postEntity);
+                await _unitOfWork.SaveChangesAsync();
+
+                _logger.LogInformation($"Admin {currentUserId} successfully banned post {postId} (Author: {postEntity.AuthorId}).");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An error occurred while admin banning post with ID: {postId}");
                 throw;
             }
         }

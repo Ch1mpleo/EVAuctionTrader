@@ -57,6 +57,13 @@ namespace EVAuctionTrader.Presentation.Pages.PostPages
                     return RedirectToPage("/PostPages/Details", new { id = Id });
                 }
 
+                if(post.Status == PostStatus.Removed)
+                {
+                    _logger.LogWarning($"User {currentUserId} attempted to edit banned post {Id}");
+                    TempData["ErrorMessage"] = "This post has been banned by an administrator and cannot be edited";
+                    return RedirectToPage("/PostPages/Details", new { id = Id });
+                }
+
                 // Map to request DTO
                 PostRequest = new PostRequestDto
                 {
