@@ -762,7 +762,6 @@ namespace EVAuctionTrader.Business.Services
                     postEntity.PhotoUrls = updatePostDto.PhotoUrls;
                 }
 
-<<<<<<< HEAD
                 //if (postEntity.Status == PostStatus.Draft && updatePostDto.Status == PostStatus.Active)
                 //{
                 //    postEntity.PublishedAt = DateTime.Now;
@@ -781,9 +780,6 @@ namespace EVAuctionTrader.Business.Services
                 //}
 
                 //postEntity.Status = updatePostDto.Status;
-=======
-                postEntity.Status = updatePostDto.Status;
->>>>>>> 037f5efc6e1b2cc71dd5f7b7c32a6ef1ded2efb1
 
                 // ✅ FIX: Convert PublishedAt to UTC and recalculate ExpiresAt
                 if (updatePostDto.PublishedAt.HasValue && postEntity.PublishedAt <= DateTime.UtcNow)
