@@ -30,7 +30,7 @@ namespace EVAuctionTrader.Presentation.Helper
                     User = admin,
                     Balance = 0.0m
                 };
-                
+
                 await context.Users.AddAsync(admin);
                 await context.Wallets.AddAsync(wallet);
             }
@@ -83,16 +83,16 @@ namespace EVAuctionTrader.Presentation.Helper
         public static async Task SeedPostsWithVehiclesAndBatteriesAsync(EVAuctionTraderDbContext context)
         {
             await context.Database.MigrateAsync();
-            
-            if(!await context.Posts.AnyAsync())
+
+            if (!await context.Posts.AnyAsync())
             {
                 var members = await context.Users
                     .Where(u => u.Role == RoleType.Member)
                     .OrderBy(u => u.Id)
                     .Take(2)
                     .ToListAsync();
-                
-                if(members.Count < 2)
+
+                if (members.Count < 2)
                 {
                     return;
                 }
@@ -123,7 +123,7 @@ namespace EVAuctionTrader.Presentation.Helper
                     Status = PostStatus.Active,
                     PublishedAt = DateTime.UtcNow.AddDays(-5),
                     ExpiresAt = DateTime.UtcNow.AddDays(25),
-                    PhotoUrls = new List<string> { "https://via.placeholder.com/800x600/4A90E2/FFFFFF?text=Tesla+Model+3" }
+                    PhotoUrls = new List<string> { "https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1169" }
                 };
 
                 // Post 2 - CATL Battery
@@ -154,7 +154,7 @@ namespace EVAuctionTrader.Presentation.Helper
                     Status = PostStatus.Active,
                     PublishedAt = DateTime.UtcNow.AddDays(-3),
                     ExpiresAt = DateTime.UtcNow.AddDays(12),
-                    PhotoUrls = new List<string> { "https://via.placeholder.com/800x600/50C878/FFFFFF?text=CATL+Battery+60kWh" }
+                    PhotoUrls = new List<string> { "https://plus.unsplash.com/premium_photo-1681433401553-589104846604?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1760" }
                 };
 
                 // Post 3 - VinFast VF8
@@ -183,7 +183,7 @@ namespace EVAuctionTrader.Presentation.Helper
                     Status = PostStatus.Active,
                     PublishedAt = DateTime.UtcNow.AddDays(-7),
                     ExpiresAt = DateTime.UtcNow.AddDays(23),
-                    PhotoUrls = new List<string> { "https://via.placeholder.com/800x600/FF6B6B/FFFFFF?text=VinFast+VF8" }
+                    PhotoUrls = new List<string> { "https://images.unsplash.com/photo-1494905998402-395d579af36f?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170" }
                 };
 
                 // Post 4 - Hyundai Kona Electric (Draft)
@@ -212,7 +212,7 @@ namespace EVAuctionTrader.Presentation.Helper
                     Status = PostStatus.Draft,
                     PublishedAt = null,
                     ExpiresAt = null,
-                    PhotoUrls = new List<string> { "https://via.placeholder.com/800x600/95E1D3/FFFFFF?text=Hyundai+Kona+Electric" }
+                    PhotoUrls = new List<string> { "https://plus.unsplash.com/premium_photo-1661891539075-24b4e473f67f?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1171" }
                 };
 
                 // Post 5 - BYD Battery
@@ -243,7 +243,7 @@ namespace EVAuctionTrader.Presentation.Helper
                     Status = PostStatus.Active,
                     PublishedAt = DateTime.UtcNow.AddDays(-1),
                     ExpiresAt = DateTime.UtcNow.AddDays(29),
-                    PhotoUrls = new List<string> { "https://via.placeholder.com/800x600/F38181/FFFFFF?text=BYD+LFP+75kWh" }
+                    PhotoUrls = new List<string> { "https://images.unsplash.com/photo-1605191737662-98ba90cb953e?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170" }
                 };
 
                 // Post 6 - Nissan Leaf
@@ -272,7 +272,7 @@ namespace EVAuctionTrader.Presentation.Helper
                     Status = PostStatus.Active,
                     PublishedAt = DateTime.UtcNow.AddDays(-10),
                     ExpiresAt = DateTime.UtcNow.AddDays(20),
-                    PhotoUrls = new List<string> { "https://via.placeholder.com/800x600/9B59B6/FFFFFF?text=Nissan+Leaf" }
+                    PhotoUrls = new List<string> { "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1171" }
                 };
 
                 // Post 7 - LG Chem Battery
@@ -303,7 +303,7 @@ namespace EVAuctionTrader.Presentation.Helper
                     Status = PostStatus.Active,
                     PublishedAt = DateTime.UtcNow.AddDays(-6),
                     ExpiresAt = DateTime.UtcNow.AddDays(24),
-                    PhotoUrls = new List<string> { "https://via.placeholder.com/800x600/3498DB/FFFFFF?text=LG+Chem+64kWh" }
+                    PhotoUrls = new List<string> { "https://images.unsplash.com/photo-1591964006776-90b32e88f5ec?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=764" }
                 };
 
                 // Post 8 - BMW i3
@@ -332,7 +332,7 @@ namespace EVAuctionTrader.Presentation.Helper
                     Status = PostStatus.Active,
                     PublishedAt = DateTime.UtcNow.AddDays(-4),
                     ExpiresAt = DateTime.UtcNow.AddDays(26),
-                    PhotoUrls = new List<string> { "https://via.placeholder.com/800x600/E67E22/FFFFFF?text=BMW+i3" }
+                    PhotoUrls = new List<string> { "https://images.unsplash.com/photo-1441148345475-03a2e82f9719?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170" }
                 };
 
                 // Post 9 - Panasonic Battery
@@ -363,7 +363,7 @@ namespace EVAuctionTrader.Presentation.Helper
                     Status = PostStatus.Active,
                     PublishedAt = DateTime.UtcNow.AddDays(-8),
                     ExpiresAt = DateTime.UtcNow.AddDays(22),
-                    PhotoUrls = new List<string> { "https://via.placeholder.com/800x600/1ABC9C/FFFFFF?text=Panasonic+70kWh" }
+                    PhotoUrls = new List<string> { "https://plus.unsplash.com/premium_photo-1661771836121-9108a83875d7?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1666" }
                 };
 
                 // Post 10 - Chevrolet Bolt
@@ -392,7 +392,7 @@ namespace EVAuctionTrader.Presentation.Helper
                     Status = PostStatus.Active,
                     PublishedAt = DateTime.UtcNow.AddDays(-2),
                     ExpiresAt = DateTime.UtcNow.AddDays(28),
-                    PhotoUrls = new List<string> { "https://via.placeholder.com/800x600/E74C3C/FFFFFF?text=Chevrolet+Bolt+EV" }
+                    PhotoUrls = new List<string> { "https://images.unsplash.com/photo-1494697536454-6f39e2cc972d?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1171" }
                 };
 
                 // Post 11 - Samsung SDI Battery
@@ -423,7 +423,7 @@ namespace EVAuctionTrader.Presentation.Helper
                     Status = PostStatus.Active,
                     PublishedAt = DateTime.UtcNow.AddDays(-9),
                     ExpiresAt = DateTime.UtcNow.AddDays(21),
-                    PhotoUrls = new List<string> { "https://via.placeholder.com/800x600/16A085/FFFFFF?text=Samsung+SDI+68kWh" }
+                    PhotoUrls = new List<string> { "https://images.unsplash.com/photo-1622062929134-a8fa99b46f56?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1631" }
                 };
 
                 // Post 12 - Audi e-tron
@@ -452,7 +452,7 @@ namespace EVAuctionTrader.Presentation.Helper
                     Status = PostStatus.Active,
                     PublishedAt = DateTime.UtcNow.AddDays(-3),
                     ExpiresAt = DateTime.UtcNow.AddDays(27),
-                    PhotoUrls = new List<string> { "https://via.placeholder.com/800x600/2ECC71/FFFFFF?text=Audi+e-tron" }
+                    PhotoUrls = new List<string> { "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170" }
                 };
 
                 // Post 13 - SK Innovation Battery
@@ -483,7 +483,7 @@ namespace EVAuctionTrader.Presentation.Helper
                     Status = PostStatus.Active,
                     PublishedAt = DateTime.UtcNow.AddDays(-5),
                     ExpiresAt = DateTime.UtcNow.AddDays(25),
-                    PhotoUrls = new List<string> { "https://via.placeholder.com/800x600/F39C12/FFFFFF?text=SK+Innovation+77kWh" }
+                    PhotoUrls = new List<string> { "https://images.unsplash.com/photo-1694889649703-e86125c14fe2?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170" }
                 };
 
                 // Post 14 - Kia EV6
@@ -512,7 +512,7 @@ namespace EVAuctionTrader.Presentation.Helper
                     Status = PostStatus.Active,
                     PublishedAt = DateTime.UtcNow.AddDays(-1),
                     ExpiresAt = DateTime.UtcNow.AddDays(29),
-                    PhotoUrls = new List<string> { "https://via.placeholder.com/800x600/8E44AD/FFFFFF?text=Kia+EV6" }
+                    PhotoUrls = new List<string> { "https://images.unsplash.com/photo-1599599054812-1fee22d625e1?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170" }
                 };
 
                 // Post 15 - Tesla Model Y
@@ -541,12 +541,12 @@ namespace EVAuctionTrader.Presentation.Helper
                     Status = PostStatus.Active,
                     PublishedAt = DateTime.UtcNow.AddDays(-7),
                     ExpiresAt = DateTime.UtcNow.AddDays(23),
-                    PhotoUrls = new List<string> { "https://via.placeholder.com/800x600/27AE60/FFFFFF?text=Tesla+Model+Y" }
+                    PhotoUrls = new List<string> { "https://images.unsplash.com/photo-1579508542697-bb18e7d9aeaa?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170" }
                 };
 
                 await context.Posts.AddRangeAsync(new[] { post1, post2, post3, post4, post5, post6, post7, post8, post9, post10, post11, post12, post13, post14, post15 });
                 await context.SaveChangesAsync();
-            }           
+            }
         }
     }
 }

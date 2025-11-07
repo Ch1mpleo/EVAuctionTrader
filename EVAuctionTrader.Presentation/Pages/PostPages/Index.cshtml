@@ -5,440 +5,1133 @@
     ViewData["Title"] = "Browse Posts";
 }
 
-<div class="staff-page-clean">
-    <div class="container">
-        <!-- Header -->
-        <div class="staff-header-clean">
-            <h1 class="staff-title-clean">
-                <i class="bi bi-grid-3x3-gap"></i>
-                Browse All Posts
-            </h1>
-            <p class="staff-subtitle-clean">Discover vehicles and batteries from our community</p>
-        </div>
-
-        @if (TempData["SuccessMessage"] != null)
-        {
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="bi bi-check-circle-fill"></i>
-                @TempData["SuccessMessage"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        }
-
-        @if (TempData["ErrorMessage"] != null)
-        {
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="bi bi-exclamation-triangle-fill"></i>
-                @TempData["ErrorMessage"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        }
-
-        <!-- Filter Section -->
-        <div class="staff-card-clean">
-            <div class="staff-card-header-clean">
-                <h3 class="staff-card-title-clean">
-                    <i class="bi bi-funnel"></i>
-                    Filters & Search
-                </h3>
-            </div>
-            <div class="staff-card-body-clean">
-                <form method="get" id="filterForm">
-                    <!-- Search Bar -->
-                    <div class="search-bar-clean mb-3">
-                        <i class="bi bi-search search-icon-clean"></i>
-                        <input type="text" name="search" class="search-input-clean"
-                               placeholder="Search by title or location..."
-                               value="@Model.Search">
+<div class="browse-page-dark">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sticky Sidebar Filter -->
+            <div class="col-lg-3">
+                <div class="filter-sidebar-sticky">
+                    <div class="filter-header">
+                        <h5 class="filter-title">
+                            <i class="bi bi-sliders"></i> Filters
+                        </h5>
                     </div>
 
-                    <!-- ✅ MỚI: Quick Price Range Buttons -->
-                    <div class="mb-3">
-                        <label class="filter-label-clean mb-2">
-                            <i class="bi bi-cash-stack"></i> Quick Price Filter
-                        </label>
-                        <div class="price-range-buttons">
-                            @foreach (var range in Model.PriceRanges)
-                            {
-                                var isActive = (range.MinPrice == Model.MinPrice && range.MaxPrice == Model.MaxPrice);
-                                <button type="button"
-                                        class="price-range-btn @(isActive ? "active" : "")"
-                                        onclick="selectPriceRange(@(range.MinPrice?.ToString() ?? "null"), @(range.MaxPrice?.ToString() ?? "null"))">
-                                    @range.Label
-                                </button>
-                            }
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success alert-sm alert-dismissible fade show" role="alert">
+                            <i class="bi bi-check-circle-fill"></i>
+                            @TempData["SuccessMessage"]
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
                         </div>
-                    </div>
+                    }
 
-                    <!-- Hidden inputs for price range -->
-                    <input type="hidden" name="minPrice" id="minPriceInput" value="@Model.MinPrice" />
-                    <input type="hidden" name="maxPrice" id="maxPriceInput" value="@Model.MaxPrice" />
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger alert-sm alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                            @TempData["ErrorMessage"]
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
 
-                    <!-- Filter Grid -->
-                    <div class="filter-grid-clean">
-                        <div class="filter-group-clean">
-                            <label class="filter-label-clean">
-                                <i class="bi bi-tag"></i> Post Type
+                    <form method="get" id="filterForm" class="filter-form-compact">
+                        <!-- Search Bar -->
+                        <div class="filter-group-compact">
+                            <label class="filter-label-sm">
+                                <i class="bi bi-search"></i> Search
                             </label>
-                            <select name="postType" class="filter-input-clean">
+                            <input type="text" name="search" class="filter-input-sm"
+                                   placeholder="Title or location..."
+                                   value="@Model.Search">
+                        </div>
+
+                        <!-- Post Type -->
+                        <div class="filter-group-compact">
+                            <label class="filter-label-sm">
+                                <i class="bi bi-tag"></i> Type
+                            </label>
+                            <select name="postType" class="filter-input-sm">
                                 <option value="">All Types</option>
                                 <option value="@((int)PostType.Vehicle)" selected="@(Model.PostType == PostType.Vehicle)">Vehicle</option>
                                 <option value="@((int)PostType.Battery)" selected="@(Model.PostType == PostType.Battery)">Battery</option>
                             </select>
                         </div>
 
-                        <div class="filter-group-clean">
-                            <label class="filter-label-clean">
+                        <!-- Version -->
+                        <div class="filter-group-compact">
+                            <label class="filter-label-sm">
                                 <i class="bi bi-star"></i> Version
                             </label>
-                            <select name="postVersion" class="filter-input-clean">
-                                <option value="">All Versions</option>
-                                <option value="@((int)PostVersion.Free)" selected="@(Model.PostVersion == PostVersion.Free)">Free</option>
+                            <select name="postVersion" class="filter-input-sm">
+                                <option value="">All</option>
+                                <option value="@((int)PostVersion.Free)" selected="@(Model.PostVersion == PostVersion.Free)">Standard</option>
                                 <option value="@((int)PostVersion.Vip)" selected="@(Model.PostVersion == PostVersion.Vip)">VIP</option>
                             </select>
                         </div>
 
                         @if (User.IsInRole("Admin"))
                         {
-                            <div class="filter-group-clean">
-                                <label class="filter-label-clean">
-                                    <i class="bi bi-circle-fill"></i> Status (Admin Only)
+                            <div class="filter-group-compact">
+                                <label class="filter-label-sm">
+                                    <i class="bi bi-circle-fill"></i> Status
                                 </label>
-                                <select name="postStatus" class="filter-input-clean">
+                                <select name="postStatus" class="filter-input-sm">
                                     <option value="">All Status</option>
                                     <option value="@((int)PostStatus.Active)" selected="@(Model.PostStatus == PostStatus.Active)">Active</option>
                                     <option value="@((int)PostStatus.Closed)" selected="@(Model.PostStatus == PostStatus.Closed)">Closed</option>
                                     <option value="@((int)PostStatus.Draft)" selected="@(Model.PostStatus == PostStatus.Draft)">Draft</option>
-                                    <option value="@((int)PostStatus.Removed)" selected="@(Model.PostStatus == PostStatus.Removed)">Removed (Banned)</option>
+                                    <option value="@((int)PostStatus.Removed)" selected="@(Model.PostStatus == PostStatus.Removed)">Removed</option>
                                 </select>
                             </div>
                         }
 
-                        <div class="filter-group-clean">
-                            <label class="filter-label-clean">
-                                <i class="bi bi-sort-numeric-down"></i> Sort by Price
+                        <!-- Price Range Slider -->
+                        <div class="filter-group-compact">
+                            <label class="filter-label-sm mb-2">
+                                <i class="bi bi-cash-stack"></i> Price Range (USD)
                             </label>
-                            <select name="priceSort" class="filter-input-clean">
-                                <option value="true" selected="@Model.PriceSort">Low to High</option>
-                                <option value="false" selected="@(!Model.PriceSort)">High to Low</option>
+                            <div class="price-range-container">
+                                <div class="price-values">
+                                    <span id="minPriceDisplay">$0</span>
+                                    <span id="maxPriceDisplay">$100k</span>
+                                </div>
+                                <div class="slider-track-bg">
+                                    <div class="slider-range" id="sliderRange"></div>
+                                </div>
+                                <div class="price-slider-wrapper">
+                                    <input type="range" 
+                                           id="minPriceSlider" 
+                                           class="price-slider" 
+                                           min="0" 
+                                           max="100000" 
+                                           step="1000" 
+                                           value="@(Model.MinPrice ?? 0)">
+                                    <input type="range" 
+                                           id="maxPriceSlider" 
+                                           class="price-slider" 
+                                           min="0" 
+                                           max="100000" 
+                                           step="1000" 
+                                           value="@(Model.MaxPrice ?? 100000)">
+                                </div>
+                            </div>
+                            <input type="hidden" name="minPrice" id="minPriceInput" value="@Model.MinPrice" />
+                            <input type="hidden" name="maxPrice" id="maxPriceInput" value="@Model.MaxPrice" />
+                        </div>
+
+                        <!-- Sort -->
+                        <div class="filter-group-compact">
+                            <label class="filter-label-sm">
+                                <i class="bi bi-sort-numeric-down"></i> Sort
+                            </label>
+                            <select name="priceSort" class="filter-input-sm">
+                                <option value="true" selected="@Model.PriceSort">Price: Low to High</option>
+                                <option value="false" selected="@(!Model.PriceSort)">Price: High to Low</option>
                             </select>
                         </div>
-                    </div>
 
-                    <!-- ✅ MỚI: Custom Price Range (Optional) -->
-                    <div class="mt-3">
-                        <label class="filter-label-clean mb-2">
-                            <i class="bi bi-sliders"></i> Custom Price Range (Optional)
-                        </label>
-                        <div class="row g-2">
-                            <div class="col-md-6">
-                                <input type="number"
-                                       class="filter-input-clean"
-                                       placeholder="Min Price (VND)"
-                                       id="customMinPrice"
-                                       step="1000000" />
-                            </div>
-                            <div class="col-md-6">
-                                <input type="number"
-                                       class="filter-input-clean"
-                                       placeholder="Max Price (VND)"
-                                       id="customMaxPrice"
-                                       step="1000000" />
-                            </div>
+                        <!-- Action Buttons -->
+                        <div class="filter-actions-compact">
+                            <button type="submit" class="btn-filter-apply">
+                                <i class="bi bi-check2"></i> Apply
+                            </button>
+                            <a asp-page="/PostPages/Index" class="btn-filter-clear">
+                                <i class="bi bi-x"></i> Clear
+                            </a>
                         </div>
-                        <button type="button"
-                                class="btn-clean btn-secondary-clean mt-2"
-                                onclick="applyCustomPrice()">
-                            <i class="bi bi-check-circle"></i> Apply Custom Price
-                        </button>
-                    </div>
-
-                    <!-- Action Buttons -->
-                    <div class="filter-actions-clean mt-3">
-                        <button type="submit" class="btn-clean btn-primary-clean">
-                            <i class="bi bi-search"></i> Apply Filters
-                        </button>
-                        <a asp-page="/PostPages/Index" class="btn-clean btn-secondary-clean">
-                            <i class="bi bi-x-circle"></i> Clear All
-                        </a>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
-        </div>
 
-        <!-- Posts Grid -->
-        @if (Model.Posts != null && Model.Posts.Any())
-        {
-            <div class="row g-4 mt-3">
-                @foreach (var post in Model.Posts)
+            <!-- Main Content Area -->
+            <div class="col-lg-9">
+                <!-- Header -->
+                <div class="browse-header">
+                    <div>
+                        <h1 class="browse-title">Browse All Posts</h1>
+                        <p class="browse-subtitle">Discover electric vehicles and batteries</p>
+                    </div>
+                    @if (Model.Posts != null && Model.Posts.Any())
+                    {
+                        <div class="results-count">
+                            <span class="count-badge">@Model.Posts.TotalCount results</span>
+                        </div>
+                    }
+                </div>
+
+                <!-- Posts Grid -->
+                @if (Model.Posts != null && Model.Posts.Any())
                 {
-                    <div class="col-md-6 col-lg-4">
-                        <div class="post-card-modern @(post.Status == PostStatus.Removed ? "banned-post" : "")">
-                            <!-- Post Image -->
-                            <div class="post-image-container">
-                                @if (post.PhotoUrls != null && post.PhotoUrls.Any())
-                                {
-                                    <img src="@post.PhotoUrls.First()" alt="@post.Title" class="post-image">
-                                }
-                                else
-                                {
-                                    <div class="post-image-placeholder">
-                                        <i class="bi bi-image"></i>
-                                    </div>
-                                }
+                    <div class="posts-grid-modern">
+                        @foreach (var post in Model.Posts)
+                        {
+                            <div class="post-card-compact @(post.Status == PostStatus.Removed ? "post-removed" : "") @(post.Version == PostVersion.Vip ? "post-vip" : "")">
+                                <!-- Image -->
+                                <div class="post-image-wrapper">
+                                    @if (post.PhotoUrls != null && post.PhotoUrls.Any())
+                                    {
+                                        <img src="@post.PhotoUrls.First()" alt="@post.Title" class="post-img">
+                                    }
+                                    else
+                                    {
+                                        <div class="post-img-placeholder">
+                                            <i class="bi bi-image"></i>
+                                        </div>
+                                    }
 
-                                <!-- Version Badge -->
-                                <span class="version-badge @(post.Version == PostVersion.Vip ? "badge-vip" : "badge-free")">
+                                    <!-- VIP Diagonal Ribbon (Only for VIP) -->
                                     @if (post.Version == PostVersion.Vip)
                                     {
-                                        <i class="bi bi-star-fill"></i>
-                                        <text> VIP</text>
-                                    }
-                                    else
-                                    {
-                                        <i class="bi bi-tag"></i>
-                                        <text> FREE</text>
-                                    }
-                                </span>
-
-                                <!-- Status Badge -->
-                                <span class="status-badge badge-@post.Status.ToString().ToLower()">
-                                    @if (post.Status == PostStatus.Removed)
-                                    {
-                                        <i class="bi bi-slash-circle"></i>
-                                        <text> BANNED</text>
-                                    }
-                                    else if (post.Status == PostStatus.Active)
-                                    {
-                                        <i class="bi bi-check-circle"></i>
-                                        <text> ACTIVE</text>
-                                    }
-                                    else if (post.Status == PostStatus.Draft)
-                                    {
-                                        <i class="bi bi-pencil"></i>
-                                        <text> DRAFT</text>
-                                    }
-                                    else if (post.Status == PostStatus.Closed)
-                                    {
-                                        <i class="bi bi-x-circle"></i>
-                                        <text> CLOSED</text>
-                                    }
-                                    else
-                                    {
-                                        @post.Status
-                                    }
-                                </span>
-                            </div>
-
-                            @if (post.Status == PostStatus.Removed)
-                            {
-                                @if (User.IsInRole("Admin"))
-                                {
-                                    <div class="ban-warning-compact admin-view">
-                                        <i class="bi bi-shield-exclamation"></i>
-                                        <span>This post was banned and is hidden from public view</span>
-                                    </div>
-                                }
-                                else
-                                {
-                                    <div class="ban-warning-compact">
-                                        <i class="bi bi-exclamation-triangle-fill"></i>
-                                        <span>Post Removed by Admin</span>
-                                    </div>
-                                }
-                            }
-
-                            <!-- Post Content -->
-                            <div class="post-content">
-                                <div class="post-type-badge">
-                                    @if (post.PostType == PostType.Vehicle)
-                                    {
-                                        <i class="bi bi-car-front"></i>
-                                        <text> Vehicle</text>
-                                    }
-                                    else
-                                    {
-                                        <i class="bi bi-battery-charging"></i>
-                                        <text> Battery</text>
-                                    }
-                                </div>
-
-                                <h3 class="post-title">@post.Title</h3>
-
-                                <p class="post-description">
-                                    @(post.Description?.Length > 100 ? post.Description.Substring(0, 100) + "..." : post.Description)
-                                </p>
-
-                                @if (post.Vehicle != null)
-                                {
-                                    <div class="post-details-compact">
-                                        <div class="detail-item">
-                                            <i class="bi bi-speedometer2"></i>
-                                            <span>@post.Vehicle.OdometerKm km</span>
+                                        <div class="vip-ribbon">
+                                            <span class="vip-ribbon-text">
+                                                <i class="bi bi-star-fill"></i> VIP
+                                            </span>
                                         </div>
-                                        <div class="detail-item">
-                                            <i class="bi bi-calendar"></i>
-                                            <span>@post.Vehicle.Year</span>
-                                        </div>
-                                    </div>
-                                }
-                                else if (post.Battery != null)
-                                {
-                                    <div class="post-details-compact">
-                                        <div class="detail-item">
-                                            <i class="bi bi-lightning-charge"></i>
-                                            <span>@post.Battery.CapacityKwh kWh</span>
-                                        </div>
-                                        <div class="detail-item">
-                                            <i class="bi bi-battery-half"></i>
-                                            <span>@post.Battery.SohPercent% SOH</span>
-                                        </div>
-                                    </div>
-                                }
+                                    }
 
-                                <div class="post-footer">
-                                    <div class="post-price">
-                                        @if (post.Price.HasValue)
+                                    <!-- Post Type Badge -->
+                                    <div class="post-type-indicator @(post.PostType == PostType.Vehicle ? "type-vehicle" : "type-battery")">
+                                        @if (post.PostType == PostType.Vehicle)
                                         {
-                                            @post.Price.Value.ToString("N0")
-                                            <text> VND</text>
+                                            <i class="bi bi-car-front-fill"></i>
                                         }
                                         else
                                         {
-                                            <span class="text-muted">Negotiable</span>
+                                            <i class="bi bi-battery-charging"></i>
                                         }
                                     </div>
-                                    <div class="post-location">
-                                        <i class="bi bi-geo-alt"></i>
-                                        @post.LocationAddress
-                                    </div>
-                                </div>
 
-                                <div class="post-author">
-                                    <i class="bi bi-person-circle"></i>
-                                    <span>@post.AuthorName</span>
-                                </div>
-
-                                <div class="post-actions">
-                                    <a asp-page="/PostPages/Details" asp-route-id="@post.Id"
-                                       class="btn-action-clean">
-                                        <i class="bi bi-eye"></i> View Details
-                                    </a>
-
-                                    @if (User.IsInRole("Admin"))
+                                    <!-- Status Badge (Only for Admin and non-Active) -->
+                                    @if (User.IsInRole("Admin") && post.Status != PostStatus.Active)
                                     {
-                                        @if (post.Status != PostStatus.Removed)
+                                        <div class="status-indicator status-@post.Status.ToString().ToLower()">
+                                            @if (post.Status == PostStatus.Removed)
+                                            {
+                                                <i class="bi bi-slash-circle"></i>
+                                                <text> BANNED</text>
+                                            }
+                                            else if (post.Status == PostStatus.Draft)
+                                            {
+                                                <i class="bi bi-pencil"></i>
+                                                <text> DRAFT</text>
+                                            }
+                                            else if (post.Status == PostStatus.Closed)
+                                            {
+                                                <i class="bi bi-x-circle"></i>
+                                                <text> CLOSED</text>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+
+                                <!-- Content -->
+                                <div class="post-card-content">
+                                    <h3 class="post-card-title">@post.Title</h3>
+                                    
+                                    <p class="post-card-description">
+                                        @(post.Description?.Length > 80 ? post.Description.Substring(0, 80) + "..." : post.Description)
+                                    </p>
+
+                                    <div class="post-card-footer">
+                                        <div class="post-card-price">
+                                            @if (post.Price.HasValue)
+                                            {
+                                                <span class="price-value">$@post.Price.Value.ToString("N0")</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="price-negotiable">Negotiable</span>
+                                            }
+                                        </div>
+                                        <div class="post-card-location">
+                                            <i class="bi bi-geo-alt-fill"></i>
+                                            <span>@post.LocationAddress</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="post-card-actions">
+                                        <a asp-page="/PostPages/Details" asp-route-id="@post.Id"
+                                           class="btn-view-details">
+                                            View Details <i class="bi bi-arrow-right"></i>
+                                        </a>
+
+                                        @if (User.IsInRole("Admin") && post.Status != PostStatus.Removed)
                                         {
                                             <form method="post" asp-page-handler="Ban" asp-route-id="@post.Id" class="d-inline">
                                                 @Html.AntiForgeryToken()
-                                                <button type="submit" class="btn-action-clean btn-action-danger"
-                                                        onclick="return confirm('Are you sure you want to ban this post? The owner will still see it as banned.');">
-                                                    <i class="bi bi-slash-circle"></i> Ban
+                                                <button type="submit" class="btn-ban-post"
+                                                        onclick="return confirm('Ban this post?');">
+                                                    <i class="bi bi-slash-circle"></i>
                                                 </button>
                                             </form>
                                         }
-                                        else
-                                        {
-                                            <span class="badge-clean badge-danger" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
-                                                <i class="bi bi-lock-fill"></i> Already Banned
-                                            </span>
-                                        }
-                                    }
+                                    </div>
                                 </div>
                             </div>
+                        }
+                    </div>
+
+                    <!-- Pagination -->
+                    @if (Model.Posts.TotalPages > 1)
+                    {
+                        <div class="pagination-modern">
+                            @if (Model.Posts.HasPrevious)
+                            {
+                                <a asp-page="/PostPages/Index"
+                                   asp-route-pageNumber="@(Model.Posts.CurrentPage - 1)"
+                                   asp-route-search="@Model.Search"
+                                   asp-route-postType="@Model.PostType"
+                                   asp-route-postVersion="@Model.PostVersion"
+                                   asp-route-postStatus="@Model.PostStatus"
+                                   asp-route-priceSort="@Model.PriceSort"
+                                   asp-route-minPrice="@Model.MinPrice"
+                                   asp-route-maxPrice="@Model.MaxPrice"
+                                   class="page-btn-modern">
+                                    <i class="bi bi-chevron-left"></i>
+                                </a>
+                            }
+
+                            <span class="page-info-modern">
+                                Page @Model.Posts.CurrentPage of @Model.Posts.TotalPages
+                            </span>
+
+                            @if (Model.Posts.HasNext)
+                            {
+                                <a asp-page="/PostPages/Index"
+                                   asp-route-pageNumber="@(Model.Posts.CurrentPage + 1)"
+                                   asp-route-search="@Model.Search"
+                                   asp-route-postType="@Model.PostType"
+                                   asp-route-postVersion="@Model.PostVersion"
+                                   asp-route-postStatus="@Model.PostStatus"
+                                   asp-route-priceSort="@Model.PriceSort"
+                                   asp-route-minPrice="@Model.MinPrice"
+                                   asp-route-maxPrice="@Model.MaxPrice"
+                                   class="page-btn-modern">
+                                    <i class="bi bi-chevron-right"></i>
+                                </a>
+                            }
                         </div>
+                    }
+                }
+                else
+                {
+                    <div class="empty-state-modern">
+                        <div class="empty-icon">
+                            <i class="bi bi-inbox"></i>
+                        </div>
+                        <h3 class="empty-title">No Posts Found</h3>
+                        <p class="empty-description">Try adjusting your filters or search criteria.</p>
+                        <a asp-page="/PostPages/Index" class="btn-reset-filters">
+                            <i class="bi bi-arrow-clockwise"></i> Reset Filters
+                        </a>
                     </div>
                 }
             </div>
-
-            <!-- Pagination -->
-            @if (Model.Posts.TotalPages > 1)
-            {
-                <div class="pagination-clean">
-                    @if (Model.Posts.HasPrevious)
-                    {
-                        <a asp-page="/PostPages/Index"
-                           asp-route-pageNumber="@(Model.Posts.CurrentPage - 1)"
-                           asp-route-search="@Model.Search"
-                           asp-route-postType="@Model.PostType"
-                           asp-route-postVersion="@Model.PostVersion"
-                           asp-route-postStatus="@Model.PostStatus"
-                           asp-route-priceSort="@Model.PriceSort"
-                           asp-route-minPrice="@Model.MinPrice"
-                           asp-route-maxPrice="@Model.MaxPrice"
-                           class="page-btn-clean">
-                            <i class="bi bi-chevron-left"></i> Previous
-                        </a>
-                    }
-
-                    <span class="page-info-clean">
-                        Page @Model.Posts.CurrentPage of @Model.Posts.TotalPages
-                    </span>
-
-                    @if (Model.Posts.HasNext)
-                    {
-                        <a asp-page="/PostPages/Index"
-                           asp-route-pageNumber="@(Model.Posts.CurrentPage + 1)"
-                           asp-route-search="@Model.Search"
-                           asp-route-postType="@Model.PostType"
-                           asp-route-postVersion="@Model.PostVersion"
-                           asp-route-postStatus="@Model.PostStatus"
-                           asp-route-priceSort="@Model.PriceSort"
-                           asp-route-minPrice="@Model.MinPrice"
-                           asp-route-maxPrice="@Model.MaxPrice"
-                           class="page-btn-clean">
-                            Next <i class="bi bi-chevron-right"></i>
-                        </a>
-                    }
-                </div>
-            }
-        }
-        else
-        {
-            <div class="empty-state-clean">
-                <i class="bi bi-inbox empty-icon-clean"></i>
-                <h3 class="empty-title-clean">No Posts Found</h3>
-                <p class="empty-description-clean">Try adjusting your filters or search criteria.</p>
-            </div>
-        }
+        </div>
     </div>
 </div>
 
 @section Styles {
     <link rel="stylesheet" href="~/css/profile.css" />
-    <link rel="stylesheet" href="~/css/posts.css" />
+    <style>
+        /* Dark Theme Browse Page Styles */
+        :root {
+            --primary-color: #0070f3;
+            --primary-hover: #0088ff;
+            --bg-dark: #0a0a0a;
+            --bg-darker: #0f0f0f;
+            --bg-card: #1a1a1a;
+            --border-color: #2a2a2a;
+            --text-primary: #ffffff;
+            --text-secondary: #aaaaaa;
+            --text-muted: #666666;
+        }
+
+        .browse-page-dark {
+            background: var(--bg-dark);
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+
+        /* Sticky Sidebar Filter */
+        .filter-sidebar-sticky {
+            position: sticky;
+            top: 80px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.25rem;
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+        }
+
+        /* Custom Scrollbar */
+        .filter-sidebar-sticky::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .filter-sidebar-sticky::-webkit-scrollbar-track {
+            background: var(--bg-darker);
+            border-radius: 10px;
+        }
+
+        .filter-sidebar-sticky::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 10px;
+        }
+
+        .filter-sidebar-sticky::-webkit-scrollbar-thumb:hover {
+            background: #333;
+        }
+
+        .filter-header {
+            margin-bottom: 1.25rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .filter-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .filter-form-compact {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .filter-group-compact {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-label-sm {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            margin: 0;
+        }
+
+        .filter-label-sm i {
+            color: var(--primary-color);
+        }
+
+        .filter-input-sm {
+            padding: 0.5rem 0.75rem;
+            background: var(--bg-darker);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .filter-input-sm:focus {
+            background: var(--bg-card);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0,112,243,0.1);
+            outline: none;
+            color: var(--text-primary);
+        }
+
+        .filter-input-sm option {
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+
+        /* Price Range Slider - FIXED */
+        .price-range-container {
+            position: relative;
+            padding: 0.5rem 0 1rem;
+        }
+
+        .price-values {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            font-size: 0.875rem;
+        }
+
+        .slider-track-bg {
+            position: relative;
+            width: 100%;
+            height: 4px;
+            background: var(--border-color);
+            border-radius: 4px;
+            margin-bottom: 4px;
+        }
+
+        .slider-range {
+            position: absolute;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--primary-hover));
+            border-radius: 4px;
+            top: 0;
+        }
+
+        .price-slider-wrapper {
+            position: relative;
+            height: 20px;
+        }
+
+        .price-slider {
+            position: absolute;
+            width: 100%;
+            height: 20px;
+            top: 0;
+            background: transparent;
+            pointer-events: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .price-slider::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            background: transparent;
+        }
+
+        .price-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            margin-top: -7px;
+            background: white;
+            border: 3px solid var(--primary-color);
+            border-radius: 50%;
+            cursor: pointer;
+            pointer-events: all;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            transition: all 0.2s;
+        }
+
+        .price-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 3px 8px rgba(0,112,243,0.5);
+        }
+
+        .price-slider::-moz-range-track {
+            width: 100%;
+            height: 4px;
+            background: transparent;
+        }
+
+        .price-slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: white;
+            border: 3px solid var(--primary-color);
+            border-radius: 50%;
+            cursor: pointer;
+            pointer-events: all;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+
+        .price-slider::-moz-range-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 3px 8px rgba(0,112,243,0.5);
+        }
+
+        /* Filter Actions */
+        .filter-actions-compact {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn-filter-apply, .btn-filter-clear {
+            flex: 1;
+            padding: 0.6rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-align: center;
+            text-decoration: none;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.35rem;
+        }
+
+        .btn-filter-apply {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-filter-apply:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,112,243,0.3);
+        }
+
+        .btn-filter-clear {
+            background: var(--bg-darker);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-filter-clear:hover {
+            background: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        /* Browse Header */
+        .browse-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .browse-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .browse-subtitle {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin: 0.25rem 0 0 0;
+        }
+
+        .results-count {
+            display: flex;
+            align-items: center;
+        }
+
+        .count-badge {
+            background: rgba(0,112,243,0.1);
+            border: 1px solid rgba(0,112,243,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        /* Posts Grid */
+        .posts-grid-modern {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Post Card Compact */
+        .post-card-compact {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .post-card-compact:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,112,243,0.15);
+            border-color: rgba(0,112,243,0.3);
+        }
+
+        /* VIP Post Card - Special Styling */
+        .post-card-compact.post-vip {
+            background: linear-gradient(135deg, var(--bg-card) 0%, rgba(255,215,0,0.05) 100%);
+            border: 2px solid rgba(255,215,0,0.3);
+            box-shadow: 0 4px 20px rgba(255,215,0,0.15);
+        }
+
+        .post-card-compact.post-vip:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 32px rgba(255,215,0,0.25);
+            border-color: rgba(255,215,0,0.5);
+        }
+
+        .post-card-compact.post-removed {
+            opacity: 0.6;
+            border: 2px solid #dc3545;
+        }
+
+        /* Image Wrapper */
+        .post-image-wrapper {
+            position: relative;
+            width: 100%;
+            height: 180px;
+            overflow: hidden;
+            background: var(--bg-darker);
+        }
+
+        .post-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+
+        .post-card-compact:hover .post-img {
+            transform: scale(1.05);
+        }
+
+        .post-img-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-darker);
+            color: var(--text-muted);
+            font-size: 2.5rem;
+        }
+
+        /* VIP Diagonal Ribbon */
+        .vip-ribbon {
+            position: absolute;
+            top: 15px;
+            right: -35px;
+            width: 150px;
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            padding: 8px 0;
+            transform: rotate(45deg);
+            box-shadow: 0 4px 12px rgba(255, 165, 0, 0.6);
+            z-index: 10;
+            overflow: hidden;
+        }
+
+        .vip-ribbon::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: vipShine 3s ease-in-out infinite;
+        }
+
+        .vip-ribbon-text {
+            display: block;
+            text-align: center;
+            color: white;
+            font-weight: 800;
+            font-size: 0.7rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+        }
+
+        .vip-ribbon-text i {
+            font-size: 0.65rem;
+        }
+
+        @@keyframes vipShine {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            50%, 100% { transform: translateX(200%) rotate(45deg); }
+        }
+
+        /* Post Type Indicator */
+        .post-type-indicator {
+            position: absolute;
+            top: 0.75rem;
+            left: 0.75rem;
+            width: 35px;
+            height: 35px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .type-vehicle {
+            background: linear-gradient(135deg, #0070f3, #0059c1);
+        }
+
+        .type-battery {
+            background: linear-gradient(135deg, #00d4aa, #00ab8a);
+        }
+
+        /* Status Indicator */
+        .status-indicator {
+            position: absolute;
+            bottom: 0.75rem;
+            right: 0.75rem;
+            padding: 0.25rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .status-removed { color: #ff4444; }
+        .status-draft { color: #ffbb33; }
+        .status-closed { color: #888; }
+
+        /* Card Content */
+        .post-card-content {
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            flex: 1;
+        }
+
+        .post-card-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .post-card-description {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin: 0;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .post-card-footer {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .post-card-price {
+            display: flex;
+            align-items: center;
+        }
+
+        .price-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .price-negotiable {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .post-card-location {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .post-card-location i {
+            color: var(--primary-color);
+        }
+
+        /* Card Actions */
+        .post-card-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: auto;
+        }
+
+        .btn-view-details {
+            flex: 1;
+            padding: 0.6rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-align: center;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.35rem;
+        }
+
+        .btn-view-details:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,112,243,0.3);
+            color: white;
+        }
+
+        .btn-ban-post {
+            padding: 0.6rem 0.75rem;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1rem;
+        }
+
+        .btn-ban-post:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+        }
+
+        /* Pagination */
+        .pagination-modern {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+        }
+
+        .page-btn-modern {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-darker);
+            border: 2px solid var(--primary-color);
+            border-radius: 8px;
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: all 0.2s;
+            font-size: 1.1rem;
+        }
+
+        .page-btn-modern:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .page-info-modern {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            padding: 0 1rem;
+        }
+
+        /* Empty State */
+        .empty-state-modern {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 2rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            text-align: center;
+        }
+
+        .empty-icon {
+            width: 100px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-darker);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            margin-bottom: 1.5rem;
+        }
+
+        .empty-icon i {
+            font-size: 3rem;
+            color: var(--text-muted);
+        }
+
+        .empty-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-description {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-reset-filters {
+            padding: 0.75rem 1.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-reset-filters:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,112,243,0.3);
+            color: white;
+        }
+
+        /* Alert Styles */
+        .alert-sm {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            background: rgba(0,112,243,0.1);
+            border: 1px solid rgba(0,112,243,0.2);
+            color: var(--text-primary);
+        }
+
+        .alert-success {
+            background: rgba(0,212,170,0.1);
+            border-color: rgba(0,212,170,0.2);
+            color: #00d4aa;
+        }
+
+        .alert-danger {
+            background: rgba(255,68,68,0.1);
+            border-color: rgba(255,68,68,0.2);
+            color: #ff4444;
+        }
+
+        /* Responsive */
+        @@media (max-width: 991px) {
+            .filter-sidebar-sticky {
+                position: static;
+                margin-bottom: 2rem;
+            }
+
+            .posts-grid-modern {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+        }
+
+        @@media (max-width: 576px) {
+            .browse-title {
+                font-size: 1.5rem;
+            }
+
+            .posts-grid-modern {
+                grid-template-columns: 1fr;
+            }
+
+            .browse-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+        }
+    </style>
 }
 
 @section Scripts {
     <script>
-        // ✅ Select Price Range Function
-        function selectPriceRange(min, max) {
-            document.getElementById('minPriceInput').value = min === null ? '' : min;
-            document.getElementById('maxPriceInput').value = max === null ? '' : max;
-            document.getElementById('customMinPrice').value = '';
-            document.getElementById('customMaxPrice').value = '';
-            document.getElementById('filterForm').submit();
-        }
+        // Price Range Slider
+        const minSlider = document.getElementById('minPriceSlider');
+        const maxSlider = document.getElementById('maxPriceSlider');
+        const minPriceDisplay = document.getElementById('minPriceDisplay');
+        const maxPriceDisplay = document.getElementById('maxPriceDisplay');
+        const minPriceInput = document.getElementById('minPriceInput');
+        const maxPriceInput = document.getElementById('maxPriceInput');
+        const sliderRange = document.getElementById('sliderRange');
 
-        // ✅ Apply Custom Price Function
-        function applyCustomPrice() {
-            const customMin = document.getElementById('customMinPrice').value;
-            const customMax = document.getElementById('customMaxPrice').value;
-
-            if (customMin || customMax) {
-                document.getElementById('minPriceInput').value = customMin;
-                document.getElementById('maxPriceInput').value = customMax;
-                document.getElementById('filterForm').submit();
-            } else {
-                alert('Please enter at least one price value (min or max)');
+        function formatPrice(value) {
+            if (value >= 1000) {
+                return '$' + (value / 1000) + 'k';
             }
+            return '$' + value;
         }
+
+        function updateSlider() {
+            let minVal = parseInt(minSlider.value);
+            let maxVal = parseInt(maxSlider.value);
+
+            // Prevent overlap
+            if (minVal > maxVal - 1000) {
+                if (this === minSlider) {
+                    minSlider.value = maxVal - 1000;
+                    minVal = maxVal - 1000;
+                } else {
+                    maxSlider.value = minVal + 1000;
+                    maxVal = minVal + 1000;
+                }
+            }
+
+            // Update display
+            minPriceDisplay.textContent = formatPrice(minVal);
+            maxPriceDisplay.textContent = formatPrice(maxVal);
+
+            // Update hidden inputs
+            minPriceInput.value = minVal;
+            maxPriceInput.value = maxVal;
+
+            // Update slider range visual
+            const minPercent = (minVal / 100000) * 100;
+            const maxPercent = (maxVal / 100000) * 100;
+            sliderRange.style.left = minPercent + '%';
+            sliderRange.style.width = (maxPercent - minPercent) + '%';
+        }
+
+        minSlider.addEventListener('input', updateSlider);
+        maxSlider.addEventListener('input', updateSlider);
+
+        // Initialize on load
+        updateSlider();
 
         // Auto-hide alerts
         setTimeout(() => {
             const alerts = document.querySelectorAll('.alert');
             alerts.forEach(alert => {
                 alert.style.opacity = '0';
+                alert.style.transition = 'opacity 0.3s';
                 setTimeout(() => alert.remove(), 300);
             });
         }, 5000);
