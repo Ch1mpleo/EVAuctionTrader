@@ -546,6 +546,191 @@ namespace EVAuctionTrader.Presentation.Helper
 
                 await context.Posts.AddRangeAsync(new[] { post1, post2, post3, post4, post5, post6, post7, post8, post9, post10, post11, post12, post13, post14, post15 });
                 await context.SaveChangesAsync();
+
+                // Seed Comments for Posts
+                var comments = new List<PostComment>
+                {
+                    // Comments for Post 1 - Tesla Model 3
+                    new PostComment
+                    {
+                        PostId = post1.Id,
+                        AuthorId = members[1].Id,
+                        Body = "This looks like a great deal! Is the autopilot feature included?"
+                    },
+                    new PostComment
+                    {
+                        PostId = post1.Id,
+                        AuthorId = members[0].Id,
+                        Body = "Yes, full self-driving capability is included. The car has all premium features!"
+                    },
+
+                    // Comments for Post 2 - CATL Battery
+                    new PostComment
+                    {
+                        PostId = post2.Id,
+                        AuthorId = members[1].Id,
+                        Body = "Can this battery be used for a Nissan Leaf?"
+                    },
+
+                    // Comments for Post 3 - VinFast VF8
+                    new PostComment
+                    {
+                        PostId = post3.Id,
+                        AuthorId = members[0].Id,
+                        Body = "Interested! Can I schedule a test drive this weekend?"
+                    },
+                    new PostComment
+                    {
+                        PostId = post3.Id,
+                        AuthorId = members[1].Id,
+                        Body = "Sure! I'm available on Saturday morning. Let me know what time works for you."
+                    },
+                    new PostComment
+                    {
+                        PostId = post3.Id,
+                        AuthorId = members[0].Id,
+                        Body = "Great! How about 10 AM on Saturday?"
+                    },
+
+                    // Comments for Post 5 - BYD Battery
+                    new PostComment
+                    {
+                        PostId = post5.Id,
+                        AuthorId = members[0].Id,
+                        Body = "What's the warranty period remaining on this battery?"
+                    },
+                    new PostComment
+                    {
+                        PostId = post5.Id,
+                        AuthorId = members[1].Id,
+                        Body = "The battery still has 5 years of warranty left from BYD."
+                    },
+
+                    // Comments for Post 6 - Nissan Leaf
+                    new PostComment
+                    {
+                        PostId = post6.Id,
+                        AuthorId = members[1].Id,
+                        Body = "Does it come with the original charging cable?"
+                    },
+
+                    // Comments for Post 7 - LG Chem Battery
+                    new PostComment
+                    {
+                        PostId = post7.Id,
+                        AuthorId = members[1].Id,
+                        Body = "Is this compatible with Tesla Model 3?"
+                    },
+                    new PostComment
+                    {
+                        PostId = post7.Id,
+                        AuthorId = members[0].Id,
+                        Body = "Yes, it's compatible! The connector type matches perfectly."
+                    },
+
+                    // Comments for Post 8 - BMW i3
+                    new PostComment
+                    {
+                        PostId = post8.Id,
+                        AuthorId = members[0].Id,
+                        Body = "Beautiful car! What's the real-world range you're getting?"
+                    },
+                    new PostComment
+                    {
+                        PostId = post8.Id,
+                        AuthorId = members[1].Id,
+                        Body = "I'm getting around 200km in city driving. Very efficient for daily commute!"
+                    },
+                    new PostComment
+                    {
+                        PostId = post8.Id,
+                        AuthorId = members[0].Id,
+                        Body = "That's impressive! I'll definitely consider this."
+                    },
+
+                    // Comments for Post 9 - Panasonic Battery
+                    new PostComment
+                    {
+                        PostId = post9.Id,
+                        AuthorId = members[0].Id,
+                        Body = "How long does a full charge take with this battery?"
+                    },
+
+                    // Comments for Post 10 - Chevrolet Bolt
+                    new PostComment
+                    {
+                        PostId = post10.Id,
+                        AuthorId = members[1].Id,
+                        Body = "Is the price negotiable? I'm very interested!"
+                    },
+                    new PostComment
+                    {
+                        PostId = post10.Id,
+                        AuthorId = members[0].Id,
+                        Body = "Yes, we can discuss the price. Please message me directly."
+                    },
+
+                    // Comments for Post 11 - Samsung SDI Battery
+                    new PostComment
+                    {
+                        PostId = post11.Id,
+                        AuthorId = members[1].Id,
+                        Body = "Can you provide the test report for this battery?"
+                    },
+
+                    // Comments for Post 12 - Audi e-tron
+                    new PostComment
+                    {
+                        PostId = post12.Id,
+                        AuthorId = members[0].Id,
+                        Body = "Wow! This is exactly what I've been looking for. Is it still available?"
+                    },
+                    new PostComment
+                    {
+                        PostId = post12.Id,
+                        AuthorId = members[1].Id,
+                        Body = "Yes, still available! Would you like to come see it?"
+                    },
+
+                    // Comments for Post 13 - SK Innovation Battery
+                    new PostComment
+                    {
+                        PostId = post13.Id,
+                        AuthorId = members[0].Id,
+                        Body = "What's the charging speed capacity of this battery?"
+                    },
+                    new PostComment
+                    {
+                        PostId = post13.Id,
+                        AuthorId = members[1].Id,
+                        Body = "It supports up to 150kW DC fast charging. Very quick!"
+                    },
+
+                    // Comments for Post 14 - Kia EV6
+                    new PostComment
+                    {
+                        PostId = post14.Id,
+                        AuthorId = members[1].Id,
+                        Body = "Absolutely stunning car! Does it have the GT-Line package?"
+                    },
+
+                    // Comments for Post 15 - Tesla Model Y
+                    new PostComment
+                    {
+                        PostId = post15.Id,
+                        AuthorId = members[0].Id,
+                        Body = "Perfect for my family! Can we arrange a viewing?"
+                    },
+                    new PostComment
+                    {
+                        PostId = post15.Id,
+                        AuthorId = members[1].Id,
+                        Body = "Of course! I'm free this week. Let me know your preferred time."
+                    }
+                };
+
+                await context.PostComments.AddRangeAsync(comments);
+                await context.SaveChangesAsync();
             }
         }
     }

@@ -208,16 +208,16 @@ namespace EVAuctionTrader.Business.Services
             }
         }
 
-        public async Task<Pagination<PostResponseDto>> GetAllPostsAsync
-    (int pageNumber = 1,
-    int pageSize = 10,
-    string? search = null,
-    PostType? postType = null,
-    PostVersion? postVersion = null,
-    PostStatus? postStatus = null,
-    bool priceSort = true,
-    decimal? minPrice = null,
-    decimal? maxPrice = null)
+        public async Task<Pagination<PostResponseDto>> GetAllPostsAsync(
+            int pageNumber = 1,
+            int pageSize = 10,
+            string? search = null,
+            PostType? postType = null,
+            PostVersion? postVersion = null,
+            PostStatus? postStatus = null,
+            bool priceSort = true,
+            decimal? minPrice = null,
+            decimal? maxPrice = null)
         {
             try
             {
@@ -386,6 +386,7 @@ namespace EVAuctionTrader.Business.Services
                 throw;
             }
         }
+
         public async Task<Pagination<PostResponseDto>> GetAllMemberPostsAsync(
             int pageNumber = 1,
             int pageSize = 10,
@@ -519,7 +520,7 @@ namespace EVAuctionTrader.Business.Services
             }
         }
 
-        public async Task<PostResponseDto?> GetPostByIdAsync(Guid postId)
+        public async Task<PostWithCommentResponseDto?> GetPostByIdAsync(Guid postId)
         {
             try
             {
@@ -573,7 +574,33 @@ namespace EVAuctionTrader.Business.Services
                         };
                     }
                 }
-                return new PostResponseDto
+
+                // Fetch comments for this post
+                var comments = await _unitOfWork.PostComments.GetAllAsync(
+                    predicate: c => c.PostId == postId && !c.IsDeleted
+                );
+
+                var commentDtos = new List<PostCommentResponseDto>();
+                foreach (var comment in comments.OrderBy(c => c.CreatedAt))
+                {
+                    var commentAuthor = await _unitOfWork.Users.GetByIdAsync(comment.AuthorId);
+                    if (commentAuthor != null)
+                    {
+                        commentDtos.Add(new PostCommentResponseDto
+                        {
+                            Id = comment.Id,
+                            PostId = comment.PostId,
+                            AuthorId = comment.AuthorId,
+                            AuthorName = commentAuthor.FullName,
+                            Body = comment.Body,
+                            CreatedAt = comment.CreatedAt
+                        });
+                    }
+                }
+
+                _logger.LogInformation($"Retrieved {commentDtos.Count} comments for post {postId}");
+
+                return new PostWithCommentResponseDto
                 {
                     Id = postEntity.Id,
                     AuthorId = postEntity.AuthorId,
@@ -589,7 +616,8 @@ namespace EVAuctionTrader.Business.Services
                     PhotoUrls = postEntity.PhotoUrls,
                     Status = postEntity.Status,
                     PublishedAt = postEntity.PublishedAt,
-                    ExpiresAt = postEntity.ExpiresAt
+                    ExpiresAt = postEntity.ExpiresAt,
+                    Comments = commentDtos
                 };
             }
             catch (Exception ex)
@@ -984,6 +1012,7 @@ namespace EVAuctionTrader.Business.Services
                 throw;
             }
         }
+
         public async Task<bool> BanPostAsync(Guid postId)
         {
             try
