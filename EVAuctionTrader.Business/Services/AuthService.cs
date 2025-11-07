@@ -6,7 +6,6 @@ using EVAuctionTrader.DataAccess.Entities;
 using EVAuctionTrader.DataAccess.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Microsoft.VisualBasic;
 
 namespace EVAuctionTrader.Business.Services
 {
