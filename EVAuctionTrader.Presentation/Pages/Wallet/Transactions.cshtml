@@ -1,0 +1,42 @@
+@page
+@model EVAuctionTrader.Presentation.Pages.Wallet.TransactionsModel
+@{
+    ViewData["Title"] = "Transaction History";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/profile.css" />
+}
+
+<div class="staff-page-clean">
+    <div class="container">
+      <!-- Header -->
+  <div class="staff-header-clean">
+            <h1 class="staff-title-clean">
+        <i class="bi bi-list-check"></i>
+                Transaction History
+            </h1>
+    <p class="staff-subtitle-clean">View all your wallet transactions</p>
+   </div>
+
+        <!-- Coming Soon Card -->
+        <div class="staff-card-clean">
+        <div class="staff-card-body-clean">
+<div class="empty-state-clean">
+         <div class="empty-icon-clean">
+              <i class="bi bi-hourglass-split"></i>
+ </div>
+       <h2 class="empty-title-clean">Coming Soon</h2>
+    <p class="empty-description-clean">
+            Transaction history feature is under development.<br />
+    Check back soon!
+    </p>
+      <a asp-page="/Wallet/Index" class="btn-clean btn-primary-clean" style="margin-top: 1.5rem;">
+         <i class="bi bi-arrow-left"></i>
+            Back to Wallet
+</a>
+       </div>
+     </div>
+        </div>
+    </div>
+</div>

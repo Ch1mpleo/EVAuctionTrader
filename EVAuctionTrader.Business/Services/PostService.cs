@@ -243,28 +243,6 @@ namespace EVAuctionTrader.Business.Services
                     _logger.LogInformation("Admin user: showing all posts.");
                 }
 
-                var utcNow = DateTime.UtcNow;
-                var postsToUpdate = await query
-                    .Where(p =>
-                        (p.PublishedAt <= utcNow && p.Status == PostStatus.Draft) ||
-                        (p.ExpiresAt <= utcNow && p.Status == PostStatus.Active))
-                    .ToListAsync();
-
-                foreach (var item in postsToUpdate)
-                {
-                    if (item.PublishedAt <= utcNow && item.Status == PostStatus.Draft)
-                        item.Status = PostStatus.Active;
-
-                    if (item.ExpiresAt <= utcNow && item.Status == PostStatus.Active)
-                        item.Status = PostStatus.Closed;
-                }
-
-                if (postsToUpdate.Any())
-                {
-                    await _unitOfWork.SaveChangesAsync();
-                    _logger.LogInformation($"Updated status for {postsToUpdate.Count} posts.");
-                }
-
                 if (postType.HasValue)
                 {
                     query = query.Where(p => p.PostType == postType.Value);
@@ -404,17 +382,6 @@ namespace EVAuctionTrader.Business.Services
                 var currentUserId = _claimsService.GetCurrentUserId;
                 query = query.Where(p => p.AuthorId == currentUserId);
                 _logger.LogInformation($"Filtering posts by current user ID: {currentUserId}");
-
-                var utcNow = DateTime.UtcNow;
-
-                foreach (var item in query)
-                {
-                    if (item.PublishedAt <= utcNow && item.Status == PostStatus.Draft)
-                        item.Status = PostStatus.Active;
-
-                    if (item.ExpiresAt <= utcNow && item.Status == PostStatus.Active)
-                        item.Status = PostStatus.Closed;
-                }
 
                 if (postType.HasValue)
                 {

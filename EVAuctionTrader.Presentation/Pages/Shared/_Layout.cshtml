@@ -133,10 +133,10 @@
                         @if (isAuthenticated)
                         {
                             <!-- Hiển thị số dư wallet -->
-                            <div class="wallet-balance">
+                            <a asp-page="/Wallet/Index" class="wallet-balance text-decoration-none">
                                 <i class="bi bi-wallet2"></i>
-                                <span class="wallet-amount">@walletBalance.ToString("N0") VND</span>
-                            </div>
+                                <span class="wallet-amount">$@walletBalance.ToString("N2")</span>
+                            </a>
 
                             <div class="dropdown user-dropdown">
                                 <a class="nav-link dropdown-toggle user-menu-trigger" href="#" id="userDropdown" role="button"
@@ -201,6 +201,12 @@
                                     }
                                     else if (userRole == "Member")
                                     {
+                                        <li>
+                                            <a class="dropdown-item" asp-page="/Wallet/Index">
+                                                <i class="bi bi-wallet2 me-2"></i>
+                                                My Wallet
+                                            </a>
+                                        </li>
                                         <li>
                                             <a class="dropdown-item" asp-page="/PostPages/Index">
                                                 <i class="bi bi-grid-3x3-gap me-2"></i>
