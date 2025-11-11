@@ -1,0 +1,321 @@
+@page
+@using EVAuctionTrader.BusinessObject.Enums
+@model EVAuctionTrader.Presentation.Pages.AuctionPages.IndexModel
+@{
+    ViewData["Title"] = "Live Auctions";
+}
+
+<div class="browse-page-dark">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sticky Sidebar Filter -->
+            <div class="col-lg-3">
+                <div class="filter-sidebar-sticky">
+                    <div class="filter-header">
+                        <h5 class="filter-title">
+                            <i class="bi bi-sliders"></i> Filters
+                        </h5>
+                    </div>
+
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success alert-sm alert-dismissible fade show" role="alert">
+                            <i class="bi bi-check-circle-fill"></i>
+                            @TempData["SuccessMessage"]
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger alert-sm alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                            @TempData["ErrorMessage"]
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <form method="get" id="filterForm" class="filter-form-compact">
+                        <!-- Search Bar -->
+                        <div class="filter-group-compact">
+                            <label class="filter-label-sm">
+                                <i class="bi bi-search"></i> Search
+                            </label>
+                            <input type="text" name="search" class="filter-input-sm"
+                                   placeholder="Search auctions..."
+                                   value="@Model.Search">
+                        </div>
+
+                        <!-- Auction Type -->
+                        <div class="filter-group-compact">
+                            <label class="filter-label-sm">
+                                <i class="bi bi-tag"></i> Type
+                            </label>
+                            <select name="auctionType" class="filter-input-sm">
+                                <option value="">All Types</option>
+                                <option value="@((int)AuctionType.Vehicle)" selected="@(Model.AuctionType == AuctionType.Vehicle)">Vehicle</option>
+                                <option value="@((int)AuctionType.Battery)" selected="@(Model.AuctionType == AuctionType.Battery)">Battery</option>
+                            </select>
+                        </div>
+
+                        <!-- Status -->
+                        <div class="filter-group-compact">
+                            <label class="filter-label-sm">
+                                <i class="bi bi-circle-fill"></i> Status
+                            </label>
+                            <select name="auctionStatus" class="filter-input-sm">
+                                <option value="">All Status</option>
+                                <option value="@((int)AuctionStatus.Scheduled)" selected="@(Model.AuctionStatus == AuctionStatus.Scheduled)">Scheduled</option>
+                                <option value="@((int)AuctionStatus.Running)" selected="@(Model.AuctionStatus == AuctionStatus.Running)">Live Now</option>
+                                <option value="@((int)AuctionStatus.Ended)" selected="@(Model.AuctionStatus == AuctionStatus.Ended)">Ended</option>
+                                <option value="@((int)AuctionStatus.Canceled)" selected="@(Model.AuctionStatus == AuctionStatus.Canceled)">Canceled</option>
+                            </select>
+                        </div>
+
+                        <!-- Sort -->
+                        <div class="filter-group-compact">
+                            <label class="filter-label-sm">
+                                <i class="bi bi-sort-numeric-down"></i> Sort
+                            </label>
+                            <select name="priceSort" class="filter-input-sm">
+                                <option value="true" selected="@Model.PriceSort">Price: Low to High</option>
+                                <option value="false" selected="@(!Model.PriceSort)">Price: High to Low</option>
+                            </select>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="filter-actions-compact">
+                            <button type="submit" class="btn-filter-apply">
+                                <i class="bi bi-check2"></i> Apply
+                            </button>
+                            <a asp-page="/AuctionPages/Index" class="btn-filter-clear">
+                                <i class="bi bi-x"></i> Clear
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Main Content Area -->
+            <div class="col-lg-9">
+                <!-- Header -->
+                <div class="browse-header">
+                    <div>
+                        <h1 class="browse-title">
+                            <i class="bi bi-lightning-charge-fill me-2"></i>
+                            Live Auctions
+                        </h1>
+                        <p class="browse-subtitle">Bid on electric vehicles and batteries in real-time</p>
+                    </div>
+                    @if (Model.Auctions != null && Model.Auctions.Any())
+                    {
+                        <div class="results-count">
+                            <span class="count-badge">@Model.Auctions.TotalCount auctions</span>
+                        </div>
+                    }
+                </div>
+
+                <!-- Auctions Grid -->
+                @if (Model.Auctions != null && Model.Auctions.Any())
+                {
+                    <div class="auctions-grid-modern">
+                        @foreach (var auction in Model.Auctions)
+                        {
+                            var statusClass = auction.Status switch
+                            {
+                                AuctionStatus.Running => "auction-live",
+                                AuctionStatus.Scheduled => "auction-scheduled",
+                                AuctionStatus.Ended => "auction-ended",
+                                AuctionStatus.Canceled => "auction-canceled",
+                                _ => ""
+                            };
+
+                            <div class="auction-card-compact @statusClass">
+                                <!-- Image -->
+                                <div class="auction-image-wrapper">
+                                    @if (!string.IsNullOrEmpty(auction.PhotoUrl))
+                                    {
+                                        <img src="@auction.PhotoUrl" alt="@auction.Title" class="auction-img">
+                                    }
+                                    else
+                                    {
+                                        <div class="auction-img-placeholder">
+                                            <i class="bi bi-image"></i>
+                                        </div>
+                                    }
+
+                                    <!-- Live Badge (Only for Running) -->
+                                    @if (auction.Status == AuctionStatus.Running)
+                                    {
+                                        <div class="live-badge-pulse">
+                                            <span class="pulse-dot"></span>
+                                            <span class="live-text">LIVE</span>
+                                        </div>
+                                    }
+
+                                    <!-- Auction Type Badge -->
+                                    <div class="auction-type-indicator @(auction.AuctionType == AuctionType.Vehicle ? "type-vehicle" : "type-battery")">
+                                        @if (auction.AuctionType == AuctionType.Vehicle)
+                                        {
+                                            <i class="bi bi-car-front-fill"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-battery-charging"></i>
+                                        }
+                                    </div>
+
+                                    <!-- Status Badge -->
+                                    @if (auction.Status != AuctionStatus.Running)
+                                    {
+                                        <div class="status-indicator status-@auction.Status.ToString().ToLower()">
+                                            @if (auction.Status == AuctionStatus.Scheduled)
+                                            {
+                                                <i class="bi bi-clock"></i>
+                                                <text> UPCOMING</text>
+                                            }
+                                            else if (auction.Status == AuctionStatus.Ended)
+                                            {
+                                                <i class="bi bi-check-circle"></i>
+                                                <text> ENDED</text>
+                                            }
+                                            else if (auction.Status == AuctionStatus.Canceled)
+                                            {
+                                                <i class="bi bi-x-circle"></i>
+                                                <text> CANCELED</text>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+
+                                <!-- Content -->
+                                <div class="auction-card-content">
+                                    <h3 class="auction-card-title">@auction.Title</h3>
+
+                                    <p class="auction-card-description">
+                                        @(auction.Description?.Length > 80 ? auction.Description.Substring(0, 80) + "..." : auction.Description)
+                                    </p>
+
+                                    <div class="auction-card-pricing">
+                                        <div class="price-row">
+                                            <span class="price-label">Current Bid:</span>
+                                            <span class="price-value">$@auction.CurrentPrice.ToString("N0")</span>
+                                        </div>
+                                        <div class="price-row">
+                                            <span class="price-label-sm">Starting: $@auction.StartPrice.ToString("N0")</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="auction-card-meta">
+                                        <div class="meta-item">
+                                            <i class="bi bi-hammer"></i>
+                                            <span>@auction.TotalBids bids</span>
+                                        </div>
+                                        <div class="meta-item">
+                                            <i class="bi bi-clock"></i>
+                                            <span>@(auction.Status == AuctionStatus.Running ? "Ends" : "Ended") @auction.EndTime.ToString("MMM dd, HH:mm")</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="auction-card-actions">
+                                        <a asp-page="/AuctionPages/Details" asp-route-id="@auction.Id"
+                                           class="btn-view-auction">
+                                            @if (auction.Status == AuctionStatus.Running)
+                                            {
+                                                <text>Join Auction</text>
+                                                <i class="bi bi-chevron-right"></i>
+                                            }
+                                            else
+                                            {
+                                                <text>View Details</text>
+                                                <i class="bi bi-arrow-right"></i>
+                                            }
+                                        </a>
+
+                                        @if (User.IsInRole("Admin") && auction.Status == AuctionStatus.Scheduled)
+                                        {
+                                            <form method="post" asp-page-handler="Cancel" asp-route-id="@auction.Id" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn-cancel-auction"
+                                                        onclick="return confirm('Cancel this auction?');">
+                                                    <i class="bi bi-x-circle"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Pagination -->
+                    @if (Model.Auctions.TotalPages > 1)
+                    {
+                        <div class="pagination-modern">
+                            @if (Model.Auctions.HasPrevious)
+                            {
+                                <a asp-page="/AuctionPages/Index"
+                                   asp-route-pageNumber="@(Model.Auctions.CurrentPage - 1)"
+                                   asp-route-search="@Model.Search"
+                                   asp-route-auctionType="@Model.AuctionType"
+                                   asp-route-auctionStatus="@Model.AuctionStatus"
+                                   asp-route-priceSort="@Model.PriceSort"
+                                   class="page-btn-modern">
+                                    <i class="bi bi-chevron-left"></i>
+                                </a>
+                            }
+
+                            <span class="page-info-modern">
+                                Page @Model.Auctions.CurrentPage of @Model.Auctions.TotalPages
+                            </span>
+
+                            @if (Model.Auctions.HasNext)
+                            {
+                                <a asp-page="/AuctionPages/Index"
+                                   asp-route-pageNumber="@(Model.Auctions.CurrentPage + 1)"
+                                   asp-route-search="@Model.Search"
+                                   asp-route-auctionType="@Model.AuctionType"
+                                   asp-route-auctionStatus="@Model.AuctionStatus"
+                                   asp-route-priceSort="@Model.PriceSort"
+                                   class="page-btn-modern">
+                                    <i class="bi bi-chevron-right"></i>
+                                </a>
+                            }
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="empty-state-modern">
+                        <div class="empty-icon">
+                            <i class="bi bi-inbox"></i>
+                        </div>
+                        <h3 class="empty-title">No Auctions Found</h3>
+                        <p class="empty-description">Try adjusting your filters or check back later.</p>
+                        <a asp-page="/AuctionPages/Index" class="btn-reset-filters">
+                            <i class="bi bi-arrow-clockwise"></i> Reset Filters
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/auctions.css" />
+}
+
+@section Scripts {
+    <script>
+        // Auto-hide alerts
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                alert.style.opacity = '0';
+                alert.style.transition = 'opacity 0.3s';
+                setTimeout(() => alert.remove(), 300);
+            });
+        }, 5000);
+    </script>
+}
