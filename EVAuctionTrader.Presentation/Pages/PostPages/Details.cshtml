@@ -1,4 +1,4 @@
-@page "{id:guid}"
+﻿@page "{id:guid}"
 @model EVAuctionTrader.Presentation.Pages.PostPages.DetailsModel
 @{
     ViewData["Title"] = Model.Post?.Title ?? "Post Details";
@@ -431,6 +431,9 @@
 
 <div class="detail-page-dark">
     <div class="container">
+        <form method="post" id="conversationForm" style="display:none;">
+            @Html.AntiForgeryToken()
+        </form>
         @if (TempData["SuccessMessage"] != null)
         {
             <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -677,7 +680,7 @@
                         {
                             @if (Model.Post.Status != EVAuctionTrader.BusinessObject.Enums.PostStatus.Removed)
                             {
-                                <button class="action-btn btn-primary-action" style="margin-bottom: 0.5rem;">
+                                <button type="button" class="action-btn btn-primary-action" id="contactSellerBtn" data-post-id="@Model.Post.Id">
                                     <i class="bi bi-chat-dots"></i> Contact Seller
                                 </button>
                                 <button class="action-btn btn-secondary-action">
@@ -757,5 +760,82 @@
                 setTimeout(() => alert.remove(), 300);
             });
         }, 5000);
+
+        // ✅ FIXED: Add post ID to URL
+        document.getElementById('contactSellerBtn')?.addEventListener('click', async function() {
+            const postId = this.dataset.postId;
+            const button = this;
+
+            try {
+                // Disable button during request
+                button.disabled = true;
+                button.innerHTML = '<i class="bi bi-hourglass-split"></i> Connecting...';
+
+                // Get AntiForgery token from the hidden form
+                const token = document.querySelector('#conversationForm input[name="__RequestVerificationToken"]')?.value;
+
+                if (!token) {
+                    throw new Error('Security token not found. Please refresh the page.');
+                }
+
+                // ✅ IMPORTANT: Include post ID in the URL path
+                const response = await fetch(`/PostPages/Details/${postId}?handler=CreateConversation`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': token
+                    },
+                    body: JSON.stringify({
+                        postId: postId,
+                        initialMessage: 'Hi, I\'m interested in this post.'
+                    })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to create conversation');
+                }
+
+                const conversation = await response.json();
+
+                // Open chat panel
+                const chatToggleBtn = document.getElementById('chatToggleBtn');
+                const chatPanel = document.getElementById('chatPanel');
+
+                if (chatToggleBtn && chatPanel) {
+                    // Open chat if not already open
+                    if (!chatPanel.classList.contains('active')) {
+                        chatToggleBtn.click();
+                    }
+
+                    // Wait for chat to open, then select the conversation
+                    setTimeout(() => {
+                        // Trigger reload of conversations in chat.js
+                        if (window.chatReloadConversations) {
+                            window.chatReloadConversations();
+                        }
+
+                        // Try to open the specific conversation
+                        setTimeout(() => {
+                            const conversationItem = document.querySelector(`[data-conversation-id="${conversation.id}"]`);
+                            if (conversationItem) {
+                                conversationItem.click();
+                            }
+                        }, 500);
+                    }, 300);
+                } else {
+                    // Fallback if chat widget is not available
+                    alert('Chat opened successfully! Check your messages.');
+                }
+
+            } catch (err) {
+                console.error('Contact seller error:', err);
+                alert(err.message || 'Error connecting to chat. Please try again.');
+            } finally {
+                // Re-enable button
+                button.disabled = false;
+                button.innerHTML = '<i class="bi bi-chat-dots"></i> Contact Seller';
+            }
+        });
     </script>
 }

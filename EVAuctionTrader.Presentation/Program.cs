@@ -1,6 +1,7 @@
 using EVAuctionTrader.DataAccess;
 using EVAuctionTrader.Presentation.Architecture;
 using EVAuctionTrader.Presentation.Helper;
+using EVAuctionTrader.Presentation.Hubs;
 using EVDealerSales.Presentation.Configuration;
 using Microsoft.AspNetCore.DataProtection;
 using Stripe;
@@ -135,6 +136,6 @@ app.MapGet("/", () => Results.Redirect("/Home/LandingPage"));
 
 app.MapRazorPages();
 
-// Map SignalR Hub
+app.MapHub<ChatHub>("/chathub");
 
 app.Run();

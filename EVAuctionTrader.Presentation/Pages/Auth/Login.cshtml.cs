@@ -31,7 +31,7 @@ namespace EVAuctionTrader.Presentation.Pages.Auth
         [BindProperty(SupportsGet = true)]
         public string? ReturnUrl { get; set; }
         public string? ErrorMessage { get; set; }
-
+        public bool LoginSuccess { get; set; }
         public void OnGet()
         {
             if (User.Identity?.IsAuthenticated == true)
@@ -71,6 +71,7 @@ namespace EVAuctionTrader.Presentation.Pages.Auth
                 }
 
                 HttpContext.Session.SetString("AuthToken", result.Token);
+                LoginSuccess = true;
 
                 if (!string.IsNullOrEmpty(ReturnUrl) && Url.IsLocalUrl(ReturnUrl))
                 {
