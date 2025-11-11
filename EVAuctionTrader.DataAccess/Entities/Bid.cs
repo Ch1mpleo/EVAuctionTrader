@@ -1,7 +1,7 @@
 ﻿namespace EVAuctionTrader.DataAccess.Entities
 {
 
-    // Người đấu giá
+    // Người tham gia đấu giá
     public class Bid : BaseEntity
     {
         public Guid AuctionId { get; set; }
