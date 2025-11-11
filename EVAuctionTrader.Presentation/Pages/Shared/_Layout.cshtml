@@ -19,31 +19,34 @@
 
     <style>
         .wallet-balance {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             color: white;
             padding: 8px 16px;
-            border-radius: 20px;
+            border-radius: 8px;
             margin-right: 15px;
             font-weight: 600;
             display: flex;
             align-items: center;
             gap: 8px;
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
             transition: all 0.3s ease;
         }
 
             .wallet-balance:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+                background: rgba(255, 255, 255, 0.1);
+                border-color: rgba(0, 102, 255, 0.3);
+                transform: translateY(-1px);               
             }
 
             .wallet-balance i {
                 font-size: 18px;
+                color: #0066ff;
             }
 
         .wallet-amount {
             font-size: 16px;
             letter-spacing: 0.5px;
+            color: #ffffff;
         }
 
         /* Responsive */
@@ -161,15 +164,6 @@
                                         </div>
                                     </li>
                                     <li><hr class="dropdown-divider"></li>
-
-                                    <!-- Thêm menu Wallet -->
-                                    <li>
-                                        <a class="dropdown-item" asp-page="/Wallet/Index">
-                                            <i class="bi bi-wallet2 me-2"></i>
-                                            My Wallet
-                                            <span class="badge bg-primary ms-2">@walletBalance.ToString("N0") VND</span>
-                                        </a>
-                                    </li>
 
                                     <li>
                                         <a class="dropdown-item" asp-page="/Profile/Index">

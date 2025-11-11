@@ -10,58 +10,68 @@
         .wallet-info-inline {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border-radius: 8px;
-            padding: 0.75rem 1rem;
+            padding: 1rem 1.25rem;
             margin-bottom: 1rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
+            gap: 1rem;
         }
 
-            .wallet-info-inline .wallet-label {
-                color: rgba(255, 255, 255, 0.9);
-                font-size: 0.75rem;
+        .wallet-balance-left{
+            flex: 1;
+        }
+
+            .wallet-balance-left .wallet-label {
+                color: rgba(255, 255, 255, 0.85);
+                font-size: 0.7rem;
                 text-transform: uppercase;
-                letter-spacing: 0.5px;
-                margin-bottom: 0.25rem;
+                letter-spacing: 0.8px;
+                margin-bottom: 0.5rem;
+                font-weight: 500;
             }
 
-            .wallet-info-inline .wallet-amount {
+            .wallet-balance-left .wallet-amount {
                 color: white;
-                font-size: 1.25rem;
+                font-size: 1.75rem;
                 font-weight: 700;
+                line-height 1;
             }
 
-            .wallet-info-inline i.wallet-icon {
-                font-size: 2rem;
-                color: rgba(255, 255, 255, 0.2);
-            }
-
-        .wallet-quick-actions {
+        .wallet-actions-right {
             display: flex;
             gap: 0.5rem;
-            margin-top: 0.5rem;
+            flex-direction: column;
+            align-items: flex-end;
         }
 
-        .wallet-quick-btn {
-            flex: 1;
-            padding: 0.4rem 0.75rem;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+        .wallet-quick-btn {           
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.25);
             color: white;
             border-radius: 6px;
-            font-size: 0.75rem;
+            font-size: 0.8rem;
+            font-weight: 500;
             text-decoration: none;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 0.35rem;
+            gap: 0.5rem;
             transition: all 0.3s ease;
+            min-width: 120px;
+            white-space: nowrap;
         }
 
             .wallet-quick-btn:hover {
-                background: rgba(255, 255, 255, 0.2);
+                background: rgba(255, 255, 255, 0.25);
                 color: white;
-                transform: translateY(-1px);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            }
+
+            .wallet-quick-btn i {
+                font-size: 0.9rem;
             }
     </style>
 }
@@ -126,23 +136,22 @@
                     {
                         <!-- Wallet Balance Inline -->
                         <div class="wallet-info-inline">
-                            <div>
+                            <div class="wallet-balance-left">
                                 <div class="wallet-label">
                                     <i class="bi bi-wallet2"></i> Wallet Balance
                                 </div>
                                 <div class="wallet-amount">
                                     @Model.WalletBalance.ToString("N0") VND
                                 </div>
-                                <div class="wallet-quick-actions">
-                                    <a href="#" class="wallet-quick-btn">
-                                        <i class="bi bi-plus-circle"></i> Add Funds
-                                    </a>
-                                    <a href="#" class="wallet-quick-btn">
-                                        <i class="bi bi-clock-history"></i> History
-                                    </a>
-                                </div>
                             </div>
-                            <i class="bi bi-wallet2 wallet-icon"></i>
+                            <div class="wallet-actions-right">
+                                <a href="#" class="wallet-quick-btn">
+                                    <i class="bi bi-plus-circle"></i> Add Funds
+                                </a>
+                                <a href="#" class="wallet-quick-btn">
+                                    <i class="bi bi-clock-history"></i> History
+                                </a>
+                            </div>
                         </div>
 
                         <div class="info-card-clean">

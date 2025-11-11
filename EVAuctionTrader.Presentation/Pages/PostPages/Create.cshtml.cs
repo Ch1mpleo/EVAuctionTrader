@@ -28,8 +28,8 @@ namespace EVAuctionTrader.Presentation.Pages.PostPages
             Version = PostVersion.Free,
             Status = PostStatus.Draft,
             PhotoUrls = new List<string>(),
-            Vehicle = new VehicleRequestPostDto(), // ✅ Initialize Vehicle
-            Battery = new BatteryRequestPostDto()  // ✅ Initialize Battery
+            Vehicle = new VehicleRequestPostDto(),
+            Battery = new BatteryRequestPostDto() 
         };
 
         [BindProperty]
