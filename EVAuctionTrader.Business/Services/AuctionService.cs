@@ -46,16 +46,61 @@ public class AuctionService : IAuctionService
                 throw new UnauthorizedAccessException("Only admins can create auctions.");
             }
 
-            if (createAuctionDto.AuctionType == AuctionType.Vehicle && !createAuctionDto.VehicleId.HasValue)
-            {
-                _logger.LogWarning("CreateAuctionAsync failed: VehicleId is required for Vehicle auction.");
-                throw new ArgumentException("VehicleId is required for Vehicle auction.");
-            }
+            // Handle Vehicle/Battery creation
+            Guid? vehicleId = createAuctionDto.VehicleId;
+            Guid? batteryId = createAuctionDto.BatteryId;
 
-            if (createAuctionDto.AuctionType == AuctionType.Battery && !createAuctionDto.BatteryId.HasValue)
+            if (createAuctionDto.AuctionType == AuctionType.Vehicle)
             {
-                _logger.LogWarning("CreateAuctionAsync failed: BatteryId is required for Battery auction.");
-                throw new ArgumentException("BatteryId is required for Battery auction.");
+                if (createAuctionDto.Vehicle != null)
+                {
+                    // Create new vehicle from nested DTO
+                    var newVehicle = new Vehicle
+                    {
+                        OwnerId = currentUserId,
+                        Brand = createAuctionDto.Vehicle.Brand,
+                        Model = createAuctionDto.Vehicle.Model,
+                        Year = createAuctionDto.Vehicle.Year,
+                        OdometerKm = createAuctionDto.Vehicle.OdometerKm,
+                        ConditionGrade = createAuctionDto.Vehicle.ConditionGrade
+                    };
+                    await _unitOfWork.Vehicles.AddAsync(newVehicle);
+                    await _unitOfWork.SaveChangesAsync();
+                    vehicleId = newVehicle.Id;
+                    _logger.LogInformation($"Created new vehicle with ID: {vehicleId}");
+                }
+                else if (!vehicleId.HasValue)
+                {
+                    _logger.LogWarning("CreateAuctionAsync failed: VehicleId or Vehicle details required for Vehicle auction.");
+                    throw new ArgumentException("VehicleId or Vehicle details required for Vehicle auction.");
+                }
+            }
+            else if (createAuctionDto.AuctionType == AuctionType.Battery)
+            {
+                if (createAuctionDto.Battery != null)
+                {
+                    // Create new battery from nested DTO
+                    var newBattery = new Battery
+                    {
+                        OwnerId = currentUserId,
+                        Manufacturer = createAuctionDto.Battery.Manufacturer,
+                        Chemistry = createAuctionDto.Battery.Chemistry,
+                        CapacityKwh = createAuctionDto.Battery.CapacityKwh,
+                        CycleCount = createAuctionDto.Battery.CycleCount,
+                        SohPercent = createAuctionDto.Battery.SohPercent,
+                        VoltageV = createAuctionDto.Battery.VoltageV,
+                        ConnectorType = createAuctionDto.Battery.ConnectorType
+                    };
+                    await _unitOfWork.Batteries.AddAsync(newBattery);
+                    await _unitOfWork.SaveChangesAsync();
+                    batteryId = newBattery.Id;
+                    _logger.LogInformation($"Created new battery with ID: {batteryId}");
+                }
+                else if (!batteryId.HasValue)
+                {
+                    _logger.LogWarning("CreateAuctionAsync failed: BatteryId or Battery details required for Battery auction.");
+                    throw new ArgumentException("BatteryId or Battery details required for Battery auction.");
+                }
             }
 
             if (createAuctionDto.StartTime >= createAuctionDto.EndTime)
@@ -74,8 +119,8 @@ public class AuctionService : IAuctionService
             {
                 CreatedBy = currentUserId,
                 AuctionType = createAuctionDto.AuctionType,
-                VehicleId = createAuctionDto.VehicleId,
-                BatteryId = createAuctionDto.BatteryId,
+                VehicleId = vehicleId,
+                BatteryId = batteryId,
                 Title = createAuctionDto.Title,
                 Description = createAuctionDto.Description,
                 StartPrice = createAuctionDto.StartPrice,

@@ -121,6 +121,7 @@ try
         var dbContext = scope.ServiceProvider.GetRequiredService<EVAuctionTraderDbContext>();
         await DbSeeder.SeedUsersAsync(dbContext);
         await DbSeeder.SeedPostsWithVehiclesAndBatteriesAsync(dbContext);
+        await DbSeeder.SeedAuctionsAsync(dbContext); // Add auction seeding
     }
 }
 catch (Exception e)
