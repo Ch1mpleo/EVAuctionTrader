@@ -2,6 +2,8 @@ using EVAuctionTrader.DataAccess;
 using EVAuctionTrader.Presentation.Architecture;
 using EVAuctionTrader.Presentation.Configuration;
 using EVAuctionTrader.Presentation.Helper;
+using EVAuctionTrader.Presentation.Hubs;
+using EVDealerSales.Presentation.Configuration;
 using Microsoft.AspNetCore.DataProtection;
 using Stripe;
 using System.IdentityModel.Tokens.Jwt;
@@ -120,6 +122,7 @@ try
         var dbContext = scope.ServiceProvider.GetRequiredService<EVAuctionTraderDbContext>();
         await DbSeeder.SeedUsersAsync(dbContext);
         await DbSeeder.SeedPostsWithVehiclesAndBatteriesAsync(dbContext);
+        await DbSeeder.SeedAuctionsAsync(dbContext); // Add auction seeding
     }
 }
 catch (Exception e)
@@ -136,5 +139,6 @@ app.MapGet("/", () => Results.Redirect("/Home/LandingPage"));
 app.MapRazorPages();
 
 // Map SignalR Hub
+app.MapHub<AuctionHub>("/auctionHub");
 
 app.Run();

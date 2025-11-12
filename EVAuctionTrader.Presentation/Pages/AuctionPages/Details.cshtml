@@ -1,0 +1,433 @@
+@page "{id:guid}"
+@using EVAuctionTrader.BusinessObject.Enums
+@model EVAuctionTrader.Presentation.Pages.AuctionPages.DetailsModel
+@{
+    ViewData["Title"] = Model.Auction?.Title ?? "Auction Details";
+    var isLive = Model.Auction?.Status == AuctionStatus.Running;
+    var canBid = Model.Auction?.UserCanBid ?? false;
+}
+
+<div class="auction-details-page">
+    <div class="container">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                @TempData["SuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                @TempData["ErrorMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        @if (Model.Auction != null)
+        {
+            <div class="row g-4">
+                <!-- Left Column: Image & Info -->
+                <div class="col-lg-7">
+                    <!-- Image -->
+                    <div class="auction-image-container">
+                        @if (!string.IsNullOrEmpty(Model.Auction.PhotoUrl))
+                        {
+                            <img src="@Model.Auction.PhotoUrl" alt="@Model.Auction.Title" class="auction-main-image">
+                        }
+                        else
+                        {
+                            <div class="auction-image-placeholder">
+                                <i class="bi bi-image"></i>
+                            </div>
+                        }
+
+                        <!-- Status Badge Overlay -->
+                        @if (isLive)
+                        {
+                            <div class="live-badge-large">
+                                <span class="pulse-dot-large"></span>
+                                <span class="live-text-large">LIVE AUCTION</span>
+                            </div>
+                        }
+                        else if (Model.Auction.Status == AuctionStatus.Ended)
+                        {
+                            <div class="ended-badge-large">
+                                <i class="bi bi-check-circle-fill"></i>
+                                AUCTION ENDED
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Description -->
+                    <div class="auction-description-card">
+                        <h3 class="section-title">
+                            <i class="bi bi-info-circle-fill me-2"></i>
+                            Description
+                        </h3>
+                        <p class="description-text">@Model.Auction.Description</p>
+                    </div>
+
+                    <!-- Vehicle/Battery Details -->
+                    @if (Model.Auction.Vehicle != null)
+                    {
+                        <div class="details-card">
+                            <h3 class="section-title">
+                                <i class="bi bi-car-front-fill me-2"></i>
+                                Vehicle Details
+                            </h3>
+                            <div class="details-grid">
+                                <div class="detail-item">
+                                    <span class="detail-label">Brand</span>
+                                    <span class="detail-value">@Model.Auction.Vehicle.Brand</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Model</span>
+                                    <span class="detail-value">@Model.Auction.Vehicle.Model</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Year</span>
+                                    <span class="detail-value">@Model.Auction.Vehicle.Year</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Odometer</span>
+                                    <span class="detail-value">@Model.Auction.Vehicle.OdometerKm.ToString("N0") km</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Condition</span>
+                                    <span class="detail-value">@Model.Auction.Vehicle.ConditionGrade</span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else if (Model.Auction.Battery != null)
+                    {
+                        <div class="details-card">
+                            <h3 class="section-title">
+                                <i class="bi bi-battery-charging me-2"></i>
+                                Battery Details
+                            </h3>
+                            <div class="details-grid">
+                                <div class="detail-item">
+                                    <span class="detail-label">Manufacturer</span>
+                                    <span class="detail-value">@Model.Auction.Battery.Manufacturer</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Chemistry</span>
+                                    <span class="detail-value">@Model.Auction.Battery.Chemistry</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Capacity</span>
+                                    <span class="detail-value">@Model.Auction.Battery.CapacityKwh kWh</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Cycle Count</span>
+                                    <span class="detail-value">@Model.Auction.Battery.CycleCount</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Health (SOH)</span>
+                                    <span class="detail-value">@Model.Auction.Battery.SohPercent%</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Voltage</span>
+                                    <span class="detail-value">@Model.Auction.Battery.VoltageV V</span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <!-- Right Column: Bidding Panel -->
+                <div class="col-lg-5">
+                    <div class="bidding-panel-sticky">
+                        <!-- Title & Countdown -->
+                        <div class="panel-header">
+                            <h2 class="auction-title-panel">@Model.Auction.Title</h2>
+                            @if (isLive)
+                            {
+                                <div class="countdown-timer" id="countdownTimer" data-end-time="@Model.Auction.EndTime.ToString("o")">
+                                    <i class="bi bi-clock-fill me-2"></i>
+                                    <span id="timeRemaining">Calculating...</span>
+                                </div>
+                            }
+                            else if (Model.Auction.Status == AuctionStatus.Scheduled)
+                            {
+                                <div class="scheduled-time">
+                                    <i class="bi bi-calendar-event me-2"></i>
+                                    Starts: @Model.Auction.StartTime.ToString("MMM dd, yyyy HH:mm")
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Current Price -->
+                        <div class="current-price-card">
+                            <div class="price-label">Current Bid</div>
+                            <div class="price-value" id="currentPrice">$@Model.Auction.CurrentPrice.ToString("N0")</div>
+                            <div class="price-info">
+                                <span>Starting: $@Model.Auction.StartPrice.ToString("N0")</span>
+                                <span>•</span>
+                                <span>Min Increment: $@Model.Auction.MinIncrement.ToString("N0")</span>
+                            </div>
+                        </div>
+
+                        <!-- User Hold Info -->
+                        @if (Model.Auction.UserCurrentHold.HasValue && Model.Auction.UserCurrentHold.Value > 0)
+                        {
+                            <div class="user-hold-card">
+                                <i class="bi bi-shield-check me-2"></i>
+                                <div>
+                                    <div class="hold-label">Your Deposit Held</div>
+                                    <div class="hold-value">$@Model.Auction.UserCurrentHold.Value.ToString("N0")</div>
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Bid Form -->
+                        @if (isLive && canBid)
+                        {
+                            <form method="post" asp-page-handler="PlaceBid" asp-route-id="@Model.Auction.Id" class="bid-form">
+                                @Html.AntiForgeryToken()
+                                <div class="form-group">
+                                    <label for="bidAmount" class="form-label">Your Bid Amount ($)</label>
+                                    <input type="number" 
+                                           class="form-control bid-input" 
+                                           id="bidAmount" 
+                                           name="bidAmount" 
+                                           min="@(Model.Auction.CurrentPrice + Model.Auction.MinIncrement)" 
+                                           step="@Model.Auction.MinIncrement"
+                                           placeholder="Enter bid amount"
+                                           required>
+                                    <div class="form-text">
+                                        Minimum bid: $@((Model.Auction.CurrentPrice + Model.Auction.MinIncrement).ToString("N0"))
+                                    </div>
+                                    <div class="form-text deposit-info">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        Deposit rate: @((Model.Auction.DepositRate * 100).ToString("0"))%
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn-place-bid">
+                                    <i class="bi bi-hammer me-2"></i>
+                                    Place Bid
+                                </button>
+                            </form>
+                        }
+                        else if (isLive && !canBid)
+                        {
+                            <div class="cannot-bid-message">
+                                <i class="bi bi-exclamation-circle me-2"></i>
+                                <div>
+                                    <strong>Cannot Bid</strong>
+                                    <p>Insufficient wallet balance or you're not eligible to bid.</p>
+                                </div>
+                            </div>
+                        }
+                        else if (Model.Auction.Status == AuctionStatus.Ended)
+                        {
+                            @if (Model.Auction.WinnerId.HasValue)
+                            {
+                                <div class="winner-card">
+                                    <i class="bi bi-trophy-fill me-2"></i>
+                                    <div>
+                                        <div class="winner-label">Winner</div>
+                                        <div class="winner-name">@Model.Auction.WinnerName</div>
+                                        <div class="winner-price">Winning Bid: $@Model.Auction.CurrentPrice.ToString("N0")</div>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="no-winner-card">
+                                    <i class="bi bi-x-circle me-2"></i>
+                                    <div>No bids were placed</div>
+                                </div>
+                            }
+                        }
+
+                        <!-- Auction Stats -->
+                        <div class="auction-stats">
+                            <div class="stat-item">
+                                <i class="bi bi-hammer"></i>
+                                <div>
+                                    <div class="stat-value" id="totalBids">@Model.Auction.TotalBids</div>
+                                    <div class="stat-label">Total Bids</div>
+                                </div>
+                            </div>
+                            <div class="stat-item">
+                                <i class="bi bi-person-circle"></i>
+                                <div>
+                                    <div class="stat-value">@Model.Auction.CreatorName</div>
+                                    <div class="stat-label">Auctioneer</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bid History -->
+                        <div class="bid-history-card">
+                            <h4 class="history-title">
+                                <i class="bi bi-clock-history me-2"></i>
+                                Bid History
+                            </h4>
+                            <div class="bid-history-list" id="bidHistoryList">
+                                @if (Model.Auction.Bids != null && Model.Auction.Bids.Any())
+                                {
+                                    @foreach (var bid in Model.Auction.Bids.Take(10))
+                                    {
+                                        <div class="bid-history-item">
+                                            <div class="bid-info">
+                                                <span class="bidder-name">@bid.BidderName</span>
+                                                <span class="bid-time">@bid.CreatedAt.ToString("HH:mm:ss")</span>
+                                            </div>
+                                            <div class="bid-amount">$@bid.Amount.ToString("N0")</div>
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <div class="no-bids-message">
+                                        <i class="bi bi-inbox"></i>
+                                        <p>No bids yet. Be the first!</p>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <p class="text-muted">Auction not found.</p>
+                <a asp-page="/AuctionPages/Index" class="btn btn-primary">Back to Auctions</a>
+            </div>
+        }
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/auction-details.css" />
+}
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.0/signalr.min.js"></script>
+    <script>
+        const auctionId = '@Model.Auction?.Id';
+        const isLive = @(isLive ? "true" : "false");
+
+        // SignalR Connection
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/auctionHub")
+            .withAutomaticReconnect()
+            .build();
+
+        // Start connection
+        connection.start()
+            .then(() => {
+                console.log("SignalR Connected");
+                if (isLive) {
+                    connection.invoke("JoinAuction", auctionId)
+                        .catch(err => console.error("Error joining auction:", err));
+                }
+            })
+            .catch(err => console.error("SignalR Connection Error:", err));
+
+        // Receive new bid
+        connection.on("ReceiveBid", (data) => {
+            console.log("New bid received:", data);
+
+            // Update current price
+            document.getElementById('currentPrice').textContent = `$${parseFloat(data.amount).toLocaleString()}`;
+
+            // Update total bids
+            const totalBidsEl = document.getElementById('totalBids');
+            totalBidsEl.textContent = parseInt(totalBidsEl.textContent) + 1;
+
+            // Add to bid history (prepend)
+            const bidHistoryList = document.getElementById('bidHistoryList');
+            const noBidsMessage = bidHistoryList.querySelector('.no-bids-message');
+            if (noBidsMessage) {
+                noBidsMessage.remove();
+            }
+
+            const bidItem = document.createElement('div');
+            bidItem.className = 'bid-history-item bid-new-animation';
+            bidItem.innerHTML = `
+                <div class="bid-info">
+                    <span class="bidder-name">${data.bidderName}</span>
+                    <span class="bid-time">${data.timestamp}</span>
+                </div>
+                <div class="bid-amount">$${parseFloat(data.amount).toLocaleString()}</div>
+            `;
+            bidHistoryList.insertBefore(bidItem, bidHistoryList.firstChild);
+
+            // Limit to 10 bids
+            while (bidHistoryList.children.length > 10) {
+                bidHistoryList.removeChild(bidHistoryList.lastChild);
+            }
+
+            // Flash animation
+            setTimeout(() => {
+                bidItem.classList.remove('bid-new-animation');
+            }, 2000);
+        });
+
+        // Countdown Timer
+        @if (isLive)
+        {
+            <text>
+            const endTime = new Date('@Model.Auction.EndTime.ToString("o")').getTime();
+
+            function updateCountdown() {
+                const now = new Date().getTime();
+                const distance = endTime - now;
+
+                if (distance < 0) {
+                    document.getElementById('timeRemaining').textContent = 'Auction Ended';
+                    document.getElementById('countdownTimer').classList.add('countdown-expired');
+                    clearInterval(countdownInterval);
+                    // Optionally reload page
+                    setTimeout(() => location.reload(), 2000);
+                    return;
+                }
+
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                let timeString = '';
+                if (days > 0) timeString += `${days}d `;
+                if (hours > 0 || days > 0) timeString += `${hours}h `;
+                if (minutes > 0 || hours > 0 || days > 0) timeString += `${minutes}m `;
+                timeString += `${seconds}s`;
+
+                document.getElementById('timeRemaining').textContent = timeString;
+            }
+
+            updateCountdown();
+            const countdownInterval = setInterval(updateCountdown, 1000);
+            </text>
+        }
+
+        // Auto-hide alerts
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                alert.style.opacity = '0';
+                alert.style.transition = 'opacity 0.3s';
+                setTimeout(() => alert.remove(), 300);
+            });
+        }, 5000);
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (isLive) {
+                connection.invoke("LeaveAuction", auctionId);
+            }
+            connection.stop();
+        });
+    </script>
+}
