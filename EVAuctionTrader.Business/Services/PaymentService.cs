@@ -1,8 +1,10 @@
 using EVAuctionTrader.Business.Interfaces;
+using EVAuctionTrader.Business.Utils;
 using EVAuctionTrader.BusinessObject.DTOs.PaymentDTOs;
 using EVAuctionTrader.BusinessObject.Enums;
 using EVAuctionTrader.DataAccess.Entities;
 using EVAuctionTrader.DataAccess.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Stripe.Checkout;
@@ -113,7 +115,9 @@ public sealed class PaymentService : IPaymentService
             {
                 Id = payment.Id,
                 UserId = payment.UserId,
+                UserName = user.FullName,
                 Amount = payment.Amount,
+                Status = payment.Status,
                 PaymentDate = payment.PaymentDate,
                 CheckoutSessionId = session.Id,
                 CheckoutUrl = session.Url
@@ -243,12 +247,25 @@ public sealed class PaymentService : IPaymentService
             wallet.Balance = newBalance;
             await _unitOfWork.Wallets.Update(wallet);
 
+            // Create wallet transaction for top-up
+            var walletTransaction = new WalletTransaction
+            {
+                WalletId = wallet.Id,
+                Type = WalletTransactionType.Topup,
+                Amount = payment.Amount,
+                BalanceAfter = newBalance,
+                Status = WalletTransactionStatus.Succeeded,
+                PaymentId = payment.Id
+            };
+
+            await _unitOfWork.WalletTransactions.AddAsync(walletTransaction);
+
             // Save all changes in a single transaction
             await _unitOfWork.SaveChangesAsync();
 
             _logger.LogInformation(
-                "Payment {PaymentId} completed successfully. User {UserId} wallet credited with ${Amount}. Balance: ${PreviousBalance} -> ${NewBalance}",
-                payment.Id, payment.UserId, payment.Amount, previousBalance, newBalance);
+                "Payment {PaymentId} completed successfully. User {UserId} wallet credited with ${Amount}. Balance: ${PreviousBalance} -> ${NewBalance}. Transaction ID: {TransactionId}",
+                payment.Id, payment.UserId, payment.Amount, previousBalance, newBalance, walletTransaction.Id);
 
             return true;
         }
@@ -257,5 +274,58 @@ public sealed class PaymentService : IPaymentService
             _logger.LogError(ex, "Error completing payment {PaymentId}. Payment status may need manual verification.", payment.Id);
             throw;
         }
+    }
+
+    public async Task<Pagination<PaymentResponseDto>> GetPaymentsAsync(int pageNumber = 1,
+            int pageSize = 10)
+    {
+        var userId = _claimsService.GetCurrentUserId;
+        var user = await _unitOfWork.Users.GetByIdAsync(userId);
+        if (user == null)
+        {
+            _logger.LogWarning("User {UserId} not found", userId);
+            throw new InvalidOperationException("User not found.");
+        }
+
+        var paymentsQuery = _unitOfWork.Payments.GetQueryable().Include(p => p.User).AsQueryable();
+
+        if (user.Role == RoleType.Admin)
+        {
+            _logger.LogInformation("Admin user {UserId} retrieving all payments", userId);
+            paymentsQuery = paymentsQuery.OrderByDescending(p => p.PaymentDate);
+        }
+        else
+        {
+            _logger.LogInformation("User {UserId} retrieving their payments", userId);
+            paymentsQuery = paymentsQuery.Where(p => p.UserId == userId)
+                .OrderByDescending(p => p.PaymentDate);
+        }
+
+        var count = await paymentsQuery.CountAsync();
+
+        var payments = await paymentsQuery
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        var paymentDtos = payments.Select(p => new PaymentResponseDto
+        {
+            Id = p.Id,
+            UserId = p.UserId,
+            UserName = p.User.FullName,
+            Amount = p.Amount,
+            Status = p.Status,
+            PaymentDate = p.PaymentDate,
+            CheckoutSessionId = p.CheckoutSessionId,
+            PaymentIntentId = p.PaymentIntentId
+        }).ToList();
+
+        return new Pagination<PaymentResponseDto>
+        (
+            paymentDtos,
+            count,
+            pageNumber,
+            pageSize
+        );
     }
 }

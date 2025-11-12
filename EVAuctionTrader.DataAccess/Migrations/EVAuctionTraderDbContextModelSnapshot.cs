@@ -268,6 +268,49 @@ namespace EVAuctionTrader.DataAccess.Migrations
                     b.ToTable("Conversations");
                 });
 
+            modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Fee", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Fees");
+                });
+
             modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Message", b =>
                 {
                     b.Property<Guid>("Id")
@@ -684,6 +727,9 @@ namespace EVAuctionTrader.DataAccess.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
+                    b.Property<Guid?>("PaymentId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid?>("PostId")
                         .HasColumnType("uuid");
 
@@ -707,6 +753,8 @@ namespace EVAuctionTrader.DataAccess.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AuctionId");
+
+                    b.HasIndex("PaymentId");
 
                     b.HasIndex("PostId");
 
@@ -902,6 +950,10 @@ namespace EVAuctionTrader.DataAccess.Migrations
                         .HasForeignKey("AuctionId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("EVAuctionTrader.DataAccess.Entities.Payment", "Payment")
+                        .WithMany()
+                        .HasForeignKey("PaymentId");
+
                     b.HasOne("EVAuctionTrader.DataAccess.Entities.Post", "Post")
                         .WithMany()
                         .HasForeignKey("PostId")
@@ -914,6 +966,8 @@ namespace EVAuctionTrader.DataAccess.Migrations
                         .IsRequired();
 
                     b.Navigation("Auction");
+
+                    b.Navigation("Payment");
 
                     b.Navigation("Post");
 

@@ -10,12 +10,12 @@ namespace EVAuctionTrader.Presentation.Pages.Wallet;
 public sealed class IndexModel : PageModel
 {
     private readonly IUserService _userService;
- private readonly ILogger<IndexModel> _logger;
+    private readonly ILogger<IndexModel> _logger;
 
     public IndexModel(IUserService userService, ILogger<IndexModel> logger)
-  {
+    {
         _userService = userService;
-  _logger = logger;
+        _logger = logger;
     }
 
     public WalletResponseDto? Wallet { get; set; }
@@ -25,22 +25,22 @@ public sealed class IndexModel : PageModel
     {
         try
         {
-  Wallet = await _userService.GetMyWalletAsync();
-   Balance = await _userService.GetMyBalanceAsync();
+            Wallet = await _userService.GetMyWalletAsync();
+            Balance = await _userService.GetMyBalanceAsync();
 
-  if (Wallet == null)
+            if (Wallet == null)
             {
- _logger.LogWarning("Wallet not found for current user");
-      TempData["ErrorMessage"] = "Wallet not found. Please contact support.";
-}
+                _logger.LogWarning("Wallet not found for current user");
+                TempData["ErrorMessage"] = "Wallet not found. Please contact support.";
+            }
 
-      return Page();
-  }
+            return Page();
+        }
         catch (Exception ex)
         {
-     _logger.LogError(ex, "Error loading wallet");
-       TempData["ErrorMessage"] = "An error occurred while loading your wallet.";
-         return Page();
+            _logger.LogError(ex, "Error loading wallet");
+            TempData["ErrorMessage"] = "An error occurred while loading your wallet.";
+            return Page();
         }
     }
 }
