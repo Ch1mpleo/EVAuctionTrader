@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Stripe.net" Version="49.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\EVAuctionTrader.BusinessObject\EVAuctionTrader.BusinessObject.csproj" />
     <ProjectReference Include="..\EVAuctionTrader.DataAccess\EVAuctionTrader.DataAccess.csproj" />
   </ItemGroup>

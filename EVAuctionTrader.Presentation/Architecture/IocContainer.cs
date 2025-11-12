@@ -1,4 +1,5 @@
-﻿using EVAuctionTrader.Business.Interfaces;
+﻿using EVAuctionTrader.Business.BackgroundServices;
+using EVAuctionTrader.Business.Interfaces;
 using EVAuctionTrader.Business.Services;
 using EVAuctionTrader.DataAccess;
 using EVAuctionTrader.DataAccess.Commons;
@@ -23,6 +24,10 @@ namespace EVAuctionTrader.Presentation.Architecture
 
             //Add business services
             services.SetupBusinessServicesLayer();
+
+            //Add background services
+            services.AddHostedService<PostStatusUpdaterService>();
+            services.AddHostedService<PaymentCleanupService>();
 
             services.SetupJwt();
             return services;
@@ -58,6 +63,7 @@ namespace EVAuctionTrader.Presentation.Architecture
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IPostService, PostService>();
+            services.AddScoped<IPaymentService, PaymentService>();
             services.AddHttpContextAccessor();
 
             return services;

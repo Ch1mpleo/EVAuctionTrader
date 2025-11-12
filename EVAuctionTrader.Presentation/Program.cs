@@ -1,7 +1,7 @@
 using EVAuctionTrader.DataAccess;
 using EVAuctionTrader.Presentation.Architecture;
+using EVAuctionTrader.Presentation.Configuration;
 using EVAuctionTrader.Presentation.Helper;
-using EVDealerSales.Presentation.Configuration;
 using Microsoft.AspNetCore.DataProtection;
 using Stripe;
 using System.IdentityModel.Tokens.Jwt;
@@ -10,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.SetupIocContainer();
 builder.Configuration
-    .AddJsonFile("appsettings.json", true, true)
+  .AddJsonFile("appsettings.json", true, true)
     .AddEnvironmentVariables();
 
 // Configure Stripe settings
@@ -66,8 +66,8 @@ builder.Services.AddDistributedMemoryCache();
 // mounted into the container (e.g. host ./data/keys -> container /keys).
 // The path can be overridden via configuration: DataProtection:KeyPath or env DATA_PROTECTION_KEY_PATH.
 var dataProtectionPath = builder.Configuration["DataProtection:KeyPath"]
-                        ?? Environment.GetEnvironmentVariable("DATA_PROTECTION_KEY_PATH")
-                        ?? "/keys";
+ ?? Environment.GetEnvironmentVariable("DATA_PROTECTION_KEY_PATH")
+        ?? "/keys";
 
 try
 {
@@ -77,7 +77,7 @@ try
     }
 
     builder.Services.AddDataProtection()
-        .PersistKeysToFileSystem(new DirectoryInfo(dataProtectionPath))
+     .PersistKeysToFileSystem(new DirectoryInfo(dataProtectionPath))
         .SetApplicationName("EVAuctionTrader");
 }
 catch (Exception ex)
