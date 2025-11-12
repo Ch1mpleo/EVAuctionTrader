@@ -1,0 +1,214 @@
+@page
+@model EVAuctionTrader.Presentation.Pages.Wallet.RechargeModel
+@{
+    ViewData["Title"] = "Recharge Wallet";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/profile.css" />
+}
+
+<div class="staff-page-clean">
+    <div class="container">
+        <!-- Header -->
+     <div class="staff-header-clean">
+   <h1 class="staff-title-clean">
+  <i class="bi bi-credit-card"></i>
+            Recharge Wallet
+      </h1>
+    <p class="staff-subtitle-clean">Add funds to your wallet using Stripe</p>
+ </div>
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+ <i class="bi bi-exclamation-triangle-fill"></i>
+     @TempData["ErrorMessage"]
+       <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+    }
+
+  <div class="row">
+     <!-- Recharge Form -->
+<div class="col-lg-7">
+        <div class="staff-card-clean">
+        <div class="staff-card-header-clean">
+   <h3 class="staff-card-title-clean">
+        <i class="bi bi-wallet2"></i>
+         Recharge Amount
+    </h3>
+   </div>
+    <div class="staff-card-body-clean">
+      <form method="post">
+    @Html.AntiForgeryToken()
+
+     <!-- Quick Amount Buttons -->
+    <div style="margin-bottom: 2rem;">
+           <label class="filter-label-clean" style="margin-bottom: 1rem;">
+  <i class="bi bi-lightning-charge"></i>
+Quick Select
+       </label>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem;">
+       <button type="button" class="btn-clean btn-secondary-clean" onclick="setAmount(10)">
+      $10
+   </button>
+<button type="button" class="btn-clean btn-secondary-clean" onclick="setAmount(50)">
+      $50
+     </button>
+       <button type="button" class="btn-clean btn-secondary-clean" onclick="setAmount(100)">
+   $100
+  </button>
+     <button type="button" class="btn-clean btn-secondary-clean" onclick="setAmount(250)">
+$250
+        </button>
+        <button type="button" class="btn-clean btn-secondary-clean" onclick="setAmount(500)">
+   $500
+    </button>
+<button type="button" class="btn-clean btn-secondary-clean" onclick="setAmount(1000)">
+    $1,000
+      </button>
+       </div>
+   </div>
+
+    <!-- Custom Amount Input -->
+        <div class="filter-group-clean" style="margin-bottom: 2rem;">
+      <label class="filter-label-clean" asp-for="Amount">
+<i class="bi bi-currency-dollar"></i>
+            Custom Amount (USD)
+         </label>
+<input type="number" 
+                 class="filter-input-clean" 
+           asp-for="Amount" 
+         step="0.01" 
+          min="1" 
+       max="10000" 
+              placeholder="Enter amount"
+       id="amountInput"
+       style="font-size: 1.5rem; font-weight: 600; text-align: center; color: #0070f3;" />
+          <span asp-validation-for="Amount" class="text-danger"></span>
+     <small style="color: #888; margin-top: 0.5rem; display: block;">
+  Minimum: $1.00 | Maximum: $10,000.00
+          </small>
+         </div>
+
+     <!-- Preview -->
+             <div class="info-card-clean" style="margin-bottom: 2rem; background: rgba(0, 112, 243, 0.05); border-color: rgba(0, 112, 243, 0.2);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+         <span style="color: #888;">Current Balance:</span>
+     <span style="color: #fff; font-weight: 600;">$@Model.CurrentBalance.ToString("N2")</span>
+         </div>
+           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+       <span style="color: #888;">Recharge Amount:</span>
+      <span style="color: #0070f3; font-weight: 600;" id="rechargeAmountDisplay">$@Model.Amount.ToString("N2")</span>
+          </div>
+          <div style="border-top: 1px solid rgba(0, 112, 243, 0.2); padding-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
+   <span style="color: #fff; font-weight: 600;">New Balance:</span>
+<span style="color: #22c55e; font-size: 1.5rem; font-weight: 700;" id="newBalanceDisplay">
+    $@((Model.CurrentBalance + Model.Amount).ToString("N2"))
+      </span>
+       </div>
+  </div>
+
+ <!-- Submit Button -->
+     <button type="submit" class="btn-clean btn-primary-clean" style="width: 100%; padding: 1rem; font-size: 1.125rem;">
+       <i class="bi bi-lock-fill"></i>
+    Proceed to Payment
+      </button>
+
+       <p style="text-align: center; color: #888; font-size: 0.875rem; margin-top: 1rem; margin-bottom: 0;">
+  <i class="bi bi-shield-check"></i>
+       Secured by Stripe Payment Gateway
+         </p>
+  </form>
+     </div>
+      </div>
+    </div>
+
+      <!-- Sidebar Info -->
+       <div class="col-lg-5">
+       <!-- Payment Info -->
+         <div class="staff-card-clean">
+ <div class="staff-card-header-clean">
+     <h3 class="staff-card-title-clean">
+     <i class="bi bi-info-circle"></i>
+ Payment Information
+ </h3>
+          </div>
+   <div class="staff-card-body-clean">
+        <div class="info-card-clean">
+        <div class="info-item-clean">
+          <div class="info-label-clean">
+        <i class="bi bi-shield-check"></i>
+    Secure Payment
+       </div>
+      <div class="info-value-clean">
+      All transactions are encrypted and secure using Stripe's industry-leading security.
+         </div>
+     </div>
+      <div class="info-item-clean">
+     <div class="info-label-clean">
+       <i class="bi bi-credit-card"></i>
+      Accepted Payment Methods
+    </div>
+    <div class="info-value-clean">
+   Credit Cards (Visa, Mastercard, American Express)
+         </div>
+    </div>
+<div class="info-item-clean">
+        <div class="info-label-clean">
+    <i class="bi bi-clock"></i>
+    Instant Processing
+   </div>
+        <div class="info-value-clean">
+    Funds are added to your wallet immediately after successful payment.
+       </div>
+         </div>
+     </div>
+       </div>
+    </div>
+
+       <!-- Security Notice -->
+         <div class="staff-card-clean">
+        <div class="staff-card-header-clean">
+  <h3 class="staff-card-title-clean">
+    <i class="bi bi-shield-fill-check"></i>
+      Security Notice
+    </h3>
+        </div>
+     <div class="staff-card-body-clean">
+        <ul style="color: #888; line-height: 1.8; margin: 0; padding-left: 1.25rem;">
+<li>Your card details are never stored on our servers</li>
+        <li>All payments are processed securely by Stripe</li>
+      <li>You will be redirected to Stripe's secure checkout</li>
+     <li>Transaction history is available in your wallet</li>
+     </ul>
+        </div>
+     </div>
+        </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        const currentBalance = @Model.CurrentBalance;
+      const amountInput = document.getElementById('amountInput');
+     const rechargeAmountDisplay = document.getElementById('rechargeAmountDisplay');
+const newBalanceDisplay = document.getElementById('newBalanceDisplay');
+
+   function setAmount(amount) {
+         amountInput.value = amount;
+            updatePreview();
+ }
+
+        function updatePreview() {
+        const amount = parseFloat(amountInput.value) || 0;
+       const newBalance = currentBalance + amount;
+      rechargeAmountDisplay.textContent = '$' + amount.toFixed(2);
+     newBalanceDisplay.textContent = '$' + newBalance.toFixed(2);
+ }
+
+        amountInput.addEventListener('input', updatePreview);
+    </script>
+}

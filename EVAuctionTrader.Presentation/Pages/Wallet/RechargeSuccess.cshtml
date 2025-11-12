@@ -1,0 +1,185 @@
+@page
+@model EVAuctionTrader.Presentation.Pages.Wallet.RechargeSuccessModel
+@{
+    ViewData["Title"] = "Payment Successful";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/profile.css" />
+}
+
+<div class="staff-page-clean">
+    <div class="container">
+ <div class="row justify-content-center">
+          <div class="col-lg-8">
+            @if (Model.PaymentConfirmed)
+          {
+      <!-- Success State -->
+   <div class="staff-card-clean" style="text-align: center; padding: 3rem 2rem;">
+      <div style="width: 100px; height: 100px; margin: 0 auto 2rem; background: rgba(34, 197, 94, 0.15); border: 3px solid #22c55e; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+<i class="bi bi-check-circle-fill" style="font-size: 3rem; color: #22c55e;"></i>
+    </div>
+
+     <h1 style="color: #fff; font-size: 2rem; font-weight: 700; margin-bottom: 1rem;">
+      Payment Successful!
+     </h1>
+
+        <p style="color: #888; font-size: 1.125rem; margin-bottom: 2rem;">
+      Your wallet has been recharged successfully. The funds are now available in your account.
+     </p>
+
+  <div class="info-card-clean" style="margin-bottom: 2rem; text-align: left;">
+  <div class="info-item-clean">
+        <div class="info-label-clean">
+ <i class="bi bi-key"></i>
+    Payment ID
+      </div>
+    <div class="info-value-clean">
+        @Model.PaymentId
+          </div>
+        </div>
+    <div class="info-item-clean">
+       <div class="info-label-clean">
+          <i class="bi bi-stripe"></i>
+     Stripe Session ID
+        </div>
+       <div class="info-value-clean" style="word-break: break-all; font-size: 0.875rem;">
+       @Model.SessionId
+     </div>
+  </div>
+     </div>
+
+    <div class="action-group-clean" style="justify-content: center;">
+      <a asp-page="/Wallet/Index" class="btn-clean btn-primary-clean">
+<i class="bi bi-wallet2"></i>
+        View Wallet
+  </a>
+      <a asp-page="/PostPages/Index" class="btn-clean btn-secondary-clean">
+ <i class="bi bi-house"></i>
+        Go to Home
+    </a>
+</div>
+    </div>
+   }
+   else
+   {
+          <!-- Failed State -->
+    <div class="staff-card-clean" style="text-align: center; padding: 3rem 2rem;">
+      <div style="width: 100px; height: 100px; margin: 0 auto 2rem; background: rgba(239, 68, 68, 0.15); border: 3px solid #ef4444; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+        <i class="bi bi-x-circle-fill" style="font-size: 3rem; color: #ef4444;"></i>
+   </div>
+
+        <h1 style="color: #fff; font-size: 2rem; font-weight: 700; margin-bottom: 1rem;">
+ Payment Confirmation Failed
+     </h1>
+
+       <p style="color: #888; font-size: 1.125rem; margin-bottom: 2rem;">
+ We couldn't confirm your payment at this time. If funds were deducted from your account, please contact support.
+         </p>
+
+       <div class="info-card-clean" style="margin-bottom: 2rem; text-align: left; background: rgba(239, 68, 68, 0.05); border-color: rgba(239, 68, 68, 0.2);">
+       <div class="info-item-clean">
+    <div class="info-label-clean">
+       <i class="bi bi-key"></i>
+    Payment ID
+     </div>
+        <div class="info-value-clean">
+     @Model.PaymentId
+      </div>
+ </div>
+       <div class="info-item-clean">
+        <div class="info-label-clean">
+      <i class="bi bi-stripe"></i>
+      Stripe Session ID
+     </div>
+    <div class="info-value-clean" style="word-break: break-all; font-size: 0.875rem;">
+ @Model.SessionId
+    </div>
+        </div>
+   </div>
+
+      <div class="action-group-clean" style="justify-content: center;">
+   <a asp-page="/Wallet/Recharge" class="btn-clean btn-primary-clean">
+    <i class="bi bi-arrow-clockwise"></i>
+Try Again
+   </a>
+         <a asp-page="/Wallet/Index" class="btn-clean btn-secondary-clean">
+       <i class="bi bi-wallet2"></i>
+Back to Wallet
+      </a>
+     </div>
+  </div>
+   }
+
+        <!-- What's Next -->
+    <div class="staff-card-clean">
+       <div class="staff-card-header-clean">
+       <h3 class="staff-card-title-clean">
+    <i class="bi bi-question-circle"></i>
+    What's Next?
+   </h3>
+    </div>
+  <div class="staff-card-body-clean">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+   <div style="text-align: center;">
+     <div style="font-size: 2rem; color: #0070f3; margin-bottom: 0.75rem;">
+     <i class="bi bi-cart-check"></i>
+    </div>
+ <h5 style="color: #fff; margin-bottom: 0.5rem;">Browse Posts</h5>
+ <p style="color: #888; font-size: 0.875rem; margin-bottom: 1rem;">
+     Explore available vehicles and batteries
+    </p>
+      <a asp-page="/PostPages/Index" class="btn-clean btn-action-clean">
+<i class="bi bi-arrow-right"></i>
+        Browse Now
+     </a>
+   </div>
+       <div style="text-align: center;">
+        <div style="font-size: 2rem; color: #22c55e; margin-bottom: 0.75rem;">
+       <i class="bi bi-list-check"></i>
+  </div>
+    <h5 style="color: #fff; margin-bottom: 0.5rem;">Transaction History</h5>
+       <p style="color: #888; font-size: 0.875rem; margin-bottom: 1rem;">
+ View all your wallet transactions
+   </p>
+     <a asp-page="/Wallet/Transactions" class="btn-clean btn-action-clean">
+      <i class="bi bi-arrow-right"></i>
+        View History
+  </a>
+  </div>
+         <div style="text-align: center;">
+     <div style="font-size: 2rem; color: #f59e0b; margin-bottom: 0.75rem;">
+ <i class="bi bi-person"></i>
+     </div>
+    <h5 style="color: #fff; margin-bottom: 0.5rem;">My Profile</h5>
+       <p style="color: #888; font-size: 0.875rem; margin-bottom: 1rem;">
+   Manage your account settings
+         </p>
+     <a asp-page="/Profile/Index" class="btn-clean btn-action-clean">
+    <i class="bi bi-arrow-right"></i>
+      Go to Profile
+         </a>
+  </div>
+        </div>
+   </div>
+  </div>
+      </div>
+   </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Confetti effect for successful payment
+        @if (Model.PaymentConfirmed)
+ {
+<text>
+ // Simple celebration animation
+    const icon = document.querySelector('.bi-check-circle-fill');
+    if (icon) {
+           icon.style.animation = 'pulse 0.5s ease-in-out 3';
+            }
+      </text>
+}
+    </script>
+}

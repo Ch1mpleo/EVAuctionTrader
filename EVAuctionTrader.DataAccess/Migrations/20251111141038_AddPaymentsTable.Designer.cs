@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using EVAuctionTrader.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EVAuctionTrader.DataAccess.Migrations
 {
     [DbContext(typeof(EVAuctionTraderDbContext))]
-    partial class EVAuctionTraderDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251111141038_AddPaymentsTable")]
+    partial class AddPaymentsTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -42,17 +45,11 @@ namespace EVAuctionTrader.DataAccess.Migrations
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<decimal>("CurrentPrice")
-                        .HasColumnType("numeric");
-
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uuid");
-
-                    b.Property<decimal>("DepositRate")
-                        .HasColumnType("numeric");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -94,9 +91,6 @@ namespace EVAuctionTrader.DataAccess.Migrations
                     b.Property<Guid?>("VehicleId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("WinnerId")
-                        .HasColumnType("uuid");
-
                     b.HasKey("Id");
 
                     b.HasIndex("BatteryId");
@@ -104,8 +98,6 @@ namespace EVAuctionTrader.DataAccess.Migrations
                     b.HasIndex("CreatedBy");
 
                     b.HasIndex("VehicleId");
-
-                    b.HasIndex("WinnerId");
 
                     b.ToTable("Auctions");
                 });
@@ -731,17 +723,11 @@ namespace EVAuctionTrader.DataAccess.Migrations
                         .WithMany()
                         .HasForeignKey("VehicleId");
 
-                    b.HasOne("EVAuctionTrader.DataAccess.Entities.User", "Winner")
-                        .WithMany()
-                        .HasForeignKey("WinnerId");
-
                     b.Navigation("Battery");
 
                     b.Navigation("Creator");
 
                     b.Navigation("Vehicle");
-
-                    b.Navigation("Winner");
                 });
 
             modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Battery", b =>
