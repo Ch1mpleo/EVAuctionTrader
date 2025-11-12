@@ -110,11 +110,15 @@ namespace EVAuctionTrader.Business.Services
                 var unreadCount = conversation.Messages
                    .Count(m => !m.IsDeleted && m.SenderId != currentUserId && m.ReadAt == null);
 
+                // ✅ Lấy hình ảnh đầu tiên của post
+                var postPhotoUrl = conversation.Post.PhotoUrls?.FirstOrDefault();
+
                 return new ConversationDto
                 {
                     Id = conversation.Id,
                     PostId = conversation.PostId,
                     PostTitle = conversation.Post.Title,
+                    PostPhotoUrl = postPhotoUrl, // ✅ Thêm photo URL
                     SellerId = conversation.SellerId,
                     SellerName = conversation.Seller.FullName,
                     BuyerId = conversation.BuyerId,
@@ -217,11 +221,15 @@ namespace EVAuctionTrader.Business.Services
                     var unreadCount = conv.Messages
                         .Count(m => !m.IsDeleted && m.SenderId != currentUserId && m.ReadAt == null);
 
+                    // ✅ Lấy hình ảnh đầu tiên của post
+                    var postPhotoUrl = conv.Post.PhotoUrls?.FirstOrDefault();
+
                     conversationDtos.Add(new ConversationDto
                     {
                         Id = conv.Id,
                         PostId = conv.PostId,
                         PostTitle = conv.Post.Title,
+                        PostPhotoUrl = postPhotoUrl, // ✅ Thêm photo URL
                         SellerId = conv.SellerId,
                         SellerName = conv.Seller.FullName,
                         BuyerId = conv.BuyerId,

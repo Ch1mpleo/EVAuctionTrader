@@ -5,6 +5,7 @@
         public Guid Id { get; set; }
         public Guid PostId { get; set; }
         public string PostTitle { get; set; } = string.Empty;
+        public string? PostPhotoUrl { get; set; } // ✅ Thêm hình ảnh sản phẩm
         public Guid SellerId { get; set; }
         public string SellerName { get; set; } = string.Empty;
         public Guid BuyerId { get; set; }

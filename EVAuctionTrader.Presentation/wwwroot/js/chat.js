@@ -182,8 +182,18 @@
         const otherUser = getCurrentUserId() === conversation.buyerId ? conversation.sellerName : conversation.buyerName;
 
         if (conversationHeaderInfo) {
-            conversationHeaderInfo.querySelector('h4').textContent = otherUser;
-            conversationHeaderInfo.querySelector('p').textContent = conversation.postTitle;
+            // ✅ Hiển thị thông tin chi tiết với hình ảnh sản phẩm
+            const postImageHtml = conversation.postPhotoUrl 
+                ? `<img src="${escapeHtml(conversation.postPhotoUrl)}" alt="Product" class="post-image-header" onerror="this.style.display='none';">`
+                : '';
+
+            conversationHeaderInfo.innerHTML = `
+                <div class="header-user-info">
+                    <h4>${escapeHtml(otherUser)}</h4>
+                    <p><i class="bi bi-tag"></i> ${escapeHtml(conversation.postTitle)}</p>
+                </div>
+                ${postImageHtml}
+            `;
         }
 
         if (conversationsView && messagesContainer) {
@@ -318,10 +328,13 @@
             if (!isCurrentUserMessage) {
                 markAsRead(currentConversationId);
             }
-        } else if (message.senderId !== getCurrentUserId()) {
-            // Chỉ reload conversations nếu tin nhắn từ người khác
-            loadConversations();
         }
+        
+        // ✅ FIX NOTIFICATION: Luôn reload conversations khi có tin nhắn mới
+        // Điều này đảm bảo badge và danh sách được cập nhật ngay lập tức
+        loadConversations().then(() => {
+            updateUnreadCount();
+        });
     }
 
     function onConversationUpdated(conversation) {
