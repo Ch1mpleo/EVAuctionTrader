@@ -15,6 +15,8 @@ namespace EVAuctionTrader.DataAccess.Interfaces
         IGenericRepository<Bid> Bids { get; }
         IGenericRepository<Conversation> Conversations { get; }
         IGenericRepository<Message> Messages { get; }
+        IGenericRepository<Payment> Payments { get; }
+        IGenericRepository<Fee> Fees { get; }
         Task<int> SaveChangesAsync();
     }
 }

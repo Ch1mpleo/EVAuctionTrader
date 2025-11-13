@@ -8,27 +8,33 @@ namespace EVAuctionTrader.Presentation.Helper
 {
     public static class DbSeeder
     {
+        private static readonly Guid SystemUserId = Guid.Empty; // System user for seeding
+
         public static async Task SeedUsersAsync(EVAuctionTraderDbContext context)
         {
-            await context.Database.MigrateAsync();
-
             if (!await context.Users.AnyAsync(u => u.Role == RoleType.Admin))
             {
                 var passwordHasher = new PasswordHasher();
                 var admin = new User
                 {
+                    Id = Guid.NewGuid(),
                     FullName = "Admin User",
                     Email = "admin@gmail.com",
                     Phone = "0786315267",
                     PasswordHash = passwordHasher.HashPassword("1@"),
                     Role = RoleType.Admin,
-                    Status = "Active"
+                    Status = "Active",
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedBy = SystemUserId
                 };
 
                 var wallet = new Wallet
                 {
+                    Id = Guid.NewGuid(),
                     User = admin,
-                    Balance = 0.0m
+                    Balance = 1000000m,
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedBy = SystemUserId
                 };
 
                 await context.Users.AddAsync(admin);
@@ -41,22 +47,27 @@ namespace EVAuctionTrader.Presentation.Helper
                 var customer = new List<User> {
                     new User
                     {
+                        Id = Guid.NewGuid(),
                         FullName = "Member 1",
                         Email = "customer1@gmail.com",
                         Phone = "0786315268",
                         PasswordHash = passwordHasher.HashPassword("1@"),
                         Role = RoleType.Member,
-                        Status = "Active"
+                        Status = "Active",
+                        CreatedAt = DateTime.UtcNow,
+                        CreatedBy = SystemUserId
                     },
-
                     new User
                     {
+                        Id = Guid.NewGuid(),
                         FullName = "Member 2",
                         Email = "customer2@gmail.com",
                         Phone = "0786315268",
                         PasswordHash = passwordHasher.HashPassword("1@"),
                         Role = RoleType.Member,
-                        Status = "Active"
+                        Status = "Active",
+                        CreatedAt = DateTime.UtcNow,
+                        CreatedBy = SystemUserId
                     }
                 };
                 await context.Users.AddRangeAsync(customer);
@@ -65,13 +76,19 @@ namespace EVAuctionTrader.Presentation.Helper
                 {
                     new Wallet
                     {
+                        Id = Guid.NewGuid(),
                         User = customer[0],
-                        Balance = 0.0m
+                        Balance = 50000m,
+                        CreatedAt = DateTime.UtcNow,
+                        CreatedBy = SystemUserId
                     },
                     new Wallet
                     {
+                        Id = Guid.NewGuid(),
                         User = customer[1],
-                        Balance = 0.0m
+                        Balance = 75000m,
+                        CreatedAt = DateTime.UtcNow,
+                        CreatedBy = SystemUserId
                     }
                 };
                 await context.Wallets.AddRangeAsync(wallets);
@@ -82,8 +99,6 @@ namespace EVAuctionTrader.Presentation.Helper
 
         public static async Task SeedPostsWithVehiclesAndBatteriesAsync(EVAuctionTraderDbContext context)
         {
-            await context.Database.MigrateAsync();
-
             if (!await context.Posts.AnyAsync())
             {
                 var members = await context.Users
@@ -730,6 +745,684 @@ namespace EVAuctionTrader.Presentation.Helper
                 };
 
                 await context.PostComments.AddRangeAsync(comments);
+                await context.SaveChangesAsync();
+            }
+        }
+
+        public static async Task SeedAuctionsAsync(EVAuctionTraderDbContext context)
+        {
+            if (!await context.Auctions.AnyAsync())
+            {
+                var admin = await context.Users.FirstOrDefaultAsync(u => u.Role == RoleType.Admin);
+                if (admin == null) return;
+
+                var member1 = await context.Users.FirstOrDefaultAsync(u => u.Email == "customer1@gmail.com");
+                var member2 = await context.Users.FirstOrDefaultAsync(u => u.Email == "customer2@gmail.com");
+
+                if (member1 == null || member2 == null) return;
+
+                // Auction 1 - Tesla Model S (Live)
+                var vehicle1 = new Vehicle
+                {
+                    OwnerId = admin.Id,
+                    Brand = "Tesla",
+                    Model = "Model S",
+                    Year = 2023,
+                    OdometerKm = 5000,
+                    ConditionGrade = "Excellent"
+                };
+                await context.Vehicles.AddAsync(vehicle1);
+                await context.SaveChangesAsync();
+
+                var auction1 = new Auction
+                {
+                    CreatedBy = admin.Id,
+                    AuctionType = AuctionType.Vehicle,
+                    VehicleId = vehicle1.Id,
+                    Title = "Tesla Model S 2023 - Premium Electric Sedan",
+                    Description = "Brand new Tesla Model S with only 5,000 km. Full self-driving capability, premium interior, and all the latest features. Don't miss this opportunity!",
+                    StartPrice = 60000m,
+                    MinIncrement = 500m,
+                    DepositRate = 0.20m,
+                    CurrentPrice = 61000m,
+                    StartTime = DateTime.UtcNow.AddHours(-2),
+                    EndTime = DateTime.UtcNow.AddHours(4),
+                    Status = AuctionStatus.Running,
+                    PhotoUrl = "https://images.unsplash.com/photo-1617788138017-80ad40651399?w=800"
+                };
+                await context.Auctions.AddAsync(auction1);
+                await context.SaveChangesAsync();
+
+                // Add bids to auction 1
+                var bidsAuction1 = new List<Bid>
+                {
+                    new Bid
+                    {
+                        AuctionId = auction1.Id,
+                        BidderId = member2.Id,
+                        Amount = 60500m,
+                        CreatedAt = DateTime.UtcNow.AddMinutes(-90)
+                    },
+                    new Bid
+                    {
+                        AuctionId = auction1.Id,
+                        BidderId = member1.Id,
+                        Amount = 61000m,
+                        CreatedAt = DateTime.UtcNow.AddMinutes(-60)
+                    }
+                };
+                await context.Bids.AddRangeAsync(bidsAuction1);
+                await context.SaveChangesAsync();
+
+                // Auction 2 - LG Chem Battery (Live)
+                var battery1 = new Battery
+                {
+                    OwnerId = admin.Id,
+                    Manufacturer = "LG Chem",
+                    Chemistry = "Lithium-ion NCM",
+                    CapacityKwh = 82.0m,
+                    CycleCount = 300,
+                    SohPercent = 95.0m,
+                    VoltageV = 400.0m,
+                    ConnectorType = "CCS2"
+                };
+                await context.Batteries.AddAsync(battery1);
+                await context.SaveChangesAsync();
+
+                var auction2 = new Auction
+                {
+                    CreatedBy = admin.Id,
+                    AuctionType = AuctionType.Battery,
+                    BatteryId = battery1.Id,
+                    Title = "LG Chem 82kWh Battery Pack - 95% SOH",
+                    Description = "High-capacity LG Chem battery with excellent health. Only 300 cycles, perfect for long-range EVs. Includes warranty and certification.",
+                    StartPrice = 8000m,
+                    MinIncrement = 200m,
+                    DepositRate = 0.20m,
+                    CurrentPrice = 8400m,
+                    StartTime = DateTime.UtcNow.AddHours(-1),
+                    EndTime = DateTime.UtcNow.AddHours(5),
+                    Status = AuctionStatus.Running,
+                    PhotoUrl = "https://images.unsplash.com/photo-1622062929134-a8fa99b46f56?w=800"
+                };
+                await context.Auctions.AddAsync(auction2);
+                await context.SaveChangesAsync();
+
+                // Add bids to auction 2
+                var bidsAuction2 = new List<Bid>
+                {
+                    new Bid
+                    {
+                        AuctionId = auction2.Id,
+                        BidderId = member1.Id,
+                        Amount = 8200m,
+                        CreatedAt = DateTime.UtcNow.AddMinutes(-45)
+                    },
+                    new Bid
+                    {
+                        AuctionId = auction2.Id,
+                        BidderId = member2.Id,
+                        Amount = 8400m,
+                        CreatedAt = DateTime.UtcNow.AddMinutes(-30)
+                    }
+                };
+                await context.Bids.AddRangeAsync(bidsAuction2);
+                await context.SaveChangesAsync();
+
+                // Auction 3 - Porsche Taycan (Scheduled)
+                var vehicle2 = new Vehicle
+                {
+                    OwnerId = admin.Id,
+                    Brand = "Porsche",
+                    Model = "Taycan",
+                    Year = 2024,
+                    OdometerKm = 1000,
+                    ConditionGrade = "Excellent"
+                };
+                await context.Vehicles.AddAsync(vehicle2);
+                await context.SaveChangesAsync();
+
+                var auction3 = new Auction
+                {
+                    CreatedBy = admin.Id,
+                    AuctionType = AuctionType.Vehicle,
+                    VehicleId = vehicle2.Id,
+                    Title = "Porsche Taycan 2024 - Luxury Performance EV",
+                    Description = "Nearly brand new Porsche Taycan with only 1,000 km. Stunning performance, luxurious interior, and cutting-edge technology. Auction starts tomorrow!",
+                    StartPrice = 95000m,
+                    MinIncrement = 1000m,
+                    DepositRate = 0.25m,
+                    CurrentPrice = 95000m,
+                    StartTime = DateTime.UtcNow.AddHours(6),
+                    EndTime = DateTime.UtcNow.AddHours(30),
+                    Status = AuctionStatus.Scheduled,
+                    PhotoUrl = "https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?w=800"
+                };
+                await context.Auctions.AddAsync(auction3);
+                await context.SaveChangesAsync();
+
+                // Auction 4 - BYD Battery (Scheduled)
+                var battery2 = new Battery
+                {
+                    OwnerId = admin.Id,
+                    Manufacturer = "BYD",
+                    Chemistry = "LFP (Lithium Iron Phosphate)",
+                    CapacityKwh = 100.0m,
+                    CycleCount = 100,
+                    SohPercent = 98.0m,
+                    VoltageV = 350.0m,
+                    ConnectorType = "CCS2"
+                };
+                await context.Batteries.AddAsync(battery2);
+                await context.SaveChangesAsync();
+
+                var auction4 = new Auction
+                {
+                    CreatedBy = admin.Id,
+                    AuctionType = AuctionType.Battery,
+                    BatteryId = battery2.Id,
+                    Title = "BYD LFP 100kWh Battery - Like New",
+                    Description = "Massive BYD LFP battery with 100kWh capacity. Only 100 cycles, 98% health. Perfect for commercial vehicles or premium EVs. Auction starts soon!",
+                    StartPrice = 12000m,
+                    MinIncrement = 500m,
+                    DepositRate = 0.20m,
+                    CurrentPrice = 12000m,
+                    StartTime = DateTime.UtcNow.AddHours(8),
+                    EndTime = DateTime.UtcNow.AddHours(32),
+                    Status = AuctionStatus.Scheduled,
+                    PhotoUrl = "https://images.unsplash.com/photo-1694889649703-e86125c14fe2?w=800"
+                };
+                await context.Auctions.AddAsync(auction4);
+                await context.SaveChangesAsync();
+
+                // Auction 5 - Mercedes EQS (Ended - with winner)
+                var vehicle3 = new Vehicle
+                {
+                    OwnerId = admin.Id,
+                    Brand = "Mercedes-Benz",
+                    Model = "EQS",
+                    Year = 2023,
+                    OdometerKm = 8000,
+                    ConditionGrade = "Very Good"
+                };
+                await context.Vehicles.AddAsync(vehicle3);
+                await context.SaveChangesAsync();
+
+                var auction5 = new Auction
+                {
+                    CreatedBy = admin.Id,
+                    AuctionType = AuctionType.Vehicle,
+                    VehicleId = vehicle3.Id,
+                    Title = "Mercedes-Benz EQS 2023 - Luxury Flagship",
+                    Description = "Mercedes EQS with 8,000 km. The pinnacle of electric luxury with advanced MBUX system and stunning range.",
+                    StartPrice = 80000m,
+                    MinIncrement = 1000m,
+                    DepositRate = 0.25m,
+                    CurrentPrice = 87000m,
+                    StartTime = DateTime.UtcNow.AddDays(-2),
+                    EndTime = DateTime.UtcNow.AddHours(-1),
+                    Status = AuctionStatus.Ended,
+                    WinnerId = member1.Id,
+                    PhotoUrl = "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=800"
+                };
+                await context.Auctions.AddAsync(auction5);
+                await context.SaveChangesAsync();
+
+                // Add bids to ended auction
+                var bidsAuction5 = new List<Bid>
+                {
+                    new Bid
+                    {
+                        AuctionId = auction5.Id,
+                        BidderId = member1.Id,
+                        Amount = 81000m,
+                        CreatedAt = DateTime.UtcNow.AddHours(-12)
+                    },
+                    new Bid
+                    {
+                        AuctionId = auction5.Id,
+                        BidderId = member2.Id,
+                        Amount = 83000m,
+                        CreatedAt = DateTime.UtcNow.AddHours(-10)
+                    },
+                    new Bid
+                    {
+                        AuctionId = auction5.Id,
+                        BidderId = member1.Id,
+                        Amount = 85000m,
+                        CreatedAt = DateTime.UtcNow.AddHours(-8)
+                    },
+                    new Bid
+                    {
+                        AuctionId = auction5.Id,
+                        BidderId = member2.Id,
+                        Amount = 86000m,
+                        CreatedAt = DateTime.UtcNow.AddHours(-6)
+                    },
+                    new Bid
+                    {
+                        AuctionId = auction5.Id,
+                        BidderId = member1.Id,
+                        Amount = 87000m,
+                        CreatedAt = DateTime.UtcNow.AddHours(-4)
+                    }
+                };
+                await context.Bids.AddRangeAsync(bidsAuction5);
+                await context.SaveChangesAsync();
+            }
+        }
+
+        public static async Task SeedFeesAsync(EVAuctionTraderDbContext context)
+        {
+            if (!await context.Fees.AnyAsync())
+            {
+                var vipPostFee = new Fee
+                {
+                    Id = Guid.NewGuid(),
+                    Type = FeeType.VipPostFee,
+                    Amount = 5m,
+                    Description = "Fee charged for creating a VIP post listing. VIP posts are displayed for 30 days and have premium placement.",
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedBy = SystemUserId
+                };
+
+                await context.Fees.AddAsync(vipPostFee);
+                await context.SaveChangesAsync();
+            }
+        }
+
+        public static async Task SeedWalletTransactionsAsync(EVAuctionTraderDbContext context)
+        {
+            if (!await context.WalletTransactions.AnyAsync())
+            {
+                var member1 = await context.Users
+                    .Include(u => u.Wallets)
+                    .FirstOrDefaultAsync(u => u.Email == "customer1@gmail.com");
+                var member2 = await context.Users
+                    .Include(u => u.Wallets)
+                    .FirstOrDefaultAsync(u => u.Email == "customer2@gmail.com");
+
+                if (member1 == null || member2 == null) return;
+
+                var wallet1 = member1.Wallets?.FirstOrDefault();
+                var wallet2 = member2.Wallets?.FirstOrDefault();
+
+                if (wallet1 == null || wallet2 == null) return;
+
+                // Get some posts and auctions for linking
+                var posts = await context.Posts.Take(5).ToListAsync();
+                var auctions = await context.Auctions.Take(3).ToListAsync();
+
+                var transactions = new List<WalletTransaction>();
+
+                // Member 1 Transactions
+                var member1Balance = 50000m;
+
+                // 1. Initial Top-up
+                member1Balance += 50000m;
+                transactions.Add(new WalletTransaction
+                {
+                    Id = Guid.NewGuid(),
+                    WalletId = wallet1.Id,
+                    Type = WalletTransactionType.Topup,
+                    Amount = 50000m,
+                    BalanceAfter = member1Balance,
+                    Status = WalletTransactionStatus.Succeeded,
+                    CreatedAt = DateTime.UtcNow.AddDays(-30),
+                    CreatedBy = member1.Id
+                });
+
+                // 2. VIP Post Fee for Post 1
+                if (posts.Count > 0)
+                {
+                    member1Balance -= 5m;
+                    transactions.Add(new WalletTransaction
+                    {
+                        Id = Guid.NewGuid(),
+                        WalletId = wallet1.Id,
+                        Type = WalletTransactionType.PostFee,
+                        Amount = 5m,
+                        BalanceAfter = member1Balance,
+                        Status = WalletTransactionStatus.Succeeded,
+                        PostId = posts[0].Id,
+                        CreatedAt = DateTime.UtcNow.AddDays(-28),
+                        CreatedBy = member1.Id
+                    });
+                }
+
+                // 3. Auction Deposit Hold
+                if (auctions.Count > 0)
+                {
+                    var depositAmount = auctions[0].StartPrice * auctions[0].DepositRate;
+                    member1Balance -= depositAmount;
+                    transactions.Add(new WalletTransaction
+                    {
+                        Id = Guid.NewGuid(),
+                        WalletId = wallet1.Id,
+                        Type = WalletTransactionType.AuctionHold,
+                        Amount = depositAmount,
+                        BalanceAfter = member1Balance,
+                        Status = WalletTransactionStatus.Succeeded,
+                        AuctionId = auctions[0].Id,
+                        CreatedAt = DateTime.UtcNow.AddDays(-25),
+                        CreatedBy = member1.Id
+                    });
+                }
+
+                // 4. Another Top-up
+                member1Balance += 30000m;
+                transactions.Add(new WalletTransaction
+                {
+                    Id = Guid.NewGuid(),
+                    WalletId = wallet1.Id,
+                    Type = WalletTransactionType.Topup,
+                    Amount = 30000m,
+                    BalanceAfter = member1Balance,
+                    Status = WalletTransactionStatus.Succeeded,
+                    CreatedAt = DateTime.UtcNow.AddDays(-20),
+                    CreatedBy = member1.Id
+                });
+
+                // 5. VIP Post Fee for Post 2
+                if (posts.Count > 1)
+                {
+                    member1Balance -= 5m;
+                    transactions.Add(new WalletTransaction
+                    {
+                        Id = Guid.NewGuid(),
+                        WalletId = wallet1.Id,
+                        Type = WalletTransactionType.PostFee,
+                        Amount = 5m,
+                        BalanceAfter = member1Balance,
+                        Status = WalletTransactionStatus.Succeeded,
+                        PostId = posts[1].Id,
+                        CreatedAt = DateTime.UtcNow.AddDays(-18),
+                        CreatedBy = member1.Id
+                    });
+                }
+
+                // 6. Auction Deposit Release (didn't win)
+                if (auctions.Count > 0)
+                {
+                    var releaseAmount = auctions[0].StartPrice * auctions[0].DepositRate;
+                    member1Balance += releaseAmount;
+                    transactions.Add(new WalletTransaction
+                    {
+                        Id = Guid.NewGuid(),
+                        WalletId = wallet1.Id,
+                        Type = WalletTransactionType.AuctionRelease,
+                        Amount = releaseAmount,
+                        BalanceAfter = member1Balance,
+                        Status = WalletTransactionStatus.Succeeded,
+                        AuctionId = auctions[0].Id,
+                        CreatedAt = DateTime.UtcNow.AddDays(-15),
+                        CreatedBy = member1.Id
+                    });
+                }
+
+                // 7. Refund for cancelled post
+                member1Balance += 5m;
+                transactions.Add(new WalletTransaction
+                {
+                    Id = Guid.NewGuid(),
+                    WalletId = wallet1.Id,
+                    Type = WalletTransactionType.Refund,
+                    Amount = 5m,
+                    BalanceAfter = member1Balance,
+                    Status = WalletTransactionStatus.Succeeded,
+                    CreatedAt = DateTime.UtcNow.AddDays(-10),
+                    CreatedBy = SystemUserId
+                });
+
+                // 8. Another Auction Hold
+                if (auctions.Count > 1)
+                {
+                    var depositAmount = auctions[1].StartPrice * auctions[1].DepositRate;
+                    member1Balance -= depositAmount;
+                    transactions.Add(new WalletTransaction
+                    {
+                        Id = Guid.NewGuid(),
+                        WalletId = wallet1.Id,
+                        Type = WalletTransactionType.AuctionHold,
+                        Amount = depositAmount,
+                        BalanceAfter = member1Balance,
+                        Status = WalletTransactionStatus.Succeeded,
+                        AuctionId = auctions[1].Id,
+                        CreatedAt = DateTime.UtcNow.AddDays(-8),
+                        CreatedBy = member1.Id
+                    });
+                }
+
+                // 9. Auction Win - Capture Payment
+                if (auctions.Count > 1)
+                {
+                    var captureAmount = auctions[1].CurrentPrice;
+                    member1Balance -= captureAmount;
+                    transactions.Add(new WalletTransaction
+                    {
+                        Id = Guid.NewGuid(),
+                        WalletId = wallet1.Id,
+                        Type = WalletTransactionType.AuctionCapture,
+                        Amount = captureAmount,
+                        BalanceAfter = member1Balance,
+                        Status = WalletTransactionStatus.Succeeded,
+                        AuctionId = auctions[1].Id,
+                        CreatedAt = DateTime.UtcNow.AddDays(-5),
+                        CreatedBy = member1.Id
+                    });
+                }
+
+                // 10. Small Top-up
+                member1Balance += 10000m;
+                transactions.Add(new WalletTransaction
+                {
+                    Id = Guid.NewGuid(),
+                    WalletId = wallet1.Id,
+                    Type = WalletTransactionType.Topup,
+                    Amount = 10000m,
+                    BalanceAfter = member1Balance,
+                    Status = WalletTransactionStatus.Succeeded,
+                    CreatedAt = DateTime.UtcNow.AddDays(-3),
+                    CreatedBy = member1.Id
+                });
+
+                // Member 2 Transactions
+                var member2Balance = 75000m;
+
+                // 1. Initial balance (already set in seed)
+                transactions.Add(new WalletTransaction
+                {
+                    Id = Guid.NewGuid(),
+                    WalletId = wallet2.Id,
+                    Type = WalletTransactionType.Topup,
+                    Amount = 75000m,
+                    BalanceAfter = member2Balance,
+                    Status = WalletTransactionStatus.Succeeded,
+                    CreatedAt = DateTime.UtcNow.AddDays(-35),
+                    CreatedBy = member2.Id
+                });
+
+                // 2. VIP Post Fee
+                if (posts.Count > 2)
+                {
+                    member2Balance -= 5m;
+                    transactions.Add(new WalletTransaction
+                    {
+                        Id = Guid.NewGuid(),
+                        WalletId = wallet2.Id,
+                        Type = WalletTransactionType.PostFee,
+                        Amount = 5m,
+                        BalanceAfter = member2Balance,
+                        Status = WalletTransactionStatus.Succeeded,
+                        PostId = posts[2].Id,
+                        CreatedAt = DateTime.UtcNow.AddDays(-32),
+                        CreatedBy = member2.Id
+                    });
+                }
+
+                // 3. Auction Hold
+                if (auctions.Count > 0)
+                {
+                    var depositAmount = auctions[0].StartPrice * auctions[0].DepositRate;
+                    member2Balance -= depositAmount;
+                    transactions.Add(new WalletTransaction
+                    {
+                        Id = Guid.NewGuid(),
+                        WalletId = wallet2.Id,
+                        Type = WalletTransactionType.AuctionHold,
+                        Amount = depositAmount,
+                        BalanceAfter = member2Balance,
+                        Status = WalletTransactionStatus.Succeeded,
+                        AuctionId = auctions[0].Id,
+                        CreatedAt = DateTime.UtcNow.AddDays(-27),
+                        CreatedBy = member2.Id
+                    });
+                }
+
+                // 4. Top-up
+                member2Balance += 20000m;
+                transactions.Add(new WalletTransaction
+                {
+                    Id = Guid.NewGuid(),
+                    WalletId = wallet2.Id,
+                    Type = WalletTransactionType.Topup,
+                    Amount = 20000m,
+                    BalanceAfter = member2Balance,
+                    Status = WalletTransactionStatus.Succeeded,
+                    CreatedAt = DateTime.UtcNow.AddDays(-22),
+                    CreatedBy = member2.Id
+                });
+
+                // 5. Another Post Fee
+                if (posts.Count > 3)
+                {
+                    member2Balance -= 5m;
+                    transactions.Add(new WalletTransaction
+                    {
+                        Id = Guid.NewGuid(),
+                        WalletId = wallet2.Id,
+                        Type = WalletTransactionType.PostFee,
+                        Amount = 5m,
+                        BalanceAfter = member2Balance,
+                        Status = WalletTransactionStatus.Succeeded,
+                        PostId = posts[3].Id,
+                        CreatedAt = DateTime.UtcNow.AddDays(-19),
+                        CreatedBy = member2.Id
+                    });
+                }
+
+                // 6. Auction Capture (Won auction)
+                if (auctions.Count > 0)
+                {
+                    var captureAmount = auctions[0].CurrentPrice;
+                    member2Balance -= captureAmount;
+                    transactions.Add(new WalletTransaction
+                    {
+                        Id = Guid.NewGuid(),
+                        WalletId = wallet2.Id,
+                        Type = WalletTransactionType.AuctionCapture,
+                        Amount = captureAmount,
+                        BalanceAfter = member2Balance,
+                        Status = WalletTransactionStatus.Succeeded,
+                        AuctionId = auctions[0].Id,
+                        CreatedAt = DateTime.UtcNow.AddDays(-14),
+                        CreatedBy = member2.Id
+                    });
+                }
+
+                // 7. Admin Adjustment (bonus)
+                member2Balance += 1000m;
+                transactions.Add(new WalletTransaction
+                {
+                    Id = Guid.NewGuid(),
+                    WalletId = wallet2.Id,
+                    Type = WalletTransactionType.Adjust,
+                    Amount = 1000m,
+                    BalanceAfter = member2Balance,
+                    Status = WalletTransactionStatus.Succeeded,
+                    CreatedAt = DateTime.UtcNow.AddDays(-12),
+                    CreatedBy = SystemUserId
+                });
+
+                // 8. Another Auction Hold
+                if (auctions.Count > 2)
+                {
+                    var depositAmount = auctions[2].StartPrice * auctions[2].DepositRate;
+                    member2Balance -= depositAmount;
+                    transactions.Add(new WalletTransaction
+                    {
+                        Id = Guid.NewGuid(),
+                        WalletId = wallet2.Id,
+                        Type = WalletTransactionType.AuctionHold,
+                        Amount = depositAmount,
+                        BalanceAfter = member2Balance,
+                        Status = WalletTransactionStatus.Succeeded,
+                        AuctionId = auctions[2].Id,
+                        CreatedAt = DateTime.UtcNow.AddDays(-7),
+                        CreatedBy = member2.Id
+                    });
+                }
+
+                // 9. Deposit Release (didn't win)
+                if (auctions.Count > 2)
+                {
+                    var releaseAmount = auctions[2].StartPrice * auctions[2].DepositRate;
+                    member2Balance += releaseAmount;
+                    transactions.Add(new WalletTransaction
+                    {
+                        Id = Guid.NewGuid(),
+                        WalletId = wallet2.Id,
+                        Type = WalletTransactionType.AuctionRelease,
+                        Amount = releaseAmount,
+                        BalanceAfter = member2Balance,
+                        Status = WalletTransactionStatus.Succeeded,
+                        AuctionId = auctions[2].Id,
+                        CreatedAt = DateTime.UtcNow.AddDays(-4),
+                        CreatedBy = member2.Id
+                    });
+                }
+
+                // 10. Recent Top-up
+                member2Balance += 15000m;
+                transactions.Add(new WalletTransaction
+                {
+                    Id = Guid.NewGuid(),
+                    WalletId = wallet2.Id,
+                    Type = WalletTransactionType.Topup,
+                    Amount = 15000m,
+                    BalanceAfter = member2Balance,
+                    Status = WalletTransactionStatus.Succeeded,
+                    CreatedAt = DateTime.UtcNow.AddDays(-1),
+                    CreatedBy = member2.Id
+                });
+
+                // 11. Pending transaction for Member 1
+                transactions.Add(new WalletTransaction
+                {
+                    Id = Guid.NewGuid(),
+                    WalletId = wallet1.Id,
+                    Type = WalletTransactionType.Topup,
+                    Amount = 5000m,
+                    BalanceAfter = null,
+                    Status = WalletTransactionStatus.Pending,
+                    CreatedAt = DateTime.UtcNow.AddHours(-2),
+                    CreatedBy = member1.Id
+                });
+
+                // 12. Failed transaction for Member 2
+                transactions.Add(new WalletTransaction
+                {
+                    Id = Guid.NewGuid(),
+                    WalletId = wallet2.Id,
+                    Type = WalletTransactionType.Topup,
+                    Amount = 10000m,
+                    BalanceAfter = null,
+                    Status = WalletTransactionStatus.Failed,
+                    CreatedAt = DateTime.UtcNow.AddHours(-5),
+                    CreatedBy = member2.Id
+                });
+
+                await context.WalletTransactions.AddRangeAsync(transactions);
                 await context.SaveChangesAsync();
             }
         }

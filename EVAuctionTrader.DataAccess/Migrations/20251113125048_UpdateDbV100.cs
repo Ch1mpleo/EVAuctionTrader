@@ -7,11 +7,32 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace EVAuctionTrader.DataAccess.Migrations
 {
     /// <inheritdoc />
-    public partial class InitDb : Migration
+    public partial class UpdateDbV100 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "Fees",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Type = table.Column<string>(type: "text", nullable: false),
+                    Amount = table.Column<decimal>(type: "numeric", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    DeletedBy = table.Column<Guid>(type: "uuid", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Fees", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
@@ -63,6 +84,37 @@ namespace EVAuctionTrader.DataAccess.Migrations
                     table.ForeignKey(
                         name: "FK_Batteries_Users_OwnerId",
                         column: x => x.OwnerId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Payments",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Amount = table.Column<decimal>(type: "numeric", nullable: false),
+                    Status = table.Column<string>(type: "text", nullable: false),
+                    PaymentDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    PaymentIntentId = table.Column<string>(type: "text", nullable: true),
+                    CheckoutSessionId = table.Column<string>(type: "text", nullable: true),
+                    ExpiresAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    DeletedBy = table.Column<Guid>(type: "uuid", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Payments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Payments_Users_UserId",
+                        column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -137,6 +189,9 @@ namespace EVAuctionTrader.DataAccess.Migrations
                     Description = table.Column<string>(type: "text", nullable: false),
                     StartPrice = table.Column<decimal>(type: "numeric", nullable: false),
                     MinIncrement = table.Column<decimal>(type: "numeric", nullable: false),
+                    DepositRate = table.Column<decimal>(type: "numeric", nullable: false),
+                    CurrentPrice = table.Column<decimal>(type: "numeric", nullable: false),
+                    WinnerId = table.Column<Guid>(type: "uuid", nullable: true),
                     StartTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     EndTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Status = table.Column<string>(type: "text", nullable: false),
@@ -162,6 +217,11 @@ namespace EVAuctionTrader.DataAccess.Migrations
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Auctions_Users_WinnerId",
+                        column: x => x.WinnerId,
+                        principalTable: "Users",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Auctions_Vehicles_VehicleId",
                         column: x => x.VehicleId,
@@ -334,6 +394,7 @@ namespace EVAuctionTrader.DataAccess.Migrations
                     Status = table.Column<string>(type: "text", nullable: false),
                     PostId = table.Column<Guid>(type: "uuid", nullable: true),
                     AuctionId = table.Column<Guid>(type: "uuid", nullable: true),
+                    PaymentId = table.Column<Guid>(type: "uuid", nullable: true),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
@@ -351,6 +412,11 @@ namespace EVAuctionTrader.DataAccess.Migrations
                         principalTable: "Auctions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_WalletTransactions_Payments_PaymentId",
+                        column: x => x.PaymentId,
+                        principalTable: "Payments",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_WalletTransactions_Posts_PostId",
                         column: x => x.PostId,
@@ -415,6 +481,11 @@ namespace EVAuctionTrader.DataAccess.Migrations
                 column: "VehicleId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Auctions_WinnerId",
+                table: "Auctions",
+                column: "WinnerId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Batteries_OwnerId",
                 table: "Batteries",
                 column: "OwnerId");
@@ -454,6 +525,11 @@ namespace EVAuctionTrader.DataAccess.Migrations
                 name: "IX_Messages_SenderId",
                 table: "Messages",
                 column: "SenderId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Payments_UserId",
+                table: "Payments",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PostComments_AuthorId",
@@ -496,6 +572,11 @@ namespace EVAuctionTrader.DataAccess.Migrations
                 column: "AuctionId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_WalletTransactions_PaymentId",
+                table: "WalletTransactions",
+                column: "PaymentId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_WalletTransactions_PostId",
                 table: "WalletTransactions",
                 column: "PostId");
@@ -513,6 +594,9 @@ namespace EVAuctionTrader.DataAccess.Migrations
                 name: "Bids");
 
             migrationBuilder.DropTable(
+                name: "Fees");
+
+            migrationBuilder.DropTable(
                 name: "Messages");
 
             migrationBuilder.DropTable(
@@ -526,6 +610,9 @@ namespace EVAuctionTrader.DataAccess.Migrations
 
             migrationBuilder.DropTable(
                 name: "Auctions");
+
+            migrationBuilder.DropTable(
+                name: "Payments");
 
             migrationBuilder.DropTable(
                 name: "Wallets");

@@ -16,16 +16,16 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />
-    <PackageReference Include="Stripe.net" Version="49.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="wwwroot\microsoft\" />
+    <ProjectReference Include="..\EVAuctionTrader.BusinessObject\EVAuctionTrader.BusinessObject.csproj" />
+    <ProjectReference Include="..\EVAuctionTrader.Business\EVAuctionTrader.Business.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\EVAuctionTrader.BusinessObject\EVAuctionTrader.BusinessObject.csproj" />
-    <ProjectReference Include="..\EVAuctionTrader.Business\EVAuctionTrader.Business.csproj" />
+    <Folder Include="Pages\Admin\" />
   </ItemGroup>
 
 </Project>

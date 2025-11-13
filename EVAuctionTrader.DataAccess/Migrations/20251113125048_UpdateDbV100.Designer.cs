@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EVAuctionTrader.DataAccess.Migrations
 {
     [DbContext(typeof(EVAuctionTraderDbContext))]
-    [Migration("20251106164540_InitDb")]
-    partial class InitDb
+    [Migration("20251113125048_UpdateDbV100")]
+    partial class UpdateDbV100
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -45,11 +45,17 @@ namespace EVAuctionTrader.DataAccess.Migrations
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
+                    b.Property<decimal>("CurrentPrice")
+                        .HasColumnType("numeric");
+
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uuid");
+
+                    b.Property<decimal>("DepositRate")
+                        .HasColumnType("numeric");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -91,6 +97,9 @@ namespace EVAuctionTrader.DataAccess.Migrations
                     b.Property<Guid?>("VehicleId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("WinnerId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("BatteryId");
@@ -98,6 +107,8 @@ namespace EVAuctionTrader.DataAccess.Migrations
                     b.HasIndex("CreatedBy");
 
                     b.HasIndex("VehicleId");
+
+                    b.HasIndex("WinnerId");
 
                     b.ToTable("Auctions");
                 });
@@ -260,6 +271,49 @@ namespace EVAuctionTrader.DataAccess.Migrations
                     b.ToTable("Conversations");
                 });
 
+            modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Fee", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Fees");
+                });
+
             modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Message", b =>
                 {
                     b.Property<Guid>("Id")
@@ -307,6 +361,62 @@ namespace EVAuctionTrader.DataAccess.Migrations
                     b.HasIndex("SenderId");
 
                     b.ToTable("Messages");
+                });
+
+            modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Payment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric");
+
+                    b.Property<string>("CheckoutSessionId")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("PaymentDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("PaymentIntentId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Payments");
                 });
 
             modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Post", b =>
@@ -620,6 +730,9 @@ namespace EVAuctionTrader.DataAccess.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
+                    b.Property<Guid?>("PaymentId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid?>("PostId")
                         .HasColumnType("uuid");
 
@@ -644,6 +757,8 @@ namespace EVAuctionTrader.DataAccess.Migrations
 
                     b.HasIndex("AuctionId");
 
+                    b.HasIndex("PaymentId");
+
                     b.HasIndex("PostId");
 
                     b.HasIndex("WalletId");
@@ -667,11 +782,17 @@ namespace EVAuctionTrader.DataAccess.Migrations
                         .WithMany()
                         .HasForeignKey("VehicleId");
 
+                    b.HasOne("EVAuctionTrader.DataAccess.Entities.User", "Winner")
+                        .WithMany()
+                        .HasForeignKey("WinnerId");
+
                     b.Navigation("Battery");
 
                     b.Navigation("Creator");
 
                     b.Navigation("Vehicle");
+
+                    b.Navigation("Winner");
                 });
 
             modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Battery", b =>
@@ -750,6 +871,17 @@ namespace EVAuctionTrader.DataAccess.Migrations
                     b.Navigation("Sender");
                 });
 
+            modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Payment", b =>
+                {
+                    b.HasOne("EVAuctionTrader.DataAccess.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Post", b =>
                 {
                     b.HasOne("EVAuctionTrader.DataAccess.Entities.User", "Author")
@@ -821,6 +953,10 @@ namespace EVAuctionTrader.DataAccess.Migrations
                         .HasForeignKey("AuctionId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("EVAuctionTrader.DataAccess.Entities.Payment", "Payment")
+                        .WithMany()
+                        .HasForeignKey("PaymentId");
+
                     b.HasOne("EVAuctionTrader.DataAccess.Entities.Post", "Post")
                         .WithMany()
                         .HasForeignKey("PostId")
@@ -833,6 +969,8 @@ namespace EVAuctionTrader.DataAccess.Migrations
                         .IsRequired();
 
                     b.Navigation("Auction");
+
+                    b.Navigation("Payment");
 
                     b.Navigation("Post");
 

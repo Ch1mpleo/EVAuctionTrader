@@ -23,6 +23,8 @@ namespace EVAuctionTrader.DataAccess
         public DbSet<WalletTransaction> WalletTransactions { get; set; }
         public DbSet<Auction> Auctions { get; set; }
         public DbSet<Bid> Bids { get; set; }
+        public DbSet<Payment> Payments { get; set; }
+        public DbSet<Fee> Fees { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -117,6 +119,11 @@ namespace EVAuctionTrader.DataAccess
                 .HasOne(b => b.Bidder)
                 .WithMany()
                 .HasForeignKey(b => b.BidderId);
+
+            modelBuilder.Entity<Payment>()
+                .HasOne(p => p.User)
+                .WithMany()
+                .HasForeignKey(p => p.UserId);
         }
     }
 }

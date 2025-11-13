@@ -11,9 +11,11 @@ namespace EVAuctionTrader.DataAccess.Entities
         public WalletTransactionStatus Status { get; set; }
         public Guid? PostId { get; set; }
         public Guid? AuctionId { get; set; }
+        public Guid? PaymentId { get; set; }
 
         public Wallet Wallet { get; set; }
         public Post Post { get; set; }
         public Auction Auction { get; set; }
+        public Payment Payment { get; set; }
     }
 }
