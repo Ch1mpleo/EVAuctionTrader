@@ -13,5 +13,6 @@ namespace EVAuctionTrader.Business.Interfaces
         Task<UserResponseDto?> UpdateMyProfileAsync(UpdateProfileRequestDto updateProfileRequestDto);
         Task<WalletResponseDto?> GetMyWalletAsync();
         Task<decimal> GetMyBalanceAsync();
+        Task<decimal> GetMyHeldBalanceAsync();
     }
 }

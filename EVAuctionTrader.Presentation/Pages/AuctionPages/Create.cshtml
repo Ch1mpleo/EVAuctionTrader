@@ -2,334 +2,794 @@
 @using EVAuctionTrader.BusinessObject.Enums
 @model EVAuctionTrader.Presentation.Pages.AuctionPages.CreateModel
 @{
-    ViewData["Title"] = "Create Auction";
+    ViewData["Title"] = "Create New Auction";
+}
+@section Styles {
+    <link rel="stylesheet" href="~/css/posts.css" />
+    <link rel="stylesheet" href="~/css/profile.css" />
+    <style>
+        .create-form-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .form-column {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .card-compact {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .card-header-compact {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid #2a2a2a;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .card-title-compact {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #fff;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-body-compact {
+            padding: 1.25rem;
+        }
+
+        .form-group-compact {
+            margin-bottom: 1rem;
+        }
+
+        .form-group-compact:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-label-compact {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            color: #aaa;
+            margin-bottom: 0.375rem;
+        }
+
+        .form-label-compact i {
+            font-size: 0.875rem;
+            color: #666;
+        }
+
+        .form-input-compact {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            background: #0a0a0a;
+            color: #fff;
+            transition: all 0.2s;
+        }
+
+        .form-input-compact:focus {
+            outline: none;
+            border-color: #0070f3;
+            box-shadow: 0 0 0 3px rgba(0, 112, 243, 0.1);
+        }
+
+        .form-input-compact::placeholder {
+            color: #666;
+        }
+
+        textarea.form-input-compact {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .type-toggle-compact {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+
+        .type-option-compact {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .type-option-compact input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+        }
+
+        .type-option-compact label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            border: 2px solid #2a2a2a;
+            border-radius: 10px;
+            background: #0a0a0a;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #aaa;
+        }
+
+        .type-option-compact label i {
+            font-size: 1.5rem;
+        }
+
+        .type-option-compact input[type="radio"]:checked + label {
+            border-color: #0070f3;
+            background: rgba(0, 112, 243, 0.05);
+            color: #0070f3;
+        }
+
+        .form-grid-compact {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-grid-compact .form-full {
+            grid-column: 1 / -1;
+        }
+
+        .photo-preview-container {
+            margin-top: 0.75rem;
+        }
+
+        .photo-preview {
+            width: 100%;
+            max-height: 300px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            display: none;
+        }
+
+        .photo-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .photo-preview-placeholder {
+            width: 100%;
+            height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 0.875rem;
+            gap: 0.5rem;
+        }
+
+        .photo-preview-placeholder i {
+            font-size: 3rem;
+        }
+
+        .form-actions-compact {
+            grid-column: 1 / -1;
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .btn-compact {
+            padding: 0.625rem 1.25rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-primary-compact {
+            flex: 1;
+            background: linear-gradient(135deg, #0070f3 0%, #0051cc 100%);
+            color: white;
+        }
+
+        .btn-primary-compact:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 112, 243, 0.3);
+        }
+
+        .btn-secondary-compact {
+            background: #1a1a1a;
+            color: #aaa;
+            border: 1px solid #2a2a2a;
+        }
+
+        .btn-secondary-compact:hover {
+            background: #2a2a2a;
+            color: #fff;
+        }
+
+        .required {
+            color: #ef4444;
+        }
+
+        .text-danger {
+            font-size: 0.75rem;
+            color: #ef4444;
+            margin-top: 0.25rem;
+            display: block;
+        }
+
+        .help-text {
+            font-size: 0.75rem;
+            color: #666;
+            margin-top: 0.25rem;
+            display: block;
+        }
+
+        .input-group-compact {
+            display: flex;
+            gap: 0;
+        }
+
+        .input-group-compact .form-input-compact {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        .input-group-text-compact {
+            padding: 0.5rem 0.75rem;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-left: none;
+            border-top-right-radius: 8px;
+            border-bottom-right-radius: 8px;
+            color: #aaa;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            min-width: 50px;
+            justify-content: center;
+        }
+
+        .alert-info-compact {
+            background: rgba(0, 112, 243, 0.1);
+            border: 1px solid rgba(0, 112, 243, 0.3);
+            border-radius: 8px;
+            padding: 0.75rem;
+            color: #0070f3;
+            font-size: 0.8125rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .alert-info-compact i {
+            font-size: 1rem;
+        }
+    </style>
 }
 
-<div class="create-auction-page">
+<div class="posts-page-clean">
     <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-10">
-                <!-- Page Header -->
-                <div class="page-header">
-                    <h1 class="page-title">
-                        <i class="bi bi-hammer"></i>
-                        Create New Auction
-                    </h1>
-                    <p class="page-subtitle">Set up a live auction for vehicles or batteries</p>
+        <div class="posts-header-clean">
+            <h1 class="posts-title-clean">
+                <i class="bi bi-hammer"></i>
+                Create New Auction
+            </h1>
+            <p class="posts-subtitle-clean">Set up a live auction for vehicles or batteries</p>
+        </div>
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <strong>Please correct the following errors:</strong>
+                <ul style="margin-top: 0.5rem; margin-bottom: 0;">
+                    @foreach (var modelState in ViewData.ModelState.Values)
+                    {
+                        foreach (var error in modelState.Errors)
+                        {
+                            <li>@error.ErrorMessage</li>
+                        }
+                    }
+                </ul>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <form method="post" asp-page="/AuctionPages/Create">
+            @Html.AntiForgeryToken()
+
+            <div class="create-form-container">
+                <!-- LEFT COLUMN: Auction Information -->
+                <div class="form-column">
+                    <!-- Auction Type Selection -->
+                    <div class="card-compact">
+                        <div class="card-header-compact">
+                            <h3 class="card-title-compact">
+                                <i class="bi bi-tag"></i>
+                                Auction Type
+                            </h3>
+                        </div>
+                        <div class="card-body-compact">
+                            <div class="type-toggle-compact">
+                                <div class="type-option-compact">
+                                    <input type="radio" asp-for="AuctionRequest.AuctionType" value="0" id="auctionTypeVehicle" checked />
+                                    <label for="auctionTypeVehicle">
+                                        <i class="bi bi-car-front"></i>
+                                        <span>Vehicle</span>
+                                    </label>
+                                </div>
+                                <div class="type-option-compact">
+                                    <input type="radio" asp-for="AuctionRequest.AuctionType" value="1" id="auctionTypeBattery" />
+                                    <label for="auctionTypeBattery">
+                                        <i class="bi bi-battery-charging"></i>
+                                        <span>Battery</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Basic Information -->
+                    <div class="card-compact">
+                        <div class="card-header-compact">
+                            <h3 class="card-title-compact">
+                                <i class="bi bi-info-circle"></i>
+                                Auction Details
+                            </h3>
+                        </div>
+                        <div class="card-body-compact">
+                            <div class="form-group-compact">
+                                <label class="form-label-compact">
+                                    <i class="bi bi-fonts"></i>
+                                    Title <span class="required">*</span>
+                                </label>
+                                <input type="text" class="form-input-compact" asp-for="AuctionRequest.Title" placeholder="2023 Tesla Model 3 - Premium Electric" required />
+                                <span asp-validation-for="AuctionRequest.Title" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group-compact">
+                                <label class="form-label-compact">
+                                    <i class="bi bi-text-paragraph"></i>
+                                    Description <span class="required">*</span>
+                                </label>
+                                <textarea class="form-input-compact" asp-for="AuctionRequest.Description" placeholder="Provide detailed information about the item..." required></textarea>
+                                <span asp-validation-for="AuctionRequest.Description" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pricing & Bidding -->
+                    <div class="card-compact">
+                        <div class="card-header-compact">
+                            <h3 class="card-title-compact">
+                                <i class="bi bi-currency-dollar"></i>
+                                Pricing & Bidding
+                            </h3>
+                        </div>
+                        <div class="card-body-compact">
+                            <div class="form-grid-compact">
+                                <div class="form-group-compact">
+                                    <label class="form-label-compact">
+                                        <i class="bi bi-cash-stack"></i>
+                                        Starting Price ($) <span class="required">*</span>
+                                    </label>
+                                    <input type="number" class="form-input-compact" asp-for="AuctionRequest.StartPrice" step="100" min="1" placeholder="10000" required />
+                                    <span asp-validation-for="AuctionRequest.StartPrice" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group-compact">
+                                    <label class="form-label-compact">
+                                        <i class="bi bi-arrow-up-circle"></i>
+                                        Min Increment ($) <span class="required">*</span>
+                                    </label>
+                                    <input type="number" class="form-input-compact" asp-for="AuctionRequest.MinIncrement" step="10" min="1" placeholder="100" required />
+                                    <span asp-validation-for="AuctionRequest.MinIncrement" class="text-danger"></span>
+                                    <span class="help-text">Min bid increase amount</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group-compact">
+                                <label class="form-label-compact">
+                                    <i class="bi bi-shield-check"></i>
+                                    Deposit Rate <span class="required">*</span>
+                                </label>
+                                <div class="input-group-compact">
+                                    <input type="number" class="form-input-compact" asp-for="AuctionRequest.DepositRate" step="0.01" min="0.01" max="1" value="0.20" id="depositRateInput" required />
+                                    <span class="input-group-text-compact" id="depositRatePercent">20%</span>
+                                </div>
+                                <span asp-validation-for="AuctionRequest.DepositRate" class="text-danger"></span>
+                                <span class="help-text">% of bid held as deposit (0.01 to 1.00)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Schedule -->
+                    <div class="card-compact">
+                        <div class="card-header-compact">
+                            <h3 class="card-title-compact">
+                                <i class="bi bi-calendar-event"></i>
+                                Schedule
+                            </h3>
+                        </div>
+                        <div class="card-body-compact">
+                            <div class="form-grid-compact">
+                                <div class="form-group-compact">
+                                    <label class="form-label-compact">
+                                        <i class="bi bi-clock"></i>
+                                        Start Date & Time <span class="required">*</span>
+                                    </label>
+                                    <input type="datetime-local" class="form-input-compact" asp-for="AuctionRequest.StartTime" id="startTimeInput" required />
+                                    <span asp-validation-for="AuctionRequest.StartTime" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group-compact">
+                                    <label class="form-label-compact">
+                                        <i class="bi bi-clock-history"></i>
+                                        End Date & Time <span class="required">*</span>
+                                    </label>
+                                    <input type="datetime-local" class="form-input-compact" asp-for="AuctionRequest.EndTime" id="endTimeInput" required />
+                                    <span asp-validation-for="AuctionRequest.EndTime" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="alert-info-compact">
+                                <i class="bi bi-lightbulb-fill"></i>
+                                <span>Auction starts automatically at scheduled time</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Create Form Card -->
-                <div class="create-form-card">
-                    <form method="post" asp-page="/AuctionPages/Create">
-                        @Html.AntiForgeryToken()
-
-                        @if (!ViewData.ModelState.IsValid)
-                        {
-                            <div class="alert alert-danger" role="alert">
-                                <i class="bi bi-exclamation-triangle-fill"></i>
-                                <strong>Please correct the following errors:</strong>
-                                <ul class="mb-0 mt-2">
-                                    @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
-                                    {
-                                        <li>@error.ErrorMessage</li>
-                                    }
-                                </ul>
-                            </div>
-                        }
-
-                        <!-- Auction Type Section -->
-                        <div class="form-section">
-                            <h3 class="section-title">Auction Type</h3>
-
-                            <div class="form-group">
-                                <label asp-for="AuctionRequest.AuctionType" class="form-label">Select Type *</label>
-                                <select asp-for="AuctionRequest.AuctionType" class="form-control" id="auctionType" required>
-                                    <option value="">Choose auction type...</option>
-                                    <option value="@((int)AuctionType.Vehicle)">Vehicle</option>
-                                    <option value="@((int)AuctionType.Battery)">Battery</option>
-                                </select>
-                            </div>
+                <!-- RIGHT COLUMN: Vehicle/Battery Details & Photo -->
+                <div class="form-column">
+                    <!-- Vehicle Details -->
+                    <div class="card-compact" id="vehicleSection" style="display: none;">
+                        <div class="card-header-compact">
+                            <h3 class="card-title-compact">
+                                <i class="bi bi-car-front"></i>
+                                Vehicle Details
+                            </h3>
                         </div>
+                        <div class="card-body-compact">
+                            <div class="form-grid-compact">
+                                <div class="form-group-compact">
+                                    <label class="form-label-compact">
+                                        <i class="bi bi-building"></i>
+                                        Brand <span class="required">*</span>
+                                    </label>
+                                    <input type="text" class="form-input-compact" asp-for="AuctionRequest.Vehicle.Brand" placeholder="Tesla, BMW..." />
+                                    <span asp-validation-for="AuctionRequest.Vehicle.Brand" class="text-danger"></span>
+                                </div>
 
-                        <!-- Vehicle Fields (shown when Vehicle selected) -->
-                        <div class="form-section" id="vehicleSection" style="display: none;">
-                            <h3 class="section-title">Vehicle Information</h3>
+                                <div class="form-group-compact">
+                                    <label class="form-label-compact">
+                                        <i class="bi bi-tag"></i>
+                                        Model <span class="required">*</span>
+                                    </label>
+                                    <input type="text" class="form-input-compact" asp-for="AuctionRequest.Vehicle.Model" placeholder="Model 3, i3..." />
+                                    <span asp-validation-for="AuctionRequest.Vehicle.Model" class="text-danger"></span>
+                                </div>
 
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label asp-for="AuctionRequest.Vehicle.Brand" class="form-label">Brand *</label>
-                                        <input asp-for="AuctionRequest.Vehicle.Brand" class="form-control" placeholder="Tesla, BMW, VinFast..." />
-                                    </div>
+                                <div class="form-group-compact">
+                                    <label class="form-label-compact">
+                                        <i class="bi bi-calendar"></i>
+                                        Year <span class="required">*</span>
+                                    </label>
+                                    <input type="number" class="form-input-compact" asp-for="AuctionRequest.Vehicle.Year" min="1900" max="2025" placeholder="2023" />
+                                    <span asp-validation-for="AuctionRequest.Vehicle.Year" class="text-danger"></span>
                                 </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label asp-for="AuctionRequest.Vehicle.Model" class="form-label">Model *</label>
-                                        <input asp-for="AuctionRequest.Vehicle.Model" class="form-control" placeholder="Model 3, i3, VF8..." />
-                                    </div>
-                                </div>
-                            </div>
 
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label asp-for="AuctionRequest.Vehicle.Year" class="form-label">Year *</label>
-                                        <input asp-for="AuctionRequest.Vehicle.Year" class="form-control" type="number" min="2000" max="2025" placeholder="2023" />
-                                    </div>
+                                <div class="form-group-compact">
+                                    <label class="form-label-compact">
+                                        <i class="bi bi-speedometer"></i>
+                                        Odometer (KM) <span class="required">*</span>
+                                    </label>
+                                    <input type="number" class="form-input-compact" asp-for="AuctionRequest.Vehicle.OdometerKm" min="0" placeholder="15000" />
+                                    <span asp-validation-for="AuctionRequest.Vehicle.OdometerKm" class="text-danger"></span>
                                 </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label asp-for="AuctionRequest.Vehicle.OdometerKm" class="form-label">Odometer (km) *</label>
-                                        <input asp-for="AuctionRequest.Vehicle.OdometerKm" class="form-control" type="number" min="0" placeholder="15000" />
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label asp-for="AuctionRequest.Vehicle.ConditionGrade" class="form-label">Condition *</label>
-                                        <select asp-for="AuctionRequest.Vehicle.ConditionGrade" class="form-control">
-                                            <option value="">Select...</option>
-                                            <option value="Excellent">Excellent</option>
-                                            <option value="Very Good">Very Good</option>
-                                            <option value="Good">Good</option>
-                                            <option value="Fair">Fair</option>
-                                        </select>
-                                    </div>
+
+                                <div class="form-group-compact form-full">
+                                    <label class="form-label-compact">
+                                        <i class="bi bi-award"></i>
+                                        Condition Grade <span class="required">*</span>
+                                    </label>
+                                    <select class="form-input-compact" asp-for="AuctionRequest.Vehicle.ConditionGrade">
+                                        <option value="">Select condition</option>
+                                        <option value="Excellent">Excellent</option>
+                                        <option value="Very Good">Very Good</option>
+                                        <option value="Good">Good</option>
+                                        <option value="Fair">Fair</option>
+                                    </select>
+                                    <span asp-validation-for="AuctionRequest.Vehicle.ConditionGrade" class="text-danger"></span>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Battery Fields (shown when Battery selected) -->
-                        <div class="form-section" id="batterySection" style="display: none;">
-                            <h3 class="section-title">Battery Information</h3>
+                    <!-- Battery Details -->
+                    <div class="card-compact" id="batterySection" style="display: none;">
+                        <div class="card-header-compact">
+                            <h3 class="card-title-compact">
+                                <i class="bi bi-battery-charging"></i>
+                                Battery Details
+                            </h3>
+                        </div>
+                        <div class="card-body-compact">
+                            <div class="form-grid-compact">
+                                <div class="form-group-compact">
+                                    <label class="form-label-compact">
+                                        <i class="bi bi-building"></i>
+                                        Manufacturer <span class="required">*</span>
+                                    </label>
+                                    <input type="text" class="form-input-compact" asp-for="AuctionRequest.Battery.Manufacturer" placeholder="CATL, LG Chem..." />
+                                    <span asp-validation-for="AuctionRequest.Battery.Manufacturer" class="text-danger"></span>
+                                </div>
 
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label asp-for="AuctionRequest.Battery.Manufacturer" class="form-label">Manufacturer *</label>
-                                        <input asp-for="AuctionRequest.Battery.Manufacturer" class="form-control" placeholder="CATL, LG Chem, BYD..." />
-                                    </div>
+                                <div class="form-group-compact">
+                                    <label class="form-label-compact">
+                                        <i class="bi bi-droplet"></i>
+                                        Chemistry <span class="required">*</span>
+                                    </label>
+                                    <input type="text" class="form-input-compact" asp-for="AuctionRequest.Battery.Chemistry" placeholder="Lithium-ion NMC..." />
+                                    <span asp-validation-for="AuctionRequest.Battery.Chemistry" class="text-danger"></span>
                                 </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label asp-for="AuctionRequest.Battery.Chemistry" class="form-label">Chemistry *</label>
-                                        <input asp-for="AuctionRequest.Battery.Chemistry" class="form-control" placeholder="Lithium-ion NMC, LFP..." />
-                                    </div>
-                                </div>
-                            </div>
 
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label asp-for="AuctionRequest.Battery.CapacityKwh" class="form-label">Capacity (kWh) *</label>
-                                        <input asp-for="AuctionRequest.Battery.CapacityKwh" class="form-control" type="number" step="0.1" min="0" placeholder="60.0" />
-                                    </div>
+                                <div class="form-group-compact">
+                                    <label class="form-label-compact">
+                                        <i class="bi bi-lightning-charge"></i>
+                                        Capacity (kWh) <span class="required">*</span>
+                                    </label>
+                                    <input type="number" class="form-input-compact" asp-for="AuctionRequest.Battery.CapacityKwh" step="0.1" min="0" placeholder="60.0" />
+                                    <span asp-validation-for="AuctionRequest.Battery.CapacityKwh" class="text-danger"></span>
                                 </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label asp-for="AuctionRequest.Battery.SohPercent" class="form-label">SOH (%) *</label>
-                                        <input asp-for="AuctionRequest.Battery.SohPercent" class="form-control" type="number" step="0.1" min="0" max="100" placeholder="85.0" />
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label asp-for="AuctionRequest.Battery.CycleCount" class="form-label">Cycle Count *</label>
-                                        <input asp-for="AuctionRequest.Battery.CycleCount" class="form-control" type="number" min="0" placeholder="800" />
-                                    </div>
-                                </div>
-                            </div>
 
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label asp-for="AuctionRequest.Battery.VoltageV" class="form-label">Voltage (V) *</label>
-                                        <input asp-for="AuctionRequest.Battery.VoltageV" class="form-control" type="number" step="0.1" min="0" placeholder="400.0" />
-                                    </div>
+                                <div class="form-group-compact">
+                                    <label class="form-label-compact">
+                                        <i class="bi bi-arrow-repeat"></i>
+                                        Cycle Count <span class="required">*</span>
+                                    </label>
+                                    <input type="number" class="form-input-compact" asp-for="AuctionRequest.Battery.CycleCount" min="0" placeholder="800" />
+                                    <span asp-validation-for="AuctionRequest.Battery.CycleCount" class="text-danger"></span>
                                 </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label asp-for="AuctionRequest.Battery.ConnectorType" class="form-label">Connector Type *</label>
-                                        <select asp-for="AuctionRequest.Battery.ConnectorType" class="form-control">
-                                            <option value="">Select...</option>
-                                            <option value="CCS2">CCS2</option>
-                                            <option value="Type 2">Type 2</option>
-                                            <option value="CHAdeMO">CHAdeMO</option>
-                                        </select>
-                                    </div>
+
+                                <div class="form-group-compact">
+                                    <label class="form-label-compact">
+                                        <i class="bi bi-heart-pulse"></i>
+                                        SOH (%) <span class="required">*</span>
+                                    </label>
+                                    <input type="number" class="form-input-compact" asp-for="AuctionRequest.Battery.SohPercent" step="0.1" min="0" max="100" placeholder="85.0" />
+                                    <span asp-validation-for="AuctionRequest.Battery.SohPercent" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group-compact">
+                                    <label class="form-label-compact">
+                                        <i class="bi bi-lightning"></i>
+                                        Voltage (V) <span class="required">*</span>
+                                    </label>
+                                    <input type="number" class="form-input-compact" asp-for="AuctionRequest.Battery.VoltageV" step="0.1" min="0" placeholder="400.0" />
+                                    <span asp-validation-for="AuctionRequest.Battery.VoltageV" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group-compact form-full">
+                                    <label class="form-label-compact">
+                                        <i class="bi bi-plug"></i>
+                                        Connector Type <span class="required">*</span>
+                                    </label>
+                                    <select class="form-input-compact" asp-for="AuctionRequest.Battery.ConnectorType">
+                                        <option value="">Select connector</option>
+                                        <option value="CCS2">CCS2</option>
+                                        <option value="Type 2">Type 2</option>
+                                        <option value="CHAdeMO">CHAdeMO</option>
+                                    </select>
+                                    <span asp-validation-for="AuctionRequest.Battery.ConnectorType" class="text-danger"></span>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Basic Information Section -->
-                        <div class="form-section">
-                            <h3 class="section-title">Auction Details</h3>
-
-                            <div class="form-group">
-                                <label asp-for="AuctionRequest.Title" class="form-label">Title *</label>
-                                <input asp-for="AuctionRequest.Title" class="form-control" placeholder="2022 Tesla Model 3 - Low Mileage" required />
+                    <!-- Photo -->
+                    <div class="card-compact">
+                        <div class="card-header-compact">
+                            <h3 class="card-title-compact">
+                                <i class="bi bi-image"></i>
+                                Photo
+                            </h3>
+                        </div>
+                        <div class="card-body-compact">
+                            <div class="form-group-compact">
+                                <label class="form-label-compact">
+                                    <i class="bi bi-link-45deg"></i>
+                                    Photo URL
+                                </label>
+                                <input type="url" class="form-input-compact" asp-for="AuctionRequest.PhotoUrl" id="photoUrlInput" placeholder="https://example.com/image.jpg" />
+                                <span class="help-text">Direct link to an image</span>
                             </div>
 
-                            <div class="form-group">
-                                <label asp-for="AuctionRequest.Description" class="form-label">Description *</label>
-                                <textarea asp-for="AuctionRequest.Description" class="form-control" rows="4" 
-                                          placeholder="Provide detailed information about the item..." required></textarea>
-                            </div>
-
-                            <div class="form-group">
-                                <label asp-for="AuctionRequest.PhotoUrl" class="form-label">Photo URL</label>
-                                <input asp-for="AuctionRequest.PhotoUrl" class="form-control" type="url" placeholder="https://example.com/image.jpg" />
-                                <small class="form-text">Enter a direct link to an image</small>
+                            <div class="photo-preview-container">
+                                <div id="photoPreview" class="photo-preview">
+                                    <img id="photoPreviewImg" src="" alt="Preview" />
+                                </div>
+                                <div id="photoPlaceholder" class="photo-preview-placeholder">
+                                    <i class="bi bi-image"></i>
+                                    <span>Photo preview will appear here</span>
+                                </div>
                             </div>
                         </div>
+                    </div>
+                </div>
 
-                        <!-- Pricing Section -->
-                        <div class="form-section">
-                            <h3 class="section-title">Pricing & Bidding</h3>
-
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label asp-for="AuctionRequest.StartPrice" class="form-label">Starting Price ($) *</label>
-                                        <input asp-for="AuctionRequest.StartPrice" class="form-control" type="number" step="100" min="1" 
-                                               placeholder="10000" required />
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label asp-for="AuctionRequest.MinIncrement" class="form-label">Min Bid Increment ($) *</label>
-                                        <input asp-for="AuctionRequest.MinIncrement" class="form-control" type="number" step="10" min="1" 
-                                               placeholder="100" required />
-                                        <small class="form-text">Each bid must increase by at least this amount</small>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label asp-for="AuctionRequest.DepositRate" class="form-label">Deposit Rate *</label>
-                                <div class="input-group">
-                                    <input asp-for="AuctionRequest.DepositRate" class="form-control" type="number" step="0.01" min="0.01" max="1" 
-                                           value="0.20" id="depositRateInput" required />
-                                    <span class="input-group-text" id="depositRatePercent">20%</span>
-                                </div>
-                                <small class="form-text">Percentage of bid amount to hold as deposit (0.01 to 1.00)</small>
-                            </div>
-                        </div>
-
-                        <!-- Schedule Section -->
-                        <div class="form-section">
-                            <h3 class="section-title">Schedule</h3>
-
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label asp-for="AuctionRequest.StartTime" class="form-label">Start Date & Time *</label>
-                                        <input asp-for="AuctionRequest.StartTime" class="form-control" type="datetime-local" required />
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label asp-for="AuctionRequest.EndTime" class="form-label">End Date & Time *</label>
-                                        <input asp-for="AuctionRequest.EndTime" class="form-control" type="datetime-local" required />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="alert alert-info">
-                                <i class="bi bi-lightbulb-fill"></i>
-                                The auction will automatically start at the scheduled time
-                            </div>
-                        </div>
-
-                        <!-- Action Buttons -->
-                        <div class="form-actions">
-                            <button type="submit" class="btn-submit">
-                                <i class="bi bi-check-circle-fill"></i>
-                                Create Auction
-                            </button>
-                            <a asp-page="/AuctionPages/Index" class="btn-cancel">
-                                <i class="bi bi-x-circle"></i>
-                                Cancel
-                            </a>
-                        </div>
-                    </form>
+                <!-- Form Actions (Full Width) -->
+                <div class="form-actions-compact">
+                    <button type="submit" class="btn-compact btn-primary-compact">
+                        <i class="bi bi-check-circle"></i> Create Auction
+                    </button>
+                    <a asp-page="/AuctionPages/Index" class="btn-compact btn-secondary-compact">
+                        <i class="bi bi-x-circle"></i> Cancel
+                    </a>
                 </div>
             </div>
-        </div>
+        </form>
     </div>
 </div>
-
-@section Styles {
-    <link rel="stylesheet" href="~/css/auction-create.css" />
-}
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
-        // Show/hide vehicle/battery sections based on auction type
-        document.getElementById('auctionType').addEventListener('change', function() {
+        document.addEventListener('DOMContentLoaded', function () {
+            // ============ AUCTION TYPE TOGGLE ============
             const vehicleSection = document.getElementById('vehicleSection');
             const batterySection = document.getElementById('batterySection');
-            
-            if (this.value == '@((int)AuctionType.Vehicle)') {
-                vehicleSection.style.display = 'block';
-                batterySection.style.display = 'none';
-                
-                // Set required for vehicle fields
-                vehicleSection.querySelectorAll('input, select').forEach(el => el.required = true);
-                batterySection.querySelectorAll('input, select').forEach(el => el.required = false);
-            } else if (this.value == '@((int)AuctionType.Battery)') {
-                vehicleSection.style.display = 'none';
-                batterySection.style.display = 'block';
-                
-                // Set required for battery fields
-                vehicleSection.querySelectorAll('input, select').forEach(el => el.required = false);
-                batterySection.querySelectorAll('input, select').forEach(el => el.required = true);
-            } else {
-                vehicleSection.style.display = 'none';
-                batterySection.style.display = 'none';
-                
-                vehicleSection.querySelectorAll('input, select').forEach(el => el.required = false);
-                batterySection.querySelectorAll('input, select').forEach(el => el.required = false);
+            const auctionTypeVehicle = document.getElementById('auctionTypeVehicle');
+            const auctionTypeBattery = document.getElementById('auctionTypeBattery');
+
+            function updateSections() {
+                if (auctionTypeVehicle.checked) {
+                    vehicleSection.style.display = 'block';
+                    batterySection.style.display = 'none';
+                    
+                    // Enable and set required for vehicle fields
+                    vehicleSection.querySelectorAll('input, select').forEach(el => {
+                        if (el.classList.contains('form-input-compact')) {
+                            el.required = true;
+                            el.disabled = false;
+                        }
+                    });
+                    
+                    // Disable and remove required from battery fields
+                    batterySection.querySelectorAll('input, select').forEach(el => {
+                        if (el.classList.contains('form-input-compact')) {
+                            el.required = false;
+                            el.disabled = true;
+                            el.value = ''; // Clear values
+                        }
+                    });
+                } else if (auctionTypeBattery.checked) {
+                    vehicleSection.style.display = 'none';
+                    batterySection.style.display = 'block';
+                    
+                    // Disable and remove required from vehicle fields
+                    vehicleSection.querySelectorAll('input, select').forEach(el => {
+                        if (el.classList.contains('form-input-compact')) {
+                            el.required = false;
+                            el.disabled = true;
+                            el.value = ''; // Clear values
+                        }
+                    });
+                    
+                    // Enable and set required for battery fields
+                    batterySection.querySelectorAll('input, select').forEach(el => {
+                        if (el.classList.contains('form-input-compact')) {
+                            el.required = true;
+                            el.disabled = false;
+                        }
+                    });
+                } else {
+                    vehicleSection.style.display = 'none';
+                    batterySection.style.display = 'none';
+                    
+                    // Disable all fields
+                    vehicleSection.querySelectorAll('input, select').forEach(el => {
+                        if (el.classList.contains('form-input-compact')) {
+                            el.required = false;
+                            el.disabled = true;
+                        }
+                    });
+                    batterySection.querySelectorAll('input, select').forEach(el => {
+                        if (el.classList.contains('form-input-compact')) {
+                            el.required = false;
+                            el.disabled = true;
+                        }
+                    });
+                }
             }
-        });
 
-        // Update deposit rate percentage display
-        document.getElementById('depositRateInput').addEventListener('input', function() {
-            const percentage = (parseFloat(this.value) * 100).toFixed(0);
-            document.getElementById('depositRatePercent').textContent = percentage + '%';
-        });
-
-        // Set minimum datetime to now
-        const now = new Date();
-        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-        const minDateTime = now.toISOString().slice(0, 16);
-        
-        const startTimeInput = document.querySelector('input[name="AuctionRequest.StartTime"]');
-        const endTimeInput = document.querySelector('input[name="AuctionRequest.EndTime"]');
-        
-        startTimeInput.min = minDateTime;
-        
-        // Set end time minimum based on start time
-        startTimeInput.addEventListener('change', function() {
-            const startTime = new Date(this.value);
-            startTime.setHours(startTime.getHours() + 1);
-            startTime.setMinutes(startTime.getMinutes() - startTime.getTimezoneOffset());
-            endTimeInput.min = startTime.toISOString().slice(0, 16);
+            auctionTypeVehicle.addEventListener('change', updateSections);
+            auctionTypeBattery.addEventListener('change', updateSections);
             
-            if (endTimeInput.value && new Date(endTimeInput.value) <= new Date(this.value)) {
-                endTimeInput.value = startTime.toISOString().slice(0, 16);
+            // Initialize on page load
+            updateSections();
+
+            // ============ DEPOSIT RATE PERCENTAGE DISPLAY ============
+            const depositRateInput = document.getElementById('depositRateInput');
+            const depositRatePercent = document.getElementById('depositRatePercent');
+
+            depositRateInput.addEventListener('input', function() {
+                const percentage = (parseFloat(this.value || 0) * 100).toFixed(0);
+                depositRatePercent.textContent = percentage + '%';
+            });
+
+            // ============ DATETIME VALIDATION ============
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            const minDateTime = now.toISOString().slice(0, 16);
+
+            const startTimeInput = document.getElementById('startTimeInput');
+            const endTimeInput = document.getElementById('endTimeInput');
+
+            // Set minimum start time to now
+            startTimeInput.min = minDateTime;
+
+            // Set minimum end time based on start time (no 1-hour requirement)
+            startTimeInput.addEventListener('change', function() {
+                if (this.value) {
+                    endTimeInput.min = this.value;
+                }
+            });
+
+            // ============ PHOTO PREVIEW ============
+            const photoUrlInput = document.getElementById('photoUrlInput');
+            const photoPreview = document.getElementById('photoPreview');
+            const photoPreviewImg = document.getElementById('photoPreviewImg');
+            const photoPlaceholder = document.getElementById('photoPlaceholder');
+
+            function updatePhotoPreview() {
+                const url = photoUrlInput.value.trim();
+
+                if (url) {
+                    photoPreviewImg.src = url;
+                    photoPreview.style.display = 'block';
+                    photoPlaceholder.style.display = 'none';
+                } else {
+                    photoPreview.style.display = 'none';
+                    photoPlaceholder.style.display = 'flex';
+                }
             }
+
+            photoPreviewImg.onerror = function() {
+                photoPreview.style.display = 'none';
+                photoPlaceholder.style.display = 'flex';
+            };
+
+            let debounceTimer;
+            photoUrlInput.addEventListener('input', function() {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(updatePhotoPreview, 300);
+            });
+
+            // Initial preview
+            updatePhotoPreview();
         });
-
-        // Trigger on page load
-        if (startTimeInput.value) {
-            startTimeInput.dispatchEvent(new Event('change'));
-        }
-
-        const auctionTypeSelect = document.getElementById('auctionType');
-        if (auctionTypeSelect.value) {
-            auctionTypeSelect.dispatchEvent(new Event('change'));
-        }
     </script>
 }

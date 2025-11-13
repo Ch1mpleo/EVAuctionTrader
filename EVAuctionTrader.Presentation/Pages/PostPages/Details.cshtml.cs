@@ -1,4 +1,5 @@
 ﻿using EVAuctionTrader.Business.Interfaces;
+using EVAuctionTrader.BusinessObject.DTOs.ChatDTOs;
 using EVAuctionTrader.BusinessObject.DTOs.PostDTOs;
 using EVAuctionTrader.BusinessObject.Enums;
 using EVAuctionTrader.DataAccess.Interfaces;
@@ -10,12 +11,18 @@ namespace EVAuctionTrader.Presentation.Pages.PostPages
     public class DetailsModel : PageModel
     {
         private readonly IPostService _postService;
+        private readonly IChatService _chatService;
         private readonly IClaimsService _claimsService;
         private readonly ILogger<DetailsModel> _logger;
 
-        public DetailsModel(IPostService postService, IClaimsService claimsService, ILogger<DetailsModel> logger)
+        public DetailsModel(
+            IPostService postService,
+            IChatService chatService,
+            IClaimsService claimsService,
+            ILogger<DetailsModel> logger)
         {
             _postService = postService;
+            _chatService = chatService;
             _claimsService = claimsService;
             _logger = logger;
         }
@@ -153,4 +160,7 @@ namespace EVAuctionTrader.Presentation.Pages.PostPages
             }
         }
     }
+
+    // DTO cho request
+    public record CreateConversationRequest(Guid PostId, string? InitialMessage);
 }

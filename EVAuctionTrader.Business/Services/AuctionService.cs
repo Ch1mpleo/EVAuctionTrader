@@ -628,6 +628,63 @@ public class AuctionService : IAuctionService
         }
     }
 
+    public async Task<Pagination<AuctionResponseDto>> GetMyWonAuctionsAsync(
+        int pageNumber = 1,
+        int pageSize = 10,
+        string? search = null)
+    {
+        try
+        {
+            _logger.LogInformation("Retrieving paginated list of won auctions for current user.");
+
+            var currentUserId = _claimsService.GetCurrentUserId;
+
+            if (currentUserId == Guid.Empty)
+            {
+                _logger.LogWarning("GetMyWonAuctionsAsync failed: Invalid user ID from claims.");
+                return new Pagination<AuctionResponseDto>(new List<AuctionResponseDto>(), 0, pageNumber, pageSize);
+            }
+
+            var query = _unitOfWork.Auctions.GetQueryable()
+                .Where(a => !a.IsDeleted && a.WinnerId == currentUserId && a.Status == AuctionStatus.Ended);
+
+            search = search?.ToLower();
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(a => a.Title.ToLower().Contains(search) || a.Description.ToLower().Contains(search));
+            }
+
+            // Order by end time descending (most recent wins first)
+            query = query.OrderByDescending(a => a.EndTime);
+
+            var totalCount = await query.CountAsync();
+
+            var auctions = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var auctionDtos = new List<AuctionResponseDto>();
+
+            foreach (var auction in auctions)
+            {
+                var dto = await MapToAuctionResponseDto(auction);
+                if (dto != null)
+                {
+                    auctionDtos.Add(dto);
+                }
+            }
+
+            _logger.LogInformation($"Retrieved {auctionDtos.Count} won auctions for user {currentUserId}.");
+
+            return new Pagination<AuctionResponseDto>(auctionDtos, totalCount, pageNumber, pageSize);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while retrieving won auctions.");
+            throw;
+        }
+    }
 
 
     // Helper methods

@@ -6,6 +6,402 @@
 @section Styles {
     <link rel="stylesheet" href="~/css/posts.css" />
     <link rel="stylesheet" href="~/css/profile.css" />
+    <style>
+        .create-form-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .form-column {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .card-compact {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .card-header-compact {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid #2a2a2a;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .card-title-compact {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #fff;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-body-compact {
+            padding: 1.25rem;
+        }
+
+        .form-group-compact {
+            margin-bottom: 1rem;
+        }
+
+        .form-group-compact:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-label-compact {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            color: #aaa;
+            margin-bottom: 0.375rem;
+        }
+
+        .form-label-compact i {
+            font-size: 0.875rem;
+            color: #666;
+        }
+
+        .form-input-compact {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            background: #0a0a0a;
+            color: #fff;
+            transition: all 0.2s;
+        }
+
+        .form-input-compact:focus {
+            outline: none;
+            border-color: #0070f3;
+            box-shadow: 0 0 0 3px rgba(0, 112, 243, 0.1);
+        }
+
+        .form-input-compact::placeholder {
+            color: #666;
+        }
+
+        textarea.form-input-compact {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .type-toggle-compact {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .type-option-compact {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .type-option-compact input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+        }
+
+        .type-option-compact label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            border: 2px solid #2a2a2a;
+            border-radius: 10px;
+            background: #0a0a0a;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #aaa;
+        }
+
+        .type-option-compact label i {
+            font-size: 1.5rem;
+        }
+
+        .type-option-compact input[type="radio"]:checked + label {
+            border-color: #0070f3;
+            background: rgba(0, 112, 243, 0.05);
+            color: #0070f3;
+        }
+
+        .form-grid-compact {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-grid-compact .form-full {
+            grid-column: 1 / -1;
+        }
+
+        .version-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+
+        .version-option {
+            position: relative;
+        }
+
+        .version-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+        }
+
+        .version-option label {
+            display: block;
+            padding: 0.75rem 1rem;
+            border: 2px solid #2a2a2a;
+            border-radius: 8px;
+            background: #0a0a0a;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .version-option input[type="radio"]:checked + label {
+            border-color: #0070f3;
+            background: rgba(0, 112, 243, 0.05);
+        }
+
+        .version-free {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .version-free .version-name {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #aaa;
+        }
+
+        .version-free .version-duration {
+            font-size: 0.75rem;
+            color: #666;
+        }
+
+        .version-option input[type="radio"]:checked + label .version-free .version-name {
+            color: #0070f3;
+        }
+
+        .version-vip {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .version-vip .vip-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            color: #000;
+            font-size: 0.625rem;
+            font-weight: 700;
+            padding: 0.125rem 0.375rem;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(251, 191, 36, 0.3);
+        }
+
+        .version-vip .version-name {
+            font-size: 0.875rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+        }
+
+        .version-vip .version-duration {
+            font-size: 0.75rem;
+            color: #666;
+        }
+
+        .version-vip .version-price {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #fbbf24;
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid rgba(251, 191, 36, 0.2);
+        }
+
+        .version-option input[type="radio"]:checked + label .version-vip {
+            animation: vipGlow 2s ease-in-out infinite;
+        }
+
+        .version-option:has(input[value="1"]) label {
+            border-color: rgba(251, 191, 36, 0.3);
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.03) 0%, rgba(245, 158, 11, 0.03) 100%);
+        }
+
+        .version-option:has(input[value="1"]:checked) label {
+            border-color: #fbbf24;
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.1) 0%, rgba(245, 158, 11, 0.1) 100%);
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.2);
+        }
+
+        @@keyframes vipGlow {
+            0%, 100% {
+                filter: brightness(1);
+            }
+            50% {
+                filter: brightness(1.2);
+            }
+        }
+
+        .photo-preview-container {
+            margin-top: 0.75rem;
+        }
+
+        .photo-preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 0.75rem;
+            margin-top: 0.75rem;
+        }
+
+        .photo-preview-item {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+        }
+
+        .photo-preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .photo-preview-item .remove-photo {
+            position: absolute;
+            top: 0.25rem;
+            right: 0.25rem;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(239, 68, 68, 0.9);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            font-size: 0.75rem;
+        }
+
+        .photo-preview-item:hover .remove-photo {
+            opacity: 1;
+        }
+
+        .photo-preview-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 0.75rem;
+        }
+
+        .photo-count-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            background: rgba(0, 112, 243, 0.15);
+            border: 1px solid rgba(0, 112, 243, 0.3);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            color: #0070f3;
+            margin-top: 0.5rem;
+        }
+
+        .form-actions-compact {
+            grid-column: 1 / -1;
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .btn-compact {
+            padding: 0.625rem 1.25rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-primary-compact {
+            flex: 1;
+            background: linear-gradient(135deg, #0070f3 0%, #0051cc 100%);
+            color: white;
+        }
+
+        .btn-primary-compact:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 112, 243, 0.3);
+        }
+
+        .btn-secondary-compact {
+            background: #1a1a1a;
+            color: #aaa;
+            border: 1px solid #2a2a2a;
+        }
+
+        .btn-secondary-compact:hover {
+            background: #2a2a2a;
+            color: #fff;
+        }
+
+        /* Required field indicator */
+        .required {
+            color: #ef4444;
+        }
+
+        /* Validation message styling */
+        .text-danger {
+            font-size: 0.75rem;
+            color: #ef4444;
+            margin-top: 0.25rem;
+            display: block;
+        }
+    </style>
 }
 
 <div class="posts-page-clean">
@@ -30,281 +426,318 @@
         <form method="post" enctype="multipart/form-data">
             @Html.AntiForgeryToken()
 
-            <div class="posts-card-clean">
-                <div class="posts-card-header-clean">
-                    <h3 class="posts-card-title-clean">
-                        <i class="bi bi-info-circle"></i>
-                        Post Information
-                    </h3>
-                </div>
-                <div class="posts-card-body-clean">
+            <div class="create-form-container">
+                <!-- LEFT COLUMN: Post Information -->
+                <div class="form-column">
                     <!-- Post Type Selection -->
-                    <div class="form-section-title">
-                        <i class="bi bi-tag"></i>
-                        Select Post Type
-                    </div>
-                    <div class="post-type-toggle">
-                        <div class="post-type-option" id="typeVehicle">
-                            <input type="radio" asp-for="PostRequest.PostType" value="0" id="postTypeVehicle" checked />
-                            <label for="postTypeVehicle">
-                                <i class="bi bi-car-front"></i>
-                                <span>Vehicle</span>
-                            </label>
+                    <div class="card-compact">
+                        <div class="card-header-compact">
+                            <h3 class="card-title-compact">
+                                <i class="bi bi-tag"></i>
+                                Post Type
+                            </h3>
                         </div>
-                        <div class="post-type-option" id="typeBattery">
-                            <input type="radio" asp-for="PostRequest.PostType" value="1" id="postTypeBattery" />
-                            <label for="postTypeBattery">
-                                <i class="bi bi-battery-charging"></i>
-                                <span>Battery</span>
-                            </label>
+                        <div class="card-body-compact">
+                            <div class="type-toggle-compact">
+                                <div class="type-option-compact">
+                                    <input type="radio" asp-for="PostRequest.PostType" value="0" id="postTypeVehicle" checked />
+                                    <label for="postTypeVehicle">
+                                        <i class="bi bi-car-front"></i>
+                                        <span>Vehicle</span>
+                                    </label>
+                                </div>
+                                <div class="type-option-compact">
+                                    <input type="radio" asp-for="PostRequest.PostType" value="1" id="postTypeBattery" />
+                                    <label for="postTypeBattery">
+                                        <i class="bi bi-battery-charging"></i>
+                                        <span>Battery</span>
+                                    </label>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Basic Information -->
-                    <div class="post-form-grid">
-                        <div class="post-form-full">
-                            <div class="filter-group-clean">
-                                <label class="filter-label-clean" asp-for="PostRequest.Title">
+                    <div class="card-compact">
+                        <div class="card-header-compact">
+                            <h3 class="card-title-compact">
+                                <i class="bi bi-info-circle"></i>
+                                Basic Information
+                            </h3>
+                        </div>
+                        <div class="card-body-compact">
+                            <div class="form-group-compact">
+                                <label class="form-label-compact" asp-for="PostRequest.Title">
                                     <i class="bi bi-fonts"></i>
-                                    Title <span style="color: #ef4444;">*</span>
+                                    Title <span class="required">*</span>
                                 </label>
-                                <input type="text" class="filter-input-clean" asp-for="PostRequest.Title" required />
+                                <input type="text" class="form-input-compact" asp-for="PostRequest.Title" placeholder="Enter post title..." required />
                                 <span asp-validation-for="PostRequest.Title" class="text-danger"></span>
                             </div>
-                        </div>
 
-                        <div class="filter-group-clean">
-                            <label class="filter-label-clean" asp-for="PostRequest.Price">
-                                <i class="bi bi-currency-dollar"></i>
-                                Price (VND)
-                            </label>
-                            <input type="number" class="filter-input-clean" asp-for="PostRequest.Price" step="1000" />
-                            <span asp-validation-for="PostRequest.Price" class="text-danger"></span>
-                        </div>
+                            <div class="form-grid-compact">
+                                <div class="form-group-compact">
+                                    <label class="form-label-compact" asp-for="PostRequest.Price">
+                                        <i class="bi bi-currency-dollar"></i>
+                                        Price ($)
+                                    </label>
+                                    <input type="number" class="form-input-compact" asp-for="PostRequest.Price" step="1000" placeholder="0" />
+                                    <span asp-validation-for="PostRequest.Price" class="text-danger"></span>
+                                </div>
 
-                        <div class="filter-group-clean">
-                            <label class="filter-label-clean" asp-for="PostRequest.LocationAddress">
-                                <i class="bi bi-geo-alt"></i>
-                                Location <span style="color: #ef4444;">*</span>
-                            </label>
-                            <input type="text" class="filter-input-clean" asp-for="PostRequest.LocationAddress" required />
-                            <span asp-validation-for="PostRequest.LocationAddress" class="text-danger"></span>
-                        </div>
+                                <div class="form-group-compact">
+                                    <label class="form-label-compact" asp-for="PostRequest.LocationAddress">
+                                        <i class="bi bi-geo-alt"></i>
+                                        Location <span class="required">*</span>
+                                    </label>
+                                    <input type="text" class="form-input-compact" asp-for="PostRequest.LocationAddress" placeholder="City, District..." required />
+                                    <span asp-validation-for="PostRequest.LocationAddress" class="text-danger"></span>
+                                </div>
+                            </div>
 
-                        <div class="post-form-full">
-                            <div class="filter-group-clean">
-                                <label class="filter-label-clean" asp-for="PostRequest.Description">
+                            <div class="form-group-compact">
+                                <label class="form-label-compact" asp-for="PostRequest.Description">
                                     <i class="bi bi-text-paragraph"></i>
-                                    Description <span style="color: #ef4444;">*</span>
+                                    Description <span class="required">*</span>
                                 </label>
-                                <textarea class="filter-input-clean" asp-for="PostRequest.Description" rows="5" required></textarea>
+                                <textarea class="form-input-compact" asp-for="PostRequest.Description" placeholder="Describe your item..." required></textarea>
                                 <span asp-validation-for="PostRequest.Description" class="text-danger"></span>
                             </div>
-                        </div>
 
-                        <div class="filter-group-clean">
-                            <label class="filter-label-clean" asp-for="PostRequest.Version">
-                                <i class="bi bi-star"></i>
-                                Post Version
-                            </label>
-                            <select class="filter-input-clean" asp-for="PostRequest.Version">
-                                <option value="0">Free (15 days)</option>
-                                <option value="1">VIP (30 days)</option>
-                            </select>
-                        </div>
+                            <div class="form-group-compact">
+                                <label class="form-label-compact" asp-for="PostRequest.Version">
+                                    <i class="bi bi-star"></i>
+                                    Post Version
+                                </label>
+                                <div class="version-selector">
+                                    <div class="version-option">
+                                        <input type="radio" asp-for="PostRequest.Version" value="0" id="versionFree" checked />
+                                        <label for="versionFree">
+                                            <div class="version-free">
+                                                <span class="version-name">Free</span>
+                                                <span class="version-duration">15 days listing</span>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div class="version-option">
+                                        <input type="radio" asp-for="PostRequest.Version" value="1" id="versionVip" />
+                                        <label for="versionVip">
+                                            <span class="vip-badge">Premium</span>
+                                            <div class="version-vip">
+                                                <span class="version-name">
+                                                    <i class="bi bi-star-fill"></i>
+                                                    VIP
+                                                </span>
+                                                <span class="version-duration">30 days + Featured</span>
+                                                <span class="version-price">$@Model.VipFeeAmount.ToString("N2")</span>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
 
-                        <div class="filter-group-clean">
-                            <label class="filter-label-clean" asp-for="PostRequest.Status">
-                                <i class="bi bi-flag"></i>
-                                Status
-                            </label>
-                            <select class="filter-input-clean" asp-for="PostRequest.Status">
-                                <option value="0">Draft</option>
-                                <option value="1">Active</option>
-                            </select>
-                        </div>
+                            <div class="form-grid-compact">
+                                <div class="form-group-compact">
+                                    <label class="form-label-compact" asp-for="PostRequest.Status">
+                                        <i class="bi bi-flag"></i>
+                                        Status
+                                    </label>
+                                    <select class="form-input-compact" asp-for="PostRequest.Status">
+                                        <option value="0">Draft</option>
+                                        <option value="1">Active</option>
+                                    </select>
+                                </div>
 
-                        <div class="filter-group-clean">
-                            <label class="filter-label-clean" asp-for="PostRequest.PublishedAt">
-                                <i class="bi bi-calendar-event"></i>
-                                Publish Date
-                            </label>
-                            <input type="datetime-local" class="filter-input-clean" asp-for="PostRequest.PublishedAt" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Vehicle Details (shown when Vehicle is selected) -->
-            <div class="posts-card-clean" id="vehicleSection">
-                <div class="posts-card-header-clean">
-                    <h3 class="posts-card-title-clean">
-                        <i class="bi bi-car-front"></i>
-                        Vehicle Details
-                    </h3>
-                </div>
-                <div class="posts-card-body-clean">
-                    <div class="post-form-grid">
-                        <div class="filter-group-clean">
-                            <label class="filter-label-clean">
-                                <i class="bi bi-building"></i>
-                                Brand <span style="color: #ef4444;">*</span>
-                            </label>
-                            <input type="text" class="filter-input-clean" asp-for="PostRequest.Vehicle.Brand" />
-                            <span asp-validation-for="PostRequest.Vehicle.Brand" class="text-danger"></span>
-                        </div>
-
-                        <div class="filter-group-clean">
-                            <label class="filter-label-clean">
-                                <i class="bi bi-tag"></i>
-                                Model <span style="color: #ef4444;">*</span>
-                            </label>
-                            <input type="text" class="filter-input-clean" asp-for="PostRequest.Vehicle.Model" />
-                            <span asp-validation-for="PostRequest.Vehicle.Model" class="text-danger"></span>
-                        </div>
-
-                        <div class="filter-group-clean">
-                            <label class="filter-label-clean">
-                                <i class="bi bi-calendar"></i>
-                                Year <span style="color: #ef4444;">*</span>
-                            </label>
-                            <input type="number" class="filter-input-clean" asp-for="PostRequest.Vehicle.Year" min="1900" max="2025" />
-                            <span asp-validation-for="PostRequest.Vehicle.Year" class="text-danger"></span>
-                        </div>
-
-                        <div class="filter-group-clean">
-                            <label class="filter-label-clean">
-                                <i class="bi bi-speedometer"></i>
-                                Odometer (KM) <span style="color: #ef4444;">*</span>
-                            </label>
-                            <input type="number" class="filter-input-clean" asp-for="PostRequest.Vehicle.OdometerKm" min="0" />
-                            <span asp-validation-for="PostRequest.Vehicle.OdometerKm" class="text-danger"></span>
-                        </div>
-
-                        <div class="filter-group-clean">
-                            <label class="filter-label-clean">
-                                <i class="bi bi-award"></i>
-                                Condition Grade <span style="color: #ef4444;">*</span>
-                            </label>
-                            <select class="filter-input-clean" asp-for="PostRequest.Vehicle.ConditionGrade">
-                                <option value="">Select condition</option>
-                                <option value="Excellent">Excellent</option>
-                                <option value="Good">Good</option>
-                                <option value="Fair">Fair</option>
-                                <option value="Poor">Poor</option>
-                            </select>
-                            <span asp-validation-for="PostRequest.Vehicle.ConditionGrade" class="text-danger"></span>
+                                <div class="form-group-compact">
+                                    <label class="form-label-compact" asp-for="PostRequest.PublishedAt">
+                                        <i class="bi bi-calendar-event"></i>
+                                        Publish Date
+                                    </label>
+                                    <input type="datetime-local" class="form-input-compact" asp-for="PostRequest.PublishedAt" />
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Battery Details (shown when Battery is selected) -->
-            <div class="posts-card-clean" id="batterySection" style="display: none;">
-                <div class="posts-card-header-clean">
-                    <h3 class="posts-card-title-clean">
-                        <i class="bi bi-battery-charging"></i>
-                        Battery Details
-                    </h3>
-                </div>
-                <div class="posts-card-body-clean">
-                    <div class="post-form-grid">
-                        <div class="filter-group-clean">
-                            <label class="filter-label-clean">
-                                <i class="bi bi-building"></i>
-                                Manufacturer <span style="color: #ef4444;">*</span>
-                            </label>
-                            <input type="text" class="filter-input-clean" asp-for="PostRequest.Battery.Manufacturer" />
-                            <span asp-validation-for="PostRequest.Battery.Manufacturer" class="text-danger"></span>
+                <!-- RIGHT COLUMN: Vehicle/Battery Details & Photos -->
+                <div class="form-column">
+                    <!-- Vehicle Details -->
+                    <div class="card-compact" id="vehicleSection">
+                        <div class="card-header-compact">
+                            <h3 class="card-title-compact">
+                                <i class="bi bi-car-front"></i>
+                                Vehicle Details
+                            </h3>
                         </div>
+                        <div class="card-body-compact">
+                            <div class="form-grid-compact">
+                                <div class="form-group-compact">
+                                    <label class="form-label-compact">
+                                        <i class="bi bi-building"></i>
+                                        Brand <span class="required">*</span>
+                                    </label>
+                                    <input type="text" class="form-input-compact" asp-for="PostRequest.Vehicle.Brand" placeholder="Tesla, BMW..." />
+                                    <span asp-validation-for="PostRequest.Vehicle.Brand" class="text-danger"></span>
+                                </div>
 
-                        <div class="filter-group-clean">
-                            <label class="filter-label-clean">
-                                <i class="bi bi-droplet"></i>
-                                Chemistry <span style="color: #ef4444;">*</span>
-                            </label>
-                            <input type="text" class="filter-input-clean" asp-for="PostRequest.Battery.Chemistry" />
-                            <span asp-validation-for="PostRequest.Battery.Chemistry" class="text-danger"></span>
+                                <div class="form-group-compact">
+                                    <label class="form-label-compact">
+                                        <i class="bi bi-tag"></i>
+                                        Model <span class="required">*</span>
+                                    </label>
+                                    <input type="text" class="form-input-compact" asp-for="PostRequest.Vehicle.Model" placeholder="Model 3, i3..." />
+                                    <span asp-validation-for="PostRequest.Vehicle.Model" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group-compact">
+                                    <label class="form-label-compact">
+                                        <i class="bi bi-calendar"></i>
+                                        Year <span class="required">*</span>
+                                    </label>
+                                    <input type="number" class="form-input-compact" asp-for="PostRequest.Vehicle.Year" min="1900" max="2025" placeholder="2023" />
+                                    <span asp-validation-for="PostRequest.Vehicle.Year" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group-compact">
+                                    <label class="form-label-compact">
+                                        <i class="bi bi-speedometer"></i>
+                                        Odometer (KM) <span class="required">*</span>
+                                    </label>
+                                    <input type="number" class="form-input-compact" asp-for="PostRequest.Vehicle.OdometerKm" min="0" placeholder="15000" />
+                                    <span asp-validation-for="PostRequest.Vehicle.OdometerKm" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group-compact form-full">
+                                    <label class="form-label-compact">
+                                        <i class="bi bi-award"></i>
+                                        Condition Grade <span class="required">*</span>
+                                    </label>
+                                    <select class="form-input-compact" asp-for="PostRequest.Vehicle.ConditionGrade">
+                                        <option value="">Select condition</option>
+                                        <option value="Excellent">Excellent</option>
+                                        <option value="Good">Good</option>
+                                        <option value="Fair">Fair</option>
+                                        <option value="Poor">Poor</option>
+                                    </select>
+                                    <span asp-validation-for="PostRequest.Vehicle.ConditionGrade" class="text-danger"></span>
+                                </div>
+                            </div>
                         </div>
+                    </div>
 
-                        <div class="filter-group-clean">
-                            <label class="filter-label-clean">
-                                <i class="bi bi-lightning-charge"></i>
-                                Capacity (kWh) <span style="color: #ef4444;">*</span>
-                            </label>
-                            <input type="number" class="filter-input-clean" asp-for="PostRequest.Battery.CapacityKwh" step="0.01" min="0" />
-                            <span asp-validation-for="PostRequest.Battery.CapacityKwh" class="text-danger"></span>
+                    <!-- Battery Details -->
+                    <div class="card-compact" id="batterySection" style="display: none;">
+                        <div class="card-header-compact">
+                            <h3 class="card-title-compact">
+                                <i class="bi bi-battery-charging"></i>
+                                Battery Details
+                            </h3>
                         </div>
+                        <div class="card-body-compact">
+                            <div class="form-grid-compact">
+                                <div class="form-group-compact">
+                                    <label class="form-label-compact">
+                                        <i class="bi bi-building"></i>
+                                        Manufacturer <span class="required">*</span>
+                                    </label>
+                                    <input type="text" class="form-input-compact" asp-for="PostRequest.Battery.Manufacturer" placeholder="CATL, LG Chem..." />
+                                    <span asp-validation-for="PostRequest.Battery.Manufacturer" class="text-danger"></span>
+                                </div>
 
-                        <div class="filter-group-clean">
-                            <label class="filter-label-clean">
-                                <i class="bi bi-arrow-repeat"></i>
-                                Cycle Count <span style="color: #ef4444;">*</span>
-                            </label>
-                            <input type="number" class="filter-input-clean" asp-for="PostRequest.Battery.CycleCount" min="0" />
-                            <span asp-validation-for="PostRequest.Battery.CycleCount" class="text-danger"></span>
+                                <div class="form-group-compact">
+                                    <label class="form-label-compact">
+                                        <i class="bi bi-droplet"></i>
+                                        Chemistry <span class="required">*</span>
+                                    </label>
+                                    <input type="text" class="form-input-compact" asp-for="PostRequest.Battery.Chemistry" placeholder="Lithium-ion NMC..." />
+                                    <span asp-validation-for="PostRequest.Battery.Chemistry" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group-compact">
+                                    <label class="form-label-compact">
+                                        <i class="bi bi-lightning-charge"></i>
+                                        Capacity (kWh) <span class="required">*</span>
+                                    </label>
+                                    <input type="number" class="form-input-compact" asp-for="PostRequest.Battery.CapacityKwh" step="0.01" min="0" placeholder="60.0" />
+                                    <span asp-validation-for="PostRequest.Battery.CapacityKwh" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group-compact">
+                                    <label class="form-label-compact">
+                                        <i class="bi bi-arrow-repeat"></i>
+                                        Cycle Count <span class="required">*</span>
+                                    </label>
+                                    <input type="number" class="form-input-compact" asp-for="PostRequest.Battery.CycleCount" min="0" placeholder="800" />
+                                    <span asp-validation-for="PostRequest.Battery.CycleCount" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group-compact">
+                                    <label class="form-label-compact">
+                                        <i class="bi bi-heart-pulse"></i>
+                                        SOH (%) <span class="required">*</span>
+                                    </label>
+                                    <input type="number" class="form-input-compact" asp-for="PostRequest.Battery.SohPercent" step="0.01" min="0" max="100" placeholder="85.0" />
+                                    <span asp-validation-for="PostRequest.Battery.SohPercent" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group-compact">
+                                    <label class="form-label-compact">
+                                        <i class="bi bi-lightning"></i>
+                                        Voltage (V) <span class="required">*</span>
+                                    </label>
+                                    <input type="number" class="form-input-compact" asp-for="PostRequest.Battery.VoltageV" step="0.01" min="0" placeholder="400.0" />
+                                    <span asp-validation-for="PostRequest.Battery.VoltageV" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group-compact form-full">
+                                    <label class="form-label-compact">
+                                        <i class="bi bi-plug"></i>
+                                        Connector Type <span class="required">*</span>
+                                    </label>
+                                    <input type="text" class="form-input-compact" asp-for="PostRequest.Battery.ConnectorType" placeholder="CCS2, Type 2..." />
+                                    <span asp-validation-for="PostRequest.Battery.ConnectorType" class="text-danger"></span>
+                                </div>
+                            </div>
                         </div>
+                    </div>
 
-                        <div class="filter-group-clean">
-                            <label class="filter-label-clean">
-                                <i class="bi bi-heart-pulse"></i>
-                                SOH Percent <span style="color: #ef4444;">*</span>
-                            </label>
-                            <input type="number" class="filter-input-clean" asp-for="PostRequest.Battery.SohPercent" step="0.01" min="0" max="100" />
-                            <span asp-validation-for="PostRequest.Battery.SohPercent" class="text-danger"></span>
+                    <!-- Photos (Moved to Right Column) -->
+                    <div class="card-compact">
+                        <div class="card-header-compact">
+                            <h3 class="card-title-compact">
+                                <i class="bi bi-images"></i>
+                                Photos
+                            </h3>
                         </div>
+                        <div class="card-body-compact">
+                            <div class="form-group-compact">
+                                <label class="form-label-compact">
+                                    <i class="bi bi-link-45deg"></i>
+                                    Photo URLs (one per line)
+                                </label>
+                                <textarea class="form-input-compact" asp-for="PhotoUrlsText" id="photoUrlsInput" rows="4" placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg"></textarea>
+                            </div>
 
-                        <div class="filter-group-clean">
-                            <label class="filter-label-clean">
-                                <i class="bi bi-lightning"></i>
-                                Voltage (V) <span style="color: #ef4444;">*</span>
-                            </label>
-                            <input type="number" class="filter-input-clean" asp-for="PostRequest.Battery.VoltageV" step="0.01" min="0" />
-                            <span asp-validation-for="PostRequest.Battery.VoltageV" class="text-danger"></span>
-                        </div>
-
-                        <div class="filter-group-clean">
-                            <label class="filter-label-clean">
-                                <i class="bi bi-plug"></i>
-                                Connector Type <span style="color: #ef4444;">*</span>
-                            </label>
-                            <input type="text" class="filter-input-clean" asp-for="PostRequest.Battery.ConnectorType" />
-                            <span asp-validation-for="PostRequest.Battery.ConnectorType" class="text-danger"></span>
+                            <div class="photo-preview-container">
+                                <div id="photoPreviewGrid" class="photo-preview-grid"></div>
+                                <div id="photoCount" class="photo-count-badge" style="display: none;">
+                                    <i class="bi bi-images"></i>
+                                    <span id="photoCountText">0 photos</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Photos -->
-            <div class="posts-card-clean">
-                <div class="posts-card-header-clean">
-                    <h3 class="posts-card-title-clean">
-                        <i class="bi bi-images"></i>
-                        Photos
-                    </h3>
-                </div>
-                <div class="posts-card-body-clean">
-                    <div class="filter-group-clean">
-                        <label class="filter-label-clean">
-                            <i class="bi bi-link-45deg"></i>
-                            Photo URLs (one per line)
-                        </label>
-                        <textarea class="filter-input-clean" asp-for="PhotoUrlsText" rows="5" placeholder="Enter photo URLs, one per line"></textarea>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Form Actions -->
-            <div class="posts-card-clean">
-                <div class="posts-card-body-clean">
-                    <div style="display: flex; gap: 0.75rem;">
-                        <button type="submit" class="btn-clean btn-primary-clean" style="flex: 1;">
-                            <i class="bi bi-check-circle"></i> Create Post
-                        </button>
-                        <a asp-page="/Posts/Index" class="btn-clean btn-secondary-clean">
-                            <i class="bi bi-x-circle"></i> Cancel
-                        </a>
-                    </div>
+                <!-- Form Actions (Full Width) -->
+                <div class="form-actions-compact">
+                    <button type="submit" class="btn-compact btn-primary-compact">
+                        <i class="bi bi-check-circle"></i> Create Post
+                    </button>
+                    <a asp-page="/PostPages/MyPosts" class="btn-compact btn-secondary-compact">
+                        <i class="bi bi-x-circle"></i> Cancel
+                    </a>
                 </div>
             </div>
         </form>
@@ -315,8 +748,7 @@
     <partial name="_ValidationScriptsPartial" />
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const typeVehicle = document.getElementById('typeVehicle');
-            const typeBattery = document.getElementById('typeBattery');
+            // ============ POST TYPE TOGGLE ============
             const vehicleSection = document.getElementById('vehicleSection');
             const batterySection = document.getElementById('batterySection');
             const postTypeVehicle = document.getElementById('postTypeVehicle');
@@ -324,29 +756,81 @@
 
             function updateSections() {
                 if (postTypeVehicle.checked) {
-                    typeVehicle.classList.add('active');
-                    typeBattery.classList.remove('active');
                     vehicleSection.style.display = 'block';
                     batterySection.style.display = 'none';
                 } else {
-                    typeVehicle.classList.remove('active');
-                    typeBattery.classList.add('active');
                     vehicleSection.style.display = 'none';
                     batterySection.style.display = 'block';
                 }
             }
 
-            typeVehicle.addEventListener('click', function () {
-                postTypeVehicle.checked = true;
-                updateSections();
-            });
-
-            typeBattery.addEventListener('click', function () {
-                postTypeBattery.checked = true;
-                updateSections();
-            });
-
+            postTypeVehicle.addEventListener('change', updateSections);
+            postTypeBattery.addEventListener('change', updateSections);
             updateSections();
+
+            // ============ PHOTO PREVIEW FUNCTIONALITY ============
+            const photoUrlsInput = document.getElementById('photoUrlsInput');
+            const photoPreviewGrid = document.getElementById('photoPreviewGrid');
+            const photoCount = document.getElementById('photoCount');
+            const photoCountText = document.getElementById('photoCountText');
+
+            let photoUrls = [];
+
+            function updatePhotoPreview() {
+                const urls = photoUrlsInput.value.split('\n').filter(url => url.trim() !== '');
+                photoUrls = urls;
+
+                photoPreviewGrid.innerHTML = '';
+
+                if (urls.length === 0) {
+                    photoCount.style.display = 'none';
+                    return;
+                }
+
+                urls.forEach((url, index) => {
+                    const previewItem = document.createElement('div');
+                    previewItem.className = 'photo-preview-item';
+
+                    const img = document.createElement('img');
+                    img.src = url.trim();
+                    img.alt = `Photo ${index + 1}`;
+                    img.onerror = function() {
+                        this.parentElement.innerHTML = '<div class="photo-preview-placeholder"><i class="bi bi-image"></i></div>';
+                    };
+
+                    const removeBtn = document.createElement('button');
+                    removeBtn.className = 'remove-photo';
+                    removeBtn.type = 'button';
+                    removeBtn.innerHTML = '<i class="bi bi-x"></i>';
+                    removeBtn.onclick = function() {
+                        removePhoto(index);
+                    };
+
+                    previewItem.appendChild(img);
+                    previewItem.appendChild(removeBtn);
+                    photoPreviewGrid.appendChild(previewItem);
+                });
+
+                photoCount.style.display = 'inline-flex';
+                photoCountText.textContent = `${urls.length} photo${urls.length !== 1 ? 's' : ''}`;
+            }
+
+            function removePhoto(index) {
+                const urls = photoUrlsInput.value.split('\n').filter(url => url.trim() !== '');
+                urls.splice(index, 1);
+                photoUrlsInput.value = urls.join('\n');
+                updatePhotoPreview();
+            }
+
+            // Debounce function for better performance
+            let debounceTimer;
+            photoUrlsInput.addEventListener('input', function() {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(updatePhotoPreview, 300);
+            });
+
+            // Initial preview if there's existing data
+            updatePhotoPreview();
         });
     </script>
 }

@@ -1,0 +1,408 @@
+@page
+@using EVAuctionTrader.BusinessObject.Enums
+@model EVAuctionTrader.Presentation.Pages.FeePages.IndexModel
+@{
+    ViewData["Title"] = "VIP Fee Management";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/profile.css" />
+    <style>
+        .fee-edit-card {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .fee-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #2a2a2a;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .fee-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #fff;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .vip-badge-large {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            color: #000;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .fee-body {
+            padding: 2rem;
+        }
+
+        .fee-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .fee-display-section {
+            background: rgba(251, 191, 36, 0.05);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .fee-amount-display {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .fee-amount-label {
+            font-size: 0.875rem;
+            color: #aaa;
+            margin-bottom: 0.5rem;
+        }
+
+        .fee-amount-value {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+        }
+
+        .fee-description-display {
+            background: #0a0a0a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .fee-description-label {
+            font-size: 0.75rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .fee-description-text {
+            font-size: 0.875rem;
+            color: #ddd;
+            line-height: 1.6;
+        }
+
+        .fee-edit-section {
+            background: rgba(0, 112, 243, 0.05);
+            border: 1px solid rgba(0, 112, 243, 0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .edit-section-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #0070f3;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-group-fee {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label-fee {
+            display: block;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            color: #aaa;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input-fee {
+            width: 100%;
+            padding: 0.75rem;
+            font-size: 0.875rem;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            background: #0a0a0a;
+            color: #fff;
+            transition: all 0.2s;
+        }
+
+        .form-input-fee:focus {
+            outline: none;
+            border-color: #0070f3;
+            box-shadow: 0 0 0 3px rgba(0, 112, 243, 0.1);
+        }
+
+        .form-input-fee[type="number"] {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .btn-update-fee {
+            width: 100%;
+            padding: 0.875rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #0070f3 0%, #0051cc 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-update-fee:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 112, 243, 0.3);
+        }
+
+        .fee-metadata {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #2a2a2a;
+        }
+
+        .metadata-item {
+            background: #0a0a0a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .metadata-label {
+            font-size: 0.75rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+
+        .metadata-value {
+            font-size: 0.875rem;
+            color: #ddd;
+        }
+
+        .help-text {
+            font-size: 0.75rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+
+        .warning-box {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .warning-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #f59e0b;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .warning-text {
+            font-size: 0.8125rem;
+            color: #aaa;
+            line-height: 1.5;
+        }
+    </style>
+}
+
+<div class="staff-page-clean">
+    <div class="container">
+        <!-- Header -->
+        <div class="staff-header-clean">
+            <div>
+                <h1 class="staff-title-clean">
+                    <i class="bi bi-star-fill"></i>
+                    VIP Fee Management
+                </h1>
+                <p class="staff-subtitle-clean">Manage VIP post listing fee</p>
+            </div>
+        </div>
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill"></i>
+                @TempData["SuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                @TempData["ErrorMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        @if (Model.VipFee != null)
+        {
+            <div class="fee-edit-card">
+                <div class="fee-header">
+                    <h3 class="fee-title">
+                        <i class="bi bi-star-fill" style="color: #fbbf24;"></i>
+                        VIP Post Fee
+                        <span class="vip-badge-large">Premium Feature</span>
+                    </h3>
+                </div>
+                <div class="fee-body">
+                    <div class="fee-info-grid">
+                        <!-- Left: Current Fee Display -->
+                        <div class="fee-display-section">
+                            <div class="fee-amount-display">
+                                <div class="fee-amount-label">Current VIP Fee</div>
+                                <div class="fee-amount-value">$@Model.VipFee.Amount.ToString("N0")</div>
+                            </div>
+                            <div class="fee-description-display">
+                                <div class="fee-description-label">Description</div>
+                                <div class="fee-description-text">@Model.VipFee.Description</div>
+                            </div>
+                        </div>
+
+                        <!-- Right: Edit Form -->
+                        <div class="fee-edit-section">
+                            <div class="edit-section-title">
+                                <i class="bi bi-pencil-square"></i>
+                                Update Fee
+                            </div>
+                            <form method="post" asp-page-handler="UpdateFee">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="feeId" value="@Model.VipFee.Id" />
+
+                                <div class="form-group-fee">
+                                    <label class="form-label-fee">
+                                        <i class="bi bi-currency-dollar"></i> Amount ($)
+                                    </label>
+                                    <input type="number" 
+                                           name="amount" 
+                                           class="form-input-fee" 
+                                           value="@Model.VipFee.Amount" 
+                                           min="0.01" 
+                                           step="0.01" 
+                                           required />
+                                    <div class="help-text">Enter the fee amount in dollars</div>
+                                </div>
+
+                                <div class="form-group-fee">
+                                    <label class="form-label-fee">
+                                        <i class="bi bi-file-text"></i> Description
+                                    </label>
+                                    <textarea name="description" 
+                                              class="form-input-fee" 
+                                              rows="4" 
+                                              required 
+                                              style="resize: vertical;">@Model.VipFee.Description</textarea>
+                                    <div class="help-text">Describe what users get with VIP posting</div>
+                                </div>
+
+                                <button type="submit" class="btn-update-fee">
+                                    <i class="bi bi-check-circle"></i>
+                                    Update VIP Fee
+                                </button>
+                            </form>
+
+                            <div class="warning-box">
+                                <div class="warning-title">
+                                    <i class="bi bi-exclamation-triangle-fill"></i>
+                                    Important
+                                </div>
+                                <div class="warning-text">
+                                    Changes will affect all new VIP post listings immediately. Existing posts will retain their original fee.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Metadata -->
+                    <div class="fee-metadata">
+                        <div class="metadata-item">
+                            <div class="metadata-label">Created</div>
+                            <div class="metadata-value">
+                                @Model.VipFee.CreatedAt.ToString("MMM dd, yyyy 'at' hh:mm tt")
+                            </div>
+                        </div>
+                        <div class="metadata-item">
+                            <div class="metadata-label">Last Updated</div>
+                            <div class="metadata-value">
+                                @if (Model.VipFee.UpdatedAt.HasValue)
+                                {
+                                    @Model.VipFee.UpdatedAt.Value.ToString("MMM dd, yyyy 'at' hh:mm tt")
+                                }
+                                else
+                                {
+                                    <span style="color: #666;">Never</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <!-- No Fee Configured -->
+            <div class="staff-card-clean">
+                <div class="staff-card-body-clean">
+                    <div class="empty-state-clean">
+                        <i class="bi bi-star empty-icon-clean" style="color: #fbbf24;"></i>
+                        <h3 class="empty-title-clean">VIP Fee Not Configured</h3>
+                        <p class="empty-description-clean">
+                            The VIP post fee hasn't been set up yet. Please contact the system administrator to configure the fee.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Auto-hide alerts after 5 seconds
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                alert.style.opacity = '0';
+                alert.style.transition = 'opacity 0.3s';
+                setTimeout(() => alert.remove(), 300);
+            });
+        }, 5000);
+
+        // Confirm before updating
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const amount = document.querySelector('input[name="amount"]').value;
+            if (!confirm(`Are you sure you want to update the VIP fee to $${parseFloat(amount).toLocaleString()}?`)) {
+                e.preventDefault();
+            }
+        });
+    </script>
+}

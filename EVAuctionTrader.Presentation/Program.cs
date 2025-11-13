@@ -119,9 +119,13 @@ try
     using (var scope = app.Services.CreateScope())
     {
         var dbContext = scope.ServiceProvider.GetRequiredService<EVAuctionTraderDbContext>();
+
+        // Seed the data follow order
         await DbSeeder.SeedUsersAsync(dbContext);
+        await DbSeeder.SeedFeesAsync(dbContext);
         await DbSeeder.SeedPostsWithVehiclesAndBatteriesAsync(dbContext);
-        await DbSeeder.SeedAuctionsAsync(dbContext); // Add auction seeding
+        await DbSeeder.SeedAuctionsAsync(dbContext);
+        await DbSeeder.SeedWalletTransactionsAsync(dbContext);
     }
 }
 catch (Exception e)
@@ -137,7 +141,9 @@ app.MapGet("/", () => Results.Redirect("/Home/LandingPage"));
 
 app.MapRazorPages();
 
+
 // Map SignalR Hub
 app.MapHub<AuctionHub>("/auctionHub");
+app.MapHub<ChatHub>("/chathub");
 
 app.Run();

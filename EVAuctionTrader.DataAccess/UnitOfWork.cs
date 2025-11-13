@@ -19,7 +19,8 @@ namespace EVAuctionTrader.DataAccess
             IGenericRepository<Bid> bidRepository,
             IGenericRepository<Conversation> conversationRepository,
             IGenericRepository<Message> messageRepository,
-            IGenericRepository<Payment> paymentRepository
+            IGenericRepository<Payment> paymentRepository,
+            IGenericRepository<Fee> feeRepository
             )
         {
             _dbContext = dbContext;
@@ -35,6 +36,7 @@ namespace EVAuctionTrader.DataAccess
             Conversations = conversationRepository;
             Messages = messageRepository;
             Payments = paymentRepository;
+            Fees = feeRepository;
         }
 
         public IGenericRepository<User> Users { get; set; }
@@ -49,6 +51,7 @@ namespace EVAuctionTrader.DataAccess
         public IGenericRepository<Conversation> Conversations { get; set; }
         public IGenericRepository<Message> Messages { get; set; }
         public IGenericRepository<Payment> Payments { get; set; }
+        public IGenericRepository<Fee> Fees { get; set; }
 
         public void Dispose()
         {
