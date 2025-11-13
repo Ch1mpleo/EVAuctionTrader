@@ -24,6 +24,12 @@ namespace EVAuctionTrader.Business.Interfaces
         // Bidding
         Task<BidResponseDto?> PlaceBidAsync(Guid auctionId, BidRequestDto bidRequest);
 
+        // User's Won Auctions
+        Task<Pagination<AuctionResponseDto>> GetMyWonAuctionsAsync(
+            int pageNumber = 1,
+            int pageSize = 10,
+            string? search = null);
+
         // Background/Scheduled operations
         Task UpdateAuctionStatusesAsync();
         Task FinalizeAuctionAsync(Guid auctionId);
