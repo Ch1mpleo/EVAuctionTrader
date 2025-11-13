@@ -23,4 +23,8 @@
     <ProjectReference Include="..\EVAuctionTrader.Business\EVAuctionTrader.Business.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Pages\Admin\" />
+  </ItemGroup>
+
 </Project>

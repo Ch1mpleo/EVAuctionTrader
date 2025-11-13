@@ -24,6 +24,7 @@ namespace EVAuctionTrader.DataAccess
         public DbSet<Auction> Auctions { get; set; }
         public DbSet<Bid> Bids { get; set; }
         public DbSet<Payment> Payments { get; set; }
+        public DbSet<Fee> Fees { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

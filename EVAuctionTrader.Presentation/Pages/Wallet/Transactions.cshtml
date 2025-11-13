@@ -1,4 +1,5 @@
 @page
+@using EVAuctionTrader.BusinessObject.Enums
 @model EVAuctionTrader.Presentation.Pages.Wallet.TransactionsModel
 @{
     ViewData["Title"] = "Transaction History";
@@ -6,37 +7,396 @@
 
 @section Styles {
     <link rel="stylesheet" href="~/css/profile.css" />
+    <style>
+        /* Transaction Type Badges */
+        .badge-topup {
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            color: white;
+        }
+
+        .badge-post-fee {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+        }
+
+        .badge-auction-hold {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+        }
+
+        .badge-auction-release {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+        }
+
+        .badge-auction-capture {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .badge-refund {
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+            color: white;
+        }
+
+        .badge-adjust {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            color: white;
+        }
+
+        /* Amount Display */
+        .amount-positive {
+            color: #22c55e;
+            font-weight: 600;
+        }
+
+        .amount-negative {
+            color: #ef4444;
+            font-weight: 600;
+        }
+
+        /* Transaction Details */
+        .transaction-details {
+            font-size: 0.875rem;
+            color: #aaaaaa;
+            margin-top: 0.25rem;
+        }
+
+        .transaction-link {
+            color: #0070f3;
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+
+            .transaction-link:hover {
+                opacity: 0.8;
+            }
+
+        /* Stats Cards */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card-wallet {
+            background: linear-gradient(135deg, #1a1a1a 0%, #0f0f0f 100%);
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .stat-icon-wallet {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 1rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .stat-icon-income {
+            background: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+        }
+
+        .stat-icon-expense {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+
+        .stat-icon-count {
+            background: rgba(0, 112, 243, 0.1);
+            color: #0070f3;
+        }
+
+        .stat-value-wallet {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label-wallet {
+            font-size: 0.875rem;
+            color: #aaaaaa;
+        }
+    </style>
 }
 
 <div class="staff-page-clean">
     <div class="container">
-      <!-- Header -->
-  <div class="staff-header-clean">
-            <h1 class="staff-title-clean">
-        <i class="bi bi-list-check"></i>
-                Transaction History
-            </h1>
-    <p class="staff-subtitle-clean">View all your wallet transactions</p>
-   </div>
-
-        <!-- Coming Soon Card -->
-        <div class="staff-card-clean">
-        <div class="staff-card-body-clean">
-<div class="empty-state-clean">
-         <div class="empty-icon-clean">
-              <i class="bi bi-hourglass-split"></i>
- </div>
-       <h2 class="empty-title-clean">Coming Soon</h2>
-    <p class="empty-description-clean">
-            Transaction history feature is under development.<br />
-    Check back soon!
-    </p>
-      <a asp-page="/Wallet/Index" class="btn-clean btn-primary-clean" style="margin-top: 1.5rem;">
-         <i class="bi bi-arrow-left"></i>
-            Back to Wallet
-</a>
-       </div>
-     </div>
+        <!-- Header -->
+        <div class="staff-header-clean">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h1 class="staff-title-clean">
+                        <i class="bi bi-list-check"></i>
+                        Transaction History
+                    </h1>
+                    <p class="staff-subtitle-clean">View all your wallet transactions</p>
+                </div>
+                <a asp-page="/Wallet/Index" class="btn-clean btn-secondary-clean">
+                    <i class="bi bi-arrow-left"></i> Back to Wallet
+                </a>
+            </div>
         </div>
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill"></i>
+                @TempData["SuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                @TempData["ErrorMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        @if (Model.Transactions != null && Model.Transactions.Any())
+        {
+            <!-- Statistics -->
+            <div class="stats-row">
+                <div class="stat-card-wallet">
+                    <div class="stat-icon-wallet stat-icon-income">
+                        <i class="bi bi-arrow-down-circle"></i>
+                    </div>
+                    <div class="stat-value-wallet">
+                        +$@Model.Transactions.Where(t => t.Type == WalletTransactionType.Topup || t.Type == WalletTransactionType.AuctionRelease || t.Type == WalletTransactionType.Refund).Sum(t => t.Amount).ToString("N0")
+                    </div>
+                    <div class="stat-label-wallet">Total Income</div>
+                </div>
+                <div class="stat-card-wallet">
+                    <div class="stat-icon-wallet stat-icon-expense">
+                        <i class="bi bi-arrow-up-circle"></i>
+                    </div>
+                    <div class="stat-value-wallet">
+                        -$@Model.Transactions.Where(t => t.Type == WalletTransactionType.PostFee || t.Type == WalletTransactionType.AuctionHold || t.Type == WalletTransactionType.AuctionCapture).Sum(t => t.Amount).ToString("N0")
+                    </div>
+                    <div class="stat-label-wallet">Total Expenses</div>
+                </div>
+                <div class="stat-card-wallet">
+                    <div class="stat-icon-wallet stat-icon-count">
+                        <i class="bi bi-receipt"></i>
+                    </div>
+                    <div class="stat-value-wallet">@Model.Transactions.TotalCount</div>
+                    <div class="stat-label-wallet">Total Transactions</div>
+                </div>
+            </div>
+
+            <!-- Transactions Table -->
+            <div class="staff-card-clean">
+                <div class="table-responsive">
+                    <table class="table-clean">
+                        <thead>
+                            <tr>
+                                <th>Date & Time</th>
+                                <th>Type</th>
+                                <th>Amount</th>
+                                <th>Balance After</th>
+                                <th>Status</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var transaction in Model.Transactions)
+                            {
+                                var isPositive = transaction.Type == WalletTransactionType.Topup ||
+                                                 transaction.Type == WalletTransactionType.AuctionRelease ||
+                                                 transaction.Type == WalletTransactionType.Refund;
+
+                                <tr>
+                                    <td>
+                                        <div class="date-cell-clean">
+                                            <div class="date-primary-clean">
+                                                @transaction.CreatedAt.ToString("MMM dd, yyyy")
+                                            </div>
+                                            <div class="date-secondary-clean">
+                                                @transaction.CreatedAt.ToString("hh:mm tt")
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @switch (transaction.Type)
+                                        {
+                                            case WalletTransactionType.Topup:
+                                                <span class="badge-clean badge-topup">
+                                                    <i class="bi bi-wallet2"></i> Top-up
+                                                </span>
+                                                break;
+                                            case WalletTransactionType.PostFee:
+                                                <span class="badge-clean badge-post-fee">
+                                                    <i class="bi bi-tag"></i> Post Fee
+                                                </span>
+                                                break;
+                                            case WalletTransactionType.AuctionHold:
+                                                <span class="badge-clean badge-auction-hold">
+                                                    <i class="bi bi-lock"></i> Auction Hold
+                                                </span>
+                                                break;
+                                            case WalletTransactionType.AuctionRelease:
+                                                <span class="badge-clean badge-auction-release">
+                                                    <i class="bi bi-unlock"></i> Auction Release
+                                                </span>
+                                                break;
+                                            case WalletTransactionType.AuctionCapture:
+                                                <span class="badge-clean badge-auction-capture">
+                                                    <i class="bi bi-check2-square"></i> Auction Payment
+                                                </span>
+                                                break;
+                                            case WalletTransactionType.Refund:
+                                                <span class="badge-clean badge-refund">
+                                                    <i class="bi bi-arrow-counterclockwise"></i> Refund
+                                                </span>
+                                                break;
+                                            case WalletTransactionType.Adjust:
+                                                <span class="badge-clean badge-adjust">
+                                                    <i class="bi bi-sliders"></i> Adjustment
+                                                </span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="@(isPositive ? "amount-positive" : "amount-negative")">
+                                            @(isPositive ? "+" : "-")$@transaction.Amount.ToString("N0")
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <strong style="color: #ffffff;">$@transaction.BalanceAfter?.ToString("N0")</strong>
+                                    </td>
+                                    <td>
+                                        @if (transaction.Status == WalletTransactionStatus.Succeeded)
+                                        {
+                                            <span class="badge-clean badge-success">
+                                                <i class="bi bi-check-circle"></i> Success
+                                            </span>
+                                        }
+                                        else if (transaction.Status == WalletTransactionStatus.Pending)
+                                        {
+                                            <span class="badge-clean badge-pending">
+                                                <i class="bi bi-clock"></i> Pending
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge-clean badge-danger">
+                                                <i class="bi bi-x-circle"></i> Failed
+                                            </span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="transaction-details">
+                                            @if (transaction.PostId.HasValue && !string.IsNullOrEmpty(transaction.PostTitle))
+                                            {
+                                                <div>
+                                                    <i class="bi bi-file-earmark-text"></i>
+                                                    <a asp-page="/PostPages/Details" asp-route-id="@transaction.PostId" class="transaction-link">
+                                                        @transaction.PostTitle
+                                                    </a>
+                                                </div>
+                                            }
+                                            @if (transaction.AuctionId.HasValue && !string.IsNullOrEmpty(transaction.AuctionTitle))
+                                            {
+                                                <div>
+                                                    <i class="bi bi-hammer"></i>
+                                                    <a asp-page="/AuctionPages/Details" asp-route-id="@transaction.AuctionId" class="transaction-link">
+                                                        @transaction.AuctionTitle
+                                                    </a>
+                                                </div>
+                                            }
+                                            @if (transaction.PaymentId.HasValue && transaction.PaymentAmount.HasValue)
+                                            {
+                                                <div>
+                                                    <i class="bi bi-credit-card"></i>
+                                                    Payment: $@transaction.PaymentAmount.Value.ToString("N0")
+                                                </div>
+                                            }
+                                            @if (!transaction.PostId.HasValue && !transaction.AuctionId.HasValue && !transaction.PaymentId.HasValue)
+                                            {
+                                                <span style="color: #666;">No related items</span>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                @if (Model.Transactions.TotalPages > 1)
+                {
+                    <div class="pagination-clean">
+                        @if (Model.Transactions.HasPrevious)
+                        {
+                            <a asp-page="/Wallet/Transactions"
+                               asp-route-pageNumber="@(Model.Transactions.CurrentPage - 1)"
+                               asp-route-pageSize="@Model.PageSize"
+                               class="page-btn-clean">
+                                <i class="bi bi-chevron-left"></i> Previous
+                            </a>
+                        }
+
+                        <span class="page-info-clean">
+                            Page @Model.Transactions.CurrentPage of @Model.Transactions.TotalPages
+                        </span>
+
+                        @if (Model.Transactions.HasNext)
+                        {
+                            <a asp-page="/Wallet/Transactions"
+                               asp-route-pageNumber="@(Model.Transactions.CurrentPage + 1)"
+                               asp-route-pageSize="@Model.PageSize"
+                               class="page-btn-clean">
+                                Next <i class="bi bi-chevron-right"></i>
+                            </a>
+                        }
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <!-- Empty State -->
+            <div class="staff-card-clean">
+                <div class="staff-card-body-clean">
+                    <div class="empty-state-clean">
+                        <i class="bi bi-inbox empty-icon-clean"></i>
+                        <h3 class="empty-title-clean">No Transactions Yet</h3>
+                        <p class="empty-description-clean">
+                            You haven't made any wallet transactions yet.<br />
+                            Top up your wallet or create a VIP post to get started!
+                        </p>
+                        <a asp-page="/Wallet/Index" class="btn-clean btn-primary-clean mt-3">
+                            <i class="bi bi-wallet2"></i> Go to Wallet
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        // Auto-hide alerts after 5 seconds
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                alert.style.opacity = '0';
+                alert.style.transition = 'opacity 0.3s';
+                setTimeout(() => alert.remove(), 300);
+            });
+        }, 5000);
+    </script>
+}

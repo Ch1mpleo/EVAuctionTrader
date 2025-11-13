@@ -998,5 +998,23 @@ namespace EVAuctionTrader.Presentation.Helper
                 await context.SaveChangesAsync();
             }
         }
+
+        public static async Task SeedFeesAsync(EVAuctionTraderDbContext context)
+        {
+            await context.Database.MigrateAsync();
+
+            if (!await context.Fees.AnyAsync())
+            {
+                var vipPostFee = new Fee
+                {
+                    Type = FeeType.VipPostFee,
+                    Amount = 5m,
+                    Description = "Fee charged for creating a VIP post listing. VIP posts are displayed for 30 days and have premium placement."
+                };
+
+                await context.Fees.AddAsync(vipPostFee);
+                await context.SaveChangesAsync();
+            }
+        }
     }
 }
