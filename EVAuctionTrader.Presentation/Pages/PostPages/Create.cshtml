@@ -241,6 +241,15 @@
             color: #666;
         }
 
+        .version-vip .version-price {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #fbbf24;
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid rgba(251, 191, 36, 0.2);
+        }
+
         .version-option input[type="radio"]:checked + label .version-vip {
             animation: vipGlow 2s ease-in-out infinite;
         }
@@ -520,6 +529,7 @@
                                                     VIP
                                                 </span>
                                                 <span class="version-duration">30 days + Featured</span>
+                                                <span class="version-price">$@Model.VipFeeAmount.ToString("N2")</span>
                                             </div>
                                         </label>
                                     </div>

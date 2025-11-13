@@ -13,11 +13,13 @@ namespace EVAuctionTrader.Presentation.Pages.PostPages
     public class CreateModel : PageModel
     {
         private readonly IPostService _postService;
+        private readonly IFeeService _feeService;
         private readonly ILogger<CreateModel> _logger;
 
-        public CreateModel(IPostService postService, ILogger<CreateModel> logger)
+        public CreateModel(IPostService postService, IFeeService feeService, ILogger<CreateModel> logger)
         {
             _postService = postService;
+            _feeService = feeService;
             _logger = logger;
         }
 
@@ -36,9 +38,25 @@ namespace EVAuctionTrader.Presentation.Pages.PostPages
         public string? PhotoUrlsText { get; set; }
 
         public string? ErrorMessage { get; set; }
+        
+        public decimal VipFeeAmount { get; set; } = 5m; // Default value
 
-        public void OnGet()
+        public async Task OnGetAsync()
         {
+            try
+            {
+                // Load VIP fee amount
+                var vipFee = await _feeService.GetFeeByTypeAsync(FeeType.VipPostFee);
+                if (vipFee != null)
+                {
+                    VipFeeAmount = vipFee.Amount;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to load VIP fee, using default");
+                // Keep default value if failed to load
+            }
         }
 
         public async Task<IActionResult> OnPostAsync()
@@ -63,6 +81,7 @@ namespace EVAuctionTrader.Presentation.Pages.PostPages
                         string.IsNullOrWhiteSpace(PostRequest.Vehicle.Model))
                     {
                         ErrorMessage = "Vehicle details are required for vehicle posts.";
+                        await OnGetAsync(); // Reload fee
                         return Page();
                     }
                     PostRequest.Battery = null; // Clear Battery data
@@ -74,6 +93,7 @@ namespace EVAuctionTrader.Presentation.Pages.PostPages
                         string.IsNullOrWhiteSpace(PostRequest.Battery.Chemistry))
                     {
                         ErrorMessage = "Battery details are required for battery posts.";
+                        await OnGetAsync(); // Reload fee
                         return Page();
                     }
                     PostRequest.Vehicle = null; // Clear Vehicle data
@@ -84,16 +104,18 @@ namespace EVAuctionTrader.Presentation.Pages.PostPages
                 if (result == null)
                 {
                     ErrorMessage = "Failed to create post. Please try again.";
+                    await OnGetAsync(); // Reload fee
                     return Page();
                 }
 
                 TempData["SuccessMessage"] = "Post created successfully!";
-                return RedirectToPage("/PostPages/Index");
+                return RedirectToPage("/PostPages/MyPosts");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating post");
                 ErrorMessage = $"Error: {ex.Message}";
+                await OnGetAsync(); // Reload fee
                 return Page();
             }
         }

@@ -1,6 +1,6 @@
 using EVAuctionTrader.Business.Interfaces;
-using EVAuctionTrader.Business.Utils;
 using EVAuctionTrader.BusinessObject.DTOs.FeeDTOs;
+using EVAuctionTrader.BusinessObject.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -19,19 +19,14 @@ public sealed class IndexModel : PageModel
         _logger = logger;
     }
 
-    public Pagination<FeeResponseDto>? Fees { get; set; }
-
-    [BindProperty(SupportsGet = true)]
-    public int PageNumber { get; set; } = 1;
-
-    [BindProperty(SupportsGet = true)]
-    public int PageSize { get; set; } = 10;
+    public FeeResponseDto? VipFee { get; set; }
 
     public async Task<IActionResult> OnGetAsync()
     {
         try
         {
-            Fees = await _feeService.GetAllFeesAsync(PageNumber, PageSize);
+            // Get VIP Post Fee specifically
+            VipFee = await _feeService.GetFeeByTypeAsync(FeeType.VipPostFee);
             return Page();
         }
         catch (UnauthorizedAccessException ex)
@@ -42,38 +37,61 @@ public sealed class IndexModel : PageModel
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error loading fees");
-            TempData["ErrorMessage"] = "An error occurred while loading fees.";
-            Fees = new Pagination<FeeResponseDto>(new List<FeeResponseDto>(), 0, 1, 10);
+            _logger.LogError(ex, "Error loading VIP fee");
+            TempData["ErrorMessage"] = "An error occurred while loading the VIP fee.";
             return Page();
         }
     }
 
-    public async Task<IActionResult> OnPostDeleteAsync(Guid id)
+    public async Task<IActionResult> OnPostUpdateFeeAsync(Guid feeId, decimal amount, string description)
     {
         try
         {
-            var result = await _feeService.DeleteFeeAsync(id);
-
-            if (result)
+            if (amount <= 0)
             {
-                TempData["SuccessMessage"] = "Fee deleted successfully.";
+                TempData["ErrorMessage"] = "Fee amount must be greater than zero.";
+                return RedirectToPage();
+            }
+
+            if (string.IsNullOrWhiteSpace(description))
+            {
+                TempData["ErrorMessage"] = "Description is required.";
+                return RedirectToPage();
+            }
+
+            var feeRequest = new FeeRequestDto
+            {
+                Type = FeeType.VipPostFee,
+                Amount = amount,
+                Description = description.Trim()
+            };
+
+            var result = await _feeService.UpdateFeeAsync(feeId, feeRequest);
+
+            if (result == null)
+            {
+                TempData["ErrorMessage"] = "Fee not found.";
             }
             else
             {
-                TempData["ErrorMessage"] = "Failed to delete fee. Fee may not exist.";
+                TempData["SuccessMessage"] = $"VIP fee updated successfully to ${result.Amount:N2}.";
             }
         }
         catch (UnauthorizedAccessException)
         {
-            TempData["ErrorMessage"] = "You don't have permission to delete fees.";
+            TempData["ErrorMessage"] = "You don't have permission to update fees.";
+        }
+        catch (ArgumentException ex)
+        {
+            _logger.LogWarning(ex, "Invalid fee data");
+            TempData["ErrorMessage"] = ex.Message;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error deleting fee {FeeId}", id);
-            TempData["ErrorMessage"] = "An error occurred while deleting the fee.";
+            _logger.LogError(ex, "Error updating fee {FeeId}", feeId);
+            TempData["ErrorMessage"] = "An error occurred while updating the fee.";
         }
 
-        return RedirectToPage(new { pageNumber = PageNumber, pageSize = PageSize });
+        return RedirectToPage();
     }
 }
