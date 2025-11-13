@@ -1,0 +1,74 @@
+@model EVAuctionTrader.BusinessObject.DTOs.PostDTOs.PostCommentResponseDto
+@inject EVAuctionTrader.DataAccess.Interfaces.IClaimsService ClaimsService
+
+@{
+    var currentUserId = ClaimsService.GetCurrentUserId;
+    var isAuthor = Model.AuthorId == currentUserId;
+    var isAdmin = User.IsInRole("Admin");
+    var canDelete = isAuthor || isAdmin;
+    var avatarInitial = Model.AuthorName?.FirstOrDefault().ToString().ToUpper() ?? "?";
+}
+
+<div class="comment-item">
+    <div class="comment-header">
+        <div class="comment-author-info">
+            <div class="comment-author-avatar">@avatarInitial</div>
+            <div class="comment-author-details">
+                <div class="comment-author">@Model.AuthorName</div>
+                <div class="comment-date">@Model.CreatedAt.ToString("MMM dd, yyyy · HH:mm")</div>
+            </div>
+        </div>
+        <div class="comment-actions">
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <button type="button" class="btn-comment-action" onclick="toggleReplyForm('@Model.Id')">
+                    <i class="bi bi-reply"></i> Reply
+                </button>
+            }
+            @if (canDelete)
+            {
+                <form method="post" asp-page-handler="DeleteComment" asp-route-commentId="@Model.Id" 
+                      style="display: inline;" onsubmit="return confirm('Delete this comment?');">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn-comment-action btn-comment-delete">
+                        <i class="bi bi-trash"></i> Delete
+                    </button>
+                </form>
+            }
+        </div>
+    </div>
+    
+    <p class="comment-body">@Model.Body</p>
+
+    <!-- Reply Form -->
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <div class="reply-form" id="reply-form-@Model.Id">
+            <form method="post" asp-page-handler="AddComment">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="NewComment.ParentCommentId" value="@Model.Id" />
+                <textarea name="NewComment.Body" class="reply-textarea" 
+                          placeholder="Write a reply..." required></textarea>
+                <div class="comment-form-actions">
+                    <button type="submit" class="btn-comment btn-comment-submit">
+                        <i class="bi bi-send-fill"></i> Reply
+                    </button>
+                    <button type="button" class="btn-comment btn-comment-cancel" onclick="toggleReplyForm('@Model.Id')">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    }
+
+    <!-- Nested Replies -->
+    @if (Model.Replies != null && Model.Replies.Any())
+    {
+        <div class="comment-replies">
+            @foreach (var reply in Model.Replies)
+            {
+                @await Html.PartialAsync("_CommentItem", reply)
+            }
+        </div>
+    }
+</div>

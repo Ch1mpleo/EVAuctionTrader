@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EVAuctionTrader.DataAccess.Migrations
 {
     [DbContext(typeof(EVAuctionTraderDbContext))]
-    [Migration("20251111175132_UpdateAuctionV1")]
-    partial class UpdateAuctionV1
+    [Migration("20251113064343_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -320,6 +320,62 @@ namespace EVAuctionTrader.DataAccess.Migrations
                     b.ToTable("Messages");
                 });
 
+            modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Payment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric");
+
+                    b.Property<string>("CheckoutSessionId")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("PaymentDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("PaymentIntentId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Payments");
+                });
+
             modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Post", b =>
                 {
                     b.Property<Guid>("Id")
@@ -432,6 +488,9 @@ namespace EVAuctionTrader.DataAccess.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
+                    b.Property<Guid?>("ParentCommentId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid>("PostId")
                         .HasColumnType("uuid");
 
@@ -444,6 +503,8 @@ namespace EVAuctionTrader.DataAccess.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AuthorId");
+
+                    b.HasIndex("ParentCommentId");
 
                     b.HasIndex("PostId");
 
@@ -767,6 +828,17 @@ namespace EVAuctionTrader.DataAccess.Migrations
                     b.Navigation("Sender");
                 });
 
+            modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Payment", b =>
+                {
+                    b.HasOne("EVAuctionTrader.DataAccess.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Post", b =>
                 {
                     b.HasOne("EVAuctionTrader.DataAccess.Entities.User", "Author")
@@ -798,6 +870,11 @@ namespace EVAuctionTrader.DataAccess.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("EVAuctionTrader.DataAccess.Entities.PostComment", "ParentComment")
+                        .WithMany("Replies")
+                        .HasForeignKey("ParentCommentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("EVAuctionTrader.DataAccess.Entities.Post", "Post")
                         .WithMany("Comments")
                         .HasForeignKey("PostId")
@@ -805,6 +882,8 @@ namespace EVAuctionTrader.DataAccess.Migrations
                         .IsRequired();
 
                     b.Navigation("Author");
+
+                    b.Navigation("ParentComment");
 
                     b.Navigation("Post");
                 });
@@ -869,6 +948,11 @@ namespace EVAuctionTrader.DataAccess.Migrations
             modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Post", b =>
                 {
                     b.Navigation("Comments");
+                });
+
+            modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.PostComment", b =>
+                {
+                    b.Navigation("Replies");
                 });
 
             modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.User", b =>

@@ -3,7 +3,6 @@ using EVAuctionTrader.Presentation.Architecture;
 using EVAuctionTrader.Presentation.Configuration;
 using EVAuctionTrader.Presentation.Helper;
 using EVAuctionTrader.Presentation.Hubs;
-using EVDealerSales.Presentation.Configuration;
 using Microsoft.AspNetCore.DataProtection;
 using Stripe;
 using System.IdentityModel.Tokens.Jwt;

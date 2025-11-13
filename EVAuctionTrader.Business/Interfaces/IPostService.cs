@@ -29,7 +29,10 @@ namespace EVAuctionTrader.Business.Interfaces
             bool priceSort = true);
         Task<PostWithCommentResponseDto?> GetPostByIdAsync(Guid postId);
         Task<bool> DeletePostAsync(Guid postId);
-
         Task<bool> BanPostAsync(Guid postId);
+        
+        // Comment methods
+        Task<PostCommentResponseDto?> CreateCommentAsync(PostCommentRequestDto commentDto);
+        Task<bool> DeleteCommentAsync(Guid commentId);
     }
 }
