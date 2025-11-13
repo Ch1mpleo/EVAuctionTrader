@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EVAuctionTrader.DataAccess.Migrations
 {
     [DbContext(typeof(EVAuctionTraderDbContext))]
-    [Migration("20251112185746_InitDb")]
-    partial class InitDb
+    [Migration("20251113125048_UpdateDbV100")]
+    partial class UpdateDbV100
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
