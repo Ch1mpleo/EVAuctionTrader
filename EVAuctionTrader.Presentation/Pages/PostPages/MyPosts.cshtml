@@ -89,24 +89,24 @@
             </div>
         </div>
 
-        <!-- Filter Section -->
+        <!-- Compact Filter Section -->
         <div class="staff-card-clean mb-4">
-            <div class="staff-card-body-clean">
-                <form method="get" class="row g-3">
-                    <div class="col-md-4">
-                        <input type="text" name="search" class="filter-input-clean"
-                               placeholder="Search your posts..."
+            <div class="staff-card-body-clean" style="padding: 1rem;">
+                <form method="get" style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 250px;">
+                        <input type="text" name="search" class="filter-input-compact"
+                               placeholder="Search posts..."
                                value="@Model.Search">
                     </div>
-                    <div class="col-md-2">
-                        <select name="postType" class="filter-input-clean">
+                    <div style="min-width: 140px;">
+                        <select name="postType" class="filter-input-compact">
                             <option value="">All Types</option>
                             <option value="@((int)PostType.Vehicle)" selected="@(Model.PostType == PostType.Vehicle)">Vehicle</option>
                             <option value="@((int)PostType.Battery)" selected="@(Model.PostType == PostType.Battery)">Battery</option>
                         </select>
                     </div>
-                    <div class="col-md-2">
-                        <select name="postStatus" class="filter-input-clean">
+                    <div style="min-width: 140px;">
+                        <select name="postStatus" class="filter-input-compact">
                             <option value="">All Status</option>
                             <option value="@((int)PostStatus.Draft)" selected="@(Model.PostStatus == PostStatus.Draft)">Draft</option>
                             <option value="@((int)PostStatus.Active)" selected="@(Model.PostStatus == PostStatus.Active)">Active</option>
@@ -114,17 +114,15 @@
                             <option value="@((int)PostStatus.Removed)" selected="@(Model.PostStatus == PostStatus.Removed)">Removed</option>
                         </select>
                     </div>
-                    <div class="col-md-2">
-                        <select name="priceSort" class="filter-input-clean">
-                            <option value="true" selected="@Model.PriceSort">Low to High</option>
-                            <option value="false" selected="@(!Model.PriceSort)">High to Low</option>
+                    <div style="min-width: 140px;">
+                        <select name="priceSort" class="filter-input-compact">
+                            <option value="true" selected="@Model.PriceSort">Price: Low to High</option>
+                            <option value="false" selected="@(!Model.PriceSort)">Price: High to Low</option>
                         </select>
                     </div>
-                    <div class="col-md-2">
-                        <button type="submit" class="btn-clean btn-primary-clean w-100">
-                            <i class="bi bi-search"></i> Filter
-                        </button>
-                    </div>
+                    <button type="submit" class="btn-filter-compact">
+                        <i class="bi bi-search"></i> Filter
+                    </button>
                 </form>
             </div>
         </div>
@@ -134,7 +132,7 @@
         {
             <div class="staff-card-clean">
                 <div class="table-responsive">
-                    <table class="table-clean">
+                    <table class="table-clean-compact">
                         <thead>
                             <tr>
                                 <th>Post</th>
@@ -144,29 +142,29 @@
                                 <th>Version</th>
                                 <th>Published</th>
                                 <th>Expires</th>
-                                <th style="width: 200px;">Actions</th>
+                                <th style="width: 60px; text-align: center;">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach (var post in Model.Posts)
                             {
-                                <tr class="@(post.Status == PostStatus.Removed ? "table-danger-subtle" : "")">
+                                <tr class="@(post.Status == PostStatus.Removed ? "table-row-disabled" : "")">
                                     <td>
-                                        <div class="user-cell-clean">
+                                        <div class="post-cell-compact">
                                             @if (post.PhotoUrls != null && post.PhotoUrls.Any())
                                             {
                                                 <img src="@post.PhotoUrls.First()" alt="@post.Title"
-                                                     style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
+                                                     class="post-thumbnail">
                                             }
                                             else
                                             {
-                                                <div class="user-avatar-clean">
+                                                <div class="post-thumbnail-placeholder">
                                                     <i class="bi bi-image"></i>
                                                 </div>
                                             }
-                                            <div class="user-info-clean">
-                                                <div class="user-name-clean">@post.Title</div>
-                                                <div class="user-role-clean">
+                                            <div class="post-info-compact">
+                                                <div class="post-title-compact">@post.Title</div>
+                                                <div class="post-location-compact">
                                                     <i class="bi bi-geo-alt"></i> @post.LocationAddress
                                                 </div>
                                             </div>
@@ -175,43 +173,47 @@
                                     <td>
                                         @if (post.PostType == PostType.Vehicle)
                                         {
-                                            <span class="badge-clean badge-info">
+                                            <span class="badge-subtle badge-neutral">
                                                 <i class="bi bi-car-front"></i> Vehicle
                                             </span>
                                         }
                                         else
                                         {
-                                            <span class="badge-clean badge-info">
+                                            <span class="badge-subtle badge-neutral">
                                                 <i class="bi bi-battery-charging"></i> Battery
                                             </span>
                                         }
                                     </td>
                                     <td>
-                                        <strong style="color: #22c55e;">
-                                            @(post.Price.HasValue? post.Price.Value.ToString("N0") + " VND" : "Negotiable")
-                                        </strong>
+                                        <span class="price-text">
+                                            @(post.Price.HasValue ? post.Price.Value.ToString("N0") + " VND" : "Negotiable")
+                                        </span>
                                     </td>
                                     <td>
                                         @switch (post.Status)
                                         {
                                             case PostStatus.Draft:
-                                                <span class="badge-clean badge-pending">
-                                                    <i class="bi bi-pencil"></i> Draft
+                                                <span class="badge-subtle badge-draft">
+                                                    <span class="status-dot" style="background: #f59e0b;"></span>
+                                                    Draft
                                                 </span>
                                                 break;
                                             case PostStatus.Active:
-                                                <span class="badge-clean badge-success">
-                                                    <i class="bi bi-check-circle"></i> Active
+                                                <span class="badge-subtle badge-active">
+                                                    <span class="status-dot" style="background: #22c55e;"></span>
+                                                    Active
                                                 </span>
                                                 break;
                                             case PostStatus.Closed:
-                                                <span class="badge-clean badge-danger">
-                                                    <i class="bi bi-x-circle"></i> Closed
+                                                <span class="badge-subtle badge-closed">
+                                                    <span class="status-dot" style="background: #ef4444;"></span>
+                                                    Closed
                                                 </span>
                                                 break;
                                             case PostStatus.Removed:
-                                                <span class="badge-clean badge-danger">
-                                                    <i class="bi bi-slash-circle"></i> Banned
+                                                <span class="badge-subtle badge-removed">
+                                                    <span class="status-dot" style="background: #64748b;"></span>
+                                                    Banned
                                                 </span>
                                                 break;
                                         }
@@ -219,118 +221,91 @@
                                     <td>
                                         @if (post.Version == PostVersion.Vip)
                                         {
-                                            <span class="badge-clean" style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #000;">
+                                            <span class="badge-subtle badge-vip">
                                                 <i class="bi bi-star-fill"></i> VIP
                                             </span>
                                         }
                                         else
                                         {
-                                            <span class="badge-clean badge-info">
-                                                <i class="bi bi-tag"></i> Free
+                                            <span class="badge-subtle badge-free">
+                                                Free
                                             </span>
                                         }
                                     </td>
                                     <td>
-                                        <div class="date-cell-clean">
-                                            <div class="date-primary-clean">
-                                                @post.PublishedAt?.ToString("MMM dd, yyyy")
-                                            </div>
-                                            <div class="date-secondary-clean">
-                                                @post.PublishedAt?.ToString("hh:mm tt")
-                                            </div>
+                                        <div class="date-compact">
+                                            <div>@post.PublishedAt?.ToString("MMM dd, yyyy")</div>
+                                            <div class="date-time-compact">@post.PublishedAt?.ToString("hh:mm tt")</div>
                                         </div>
                                     </td>
                                     <td>
-                                        <div class="date-cell-clean">
-                                            <div class="date-primary-clean">
-                                                @post.ExpiresAt?.ToString("MMM dd, yyyy")
-                                            </div>
-                                            <div class="date-secondary-clean">
-                                                @post.ExpiresAt?.ToString("hh:mm tt")
-                                            </div>
+                                        <div class="date-compact">
+                                            <div>@post.ExpiresAt?.ToString("MMM dd, yyyy")</div>
+                                            <div class="date-time-compact">@post.ExpiresAt?.ToString("hh:mm tt")</div>
                                         </div>
                                     </td>
-                                    <td>
-                                        <div class="action-group-clean">
-                                            <a asp-page="/PostPages/Details" asp-route-id="@post.Id"
-                                               class="btn-action-clean" title="View Details">
-                                                <i class="bi bi-eye"></i>
-                                            </a>
-
-                                            @if (post.Status != PostStatus.Removed)
-                                            {
-                                                <a asp-page="/PostPages/Update" asp-route-id="@post.Id"
-                                                   class="btn-action-clean btn-action-success" title="Edit">
-                                                    <i class="bi bi-pencil"></i>
-                                                </a>
-
-                                                <!-- ✅ NEW: Status Update Dropdown -->
-                                                <div class="btn-group" role="group">
-                                                    <button type="button" class="btn-action-clean dropdown-toggle"
-                                                            data-bs-toggle="dropdown" aria-expanded="false"
-                                                            title="Change Status"
-                                                            style="border-radius: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                                                        <i class="bi bi-arrow-repeat"></i>
-                                                    </button>
-                                                    <ul class="dropdown-menu dropdown-menu-end" style="min-width: 180px; border-radius: 12px; border: 1px solid #1a1a1a; background: #0a0a0a; padding: 0.5rem;">
-                                                        @if (post.Status == PostStatus.Draft)
-                                                        {
-                                                            <li>
-                                                                <form method="post" asp-page-handler="UpdateStatus" asp-route-id="@post.Id" asp-route-newStatus="@((int)PostStatus.Active)" class="d-inline">
-                                                                    @Html.AntiForgeryToken()
-                                                                    <button type="submit" class="dropdown-item"
-                                                                            style="color: #22c55e; padding: 0.5rem 1rem; border-radius: 8px; background: transparent; border: none; width: 100%; text-align: left; cursor: pointer;">
-                                                                        <i class="bi bi-check-circle me-2"></i> Publish
-                                                                    </button>
-                                                                </form>
-                                                            </li>
-                                                        }
-                                                        @if (post.Status == PostStatus.Active)
-                                                        {
-                                                            <li>
-                                                                <form method="post" asp-page-handler="UpdateStatus" asp-route-id="@post.Id" asp-route-newStatus="@((int)PostStatus.Closed)" class="d-inline">
-                                                                    @Html.AntiForgeryToken()
-                                                                    <button type="submit" class="dropdown-item"
-                                                                            style="color: #ef4444; padding: 0.5rem 1rem; border-radius: 8px; background: transparent; border: none; width: 100%; text-align: left; cursor: pointer;"
-                                                                            onclick="return confirm('Are you sure you want to close this post?');">
-                                                                        <i class="bi bi-x-circle me-2"></i> Close Post
-                                                                    </button>
-                                                                </form>
-                                                            </li>
-                                                        }
-                                                        @if (post.Status == PostStatus.Closed || post.Status == PostStatus.Draft)
-                                                        {
-                                                            <li><hr class="dropdown-divider" style="border-color: #1a1a1a; margin: 0.5rem 0;"></li>
-                                                            <li class="px-3 py-2" style="font-size: 0.75rem; color: #666;">
-                                                                @if (post.Status == PostStatus.Closed)
-                                                                {
-                                                                    <span>Post is closed. Edit to reactivate.</span>
-                                                                }
-                                                                else
-                                                                {
-                                                                    <span>More options available</span>
-                                                                }
-                                                            </li>
-                                                        }
-                                                    </ul>
-                                                </div>
-
-                                                <form method="post" asp-page-handler="Delete" asp-route-id="@post.Id" class="d-inline">
-                                                    @Html.AntiForgeryToken()
-                                                    <button type="submit" class="btn-action-clean btn-action-danger"
-                                                            title="Delete"
-                                                            onclick="return confirm('Are you sure you want to delete this post? This action cannot be undone.');">
-                                                        <i class="bi bi-trash"></i>
-                                                    </button>
-                                                </form>
-                                            }
-                                            else
-                                            {
-                                                <span class="text-muted" style="font-size: 0.875rem;">
-                                                    <i class="bi bi-lock"></i> Banned
-                                                </span>
-                                            }
-                                        </div>
+                                    <td style="text-align: center;">
+                                        @if (post.Status != PostStatus.Removed)
+                                        {
+                                            <div class="dropdown">
+                                                <button class="btn-kebab" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Actions">
+                                                    <i class="bi bi-three-dots-vertical"></i>
+                                                </button>
+                                                <ul class="dropdown-menu dropdown-menu-end dropdown-compact">
+                                                    <li>
+                                                        <a class="dropdown-item-compact" asp-page="/PostPages/Details" asp-route-id="@post.Id">
+                                                            <i class="bi bi-eye"></i> View Details
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a class="dropdown-item-compact" asp-page="/PostPages/Update" asp-route-id="@post.Id">
+                                                            <i class="bi bi-pencil"></i> Edit Post
+                                                        </a>
+                                                    </li>
+                                                    @if (post.Status == PostStatus.Draft)
+                                                    {
+                                                        <li><hr class="dropdown-divider-compact"></li>
+                                                        <li>
+                                                            <form method="post" asp-page-handler="UpdateStatus" asp-route-id="@post.Id" asp-route-newStatus="@((int)PostStatus.Active)">
+                                                                @Html.AntiForgeryToken()
+                                                                <button type="submit" class="dropdown-item-compact dropdown-item-success">
+                                                                    <i class="bi bi-check-circle"></i> Publish Post
+                                                                </button>
+                                                            </form>
+                                                        </li>
+                                                    }
+                                                    @if (post.Status == PostStatus.Active)
+                                                    {
+                                                        <li><hr class="dropdown-divider-compact"></li>
+                                                        <li>
+                                                            <form method="post" asp-page-handler="UpdateStatus" asp-route-id="@post.Id" asp-route-newStatus="@((int)PostStatus.Closed)">
+                                                                @Html.AntiForgeryToken()
+                                                                <button type="submit" class="dropdown-item-compact dropdown-item-warning" 
+                                                                        onclick="return confirm('Are you sure you want to close this post?');">
+                                                                    <i class="bi bi-x-circle"></i> Close Post
+                                                                </button>
+                                                            </form>
+                                                        </li>
+                                                    }
+                                                    <li><hr class="dropdown-divider-compact"></li>
+                                                    <li>
+                                                        <form method="post" asp-page-handler="Delete" asp-route-id="@post.Id">
+                                                            @Html.AntiForgeryToken()
+                                                            <button type="submit" class="dropdown-item-compact dropdown-item-danger"
+                                                                    onclick="return confirm('Are you sure you want to delete this post? This action cannot be undone.');">
+                                                                <i class="bi bi-trash"></i> Delete Post
+                                                            </button>
+                                                        </form>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-disabled">
+                                                <i class="bi bi-lock"></i>
+                                            </span>
+                                        }
                                     </td>
                                 </tr>
                             }
@@ -393,14 +368,275 @@
     <link rel="stylesheet" href="~/css/profile.css" />
     <link rel="stylesheet" href="~/css/posts.css" />
     <style>
-        /* ✅ Custom Dropdown Styling */
-        .dropdown-item:hover {
-            background: rgba(255, 255, 255, 0.05) !important;
-            color: #fff !important;
+        /* ============ COMPACT FILTER SECTION ============ */
+        .filter-input-compact {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            background: #0a0a0a;
+            color: #fff;
+            transition: all 0.2s;
         }
 
-        .btn-action-clean.dropdown-toggle::after {
-            display: none;
+        .filter-input-compact:focus {
+            outline: none;
+            border-color: #0070f3;
+            box-shadow: 0 0 0 3px rgba(0, 112, 243, 0.1);
+        }
+
+        .btn-filter-compact {
+            padding: 0.5rem 1.25rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #0070f3 0%, #0051cc 100%);
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-filter-compact:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 112, 243, 0.3);
+        }
+
+        /* ============ COMPACT TABLE STYLES ============ */
+        .table-clean-compact {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        .table-clean-compact thead th {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.8125rem;
+            color: #aaa;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid #1a1a1a;
+            background: #0a0a0a;
+        }
+
+        .table-clean-compact tbody td {
+            padding: 0.875rem 1rem;
+            border-bottom: 1px solid #1a1a1a;
+            vertical-align: middle;
+        }
+
+        .table-clean-compact tbody tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .table-row-disabled {
+            opacity: 0.5;
+        }
+
+        /* ============ POST CELL COMPACT ============ */
+        .post-cell-compact {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .post-thumbnail {
+            width: 48px;
+            height: 48px;
+            object-fit: cover;
+            border-radius: 6px;
+            flex-shrink: 0;
+        }
+
+        .post-thumbnail-placeholder {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #1a1a1a;
+            border-radius: 6px;
+            color: #666;
+            flex-shrink: 0;
+        }
+
+        .post-info-compact {
+            min-width: 0;
+        }
+
+        .post-title-compact {
+            font-weight: 500;
+            color: #fff;
+            margin-bottom: 0.25rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .post-location-compact {
+            font-size: 0.75rem;
+            color: #888;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        /* ============ SUBTLE BADGES ============ */
+        .badge-subtle {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.25rem 0.625rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            border-radius: 6px;
+            white-space: nowrap;
+        }
+
+        .badge-neutral {
+            background: rgba(100, 116, 139, 0.15);
+            color: #94a3b8;
+            border: 1px solid rgba(100, 116, 139, 0.2);
+        }
+
+        .badge-draft {
+            background: rgba(245, 158, 11, 0.1);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .badge-active {
+            background: rgba(34, 197, 94, 0.1);
+            color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+
+        .badge-closed {
+            background: rgba(239, 68, 68, 0.1);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .badge-removed {
+            background: rgba(100, 116, 139, 0.1);
+            color: #94a3b8;
+            border: 1px solid rgba(100, 116, 139, 0.2);
+        }
+
+        .badge-vip {
+            background: rgba(251, 191, 36, 0.15);
+            color: #fbbf24;
+            border: 1px solid rgba(251, 191, 36, 0.3);
+        }
+
+        .badge-free {
+            background: rgba(100, 116, 139, 0.1);
+            color: #94a3b8;
+            border: 1px solid rgba(100, 116, 139, 0.2);
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        /* ============ PRICE TEXT ============ */
+        .price-text {
+            font-weight: 600;
+            color: #fff;
+        }
+
+        /* ============ DATE COMPACT ============ */
+        .date-compact {
+            font-size: 0.8125rem;
+            line-height: 1.4;
+        }
+
+        .date-time-compact {
+            font-size: 0.75rem;
+            color: #666;
+        }
+
+        /* ============ KEBAB MENU ============ */
+        .btn-kebab {
+            width: 32px;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            border-radius: 6px;
+            background: transparent;
+            color: #aaa;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-kebab:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+        }
+
+        /* ============ DROPDOWN COMPACT ============ */
+        .dropdown-compact {
+            min-width: 180px;
+            padding: 0.5rem;
+            border-radius: 10px;
+            border: 1px solid #1a1a1a;
+            background: #0f0f0f;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+        }
+
+        .dropdown-item-compact {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            color: #ddd;
+            text-decoration: none;
+            border-radius: 6px;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .dropdown-item-compact:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+        }
+
+        .dropdown-item-success:hover {
+            background: rgba(34, 197, 94, 0.15);
+            color: #4ade80;
+        }
+
+        .dropdown-item-warning:hover {
+            background: rgba(245, 158, 11, 0.15);
+            color: #fbbf24;
+        }
+
+        .dropdown-item-danger:hover {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+        }
+
+        .dropdown-divider-compact {
+            margin: 0.5rem 0;
+            border-top: 1px solid #1a1a1a;
+        }
+
+        .text-disabled {
+            color: #666;
+            font-size: 0.875rem;
         }
     </style>
 }
