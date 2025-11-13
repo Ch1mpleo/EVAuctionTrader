@@ -186,7 +186,7 @@
                                     </td>
                                     <td>
                                         <span class="price-text">
-                                            @(post.Price.HasValue ? post.Price.Value.ToString("N0") + " VND" : "Negotiable")
+                                            @(post.Price.HasValue ? "$" + post.Price.Value.ToString("N0") : "Negotiable")
                                         </span>
                                     </td>
                                     <td>
