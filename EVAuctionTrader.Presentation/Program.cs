@@ -4,7 +4,6 @@ using EVAuctionTrader.Presentation.Configuration;
 using EVAuctionTrader.Presentation.Helper;
 using EVAuctionTrader.Presentation.Hubs;
 using Microsoft.AspNetCore.DataProtection;
-using Microsoft.EntityFrameworkCore;
 using Stripe;
 using System.IdentityModel.Tokens.Jwt;
 
@@ -120,13 +119,13 @@ try
     using (var scope = app.Services.CreateScope())
     {
         var dbContext = scope.ServiceProvider.GetRequiredService<EVAuctionTraderDbContext>();
-        
-        // Now seed the data in order
+
+        // Seed the data follow order
         await DbSeeder.SeedUsersAsync(dbContext);
-        await DbSeeder.SeedFeesAsync(dbContext); // Seed fees before posts
+        await DbSeeder.SeedFeesAsync(dbContext);
         await DbSeeder.SeedPostsWithVehiclesAndBatteriesAsync(dbContext);
-        await DbSeeder.SeedAuctionsAsync(dbContext); // Add auction seeding
-        await DbSeeder.SeedWalletTransactionsAsync(dbContext); // Add wallet transaction seeding
+        await DbSeeder.SeedAuctionsAsync(dbContext);
+        await DbSeeder.SeedWalletTransactionsAsync(dbContext);
     }
 }
 catch (Exception e)
