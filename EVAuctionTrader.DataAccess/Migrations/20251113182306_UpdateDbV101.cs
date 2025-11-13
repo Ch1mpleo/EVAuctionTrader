@@ -7,11 +7,32 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace EVAuctionTrader.DataAccess.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class UpdateDbV101 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "Fees",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Type = table.Column<string>(type: "text", nullable: false),
+                    Amount = table.Column<decimal>(type: "numeric", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    DeletedBy = table.Column<Guid>(type: "uuid", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Fees", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
@@ -380,6 +401,7 @@ namespace EVAuctionTrader.DataAccess.Migrations
                     Status = table.Column<string>(type: "text", nullable: false),
                     PostId = table.Column<Guid>(type: "uuid", nullable: true),
                     AuctionId = table.Column<Guid>(type: "uuid", nullable: true),
+                    PaymentId = table.Column<Guid>(type: "uuid", nullable: true),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
@@ -397,6 +419,11 @@ namespace EVAuctionTrader.DataAccess.Migrations
                         principalTable: "Auctions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_WalletTransactions_Payments_PaymentId",
+                        column: x => x.PaymentId,
+                        principalTable: "Payments",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_WalletTransactions_Posts_PostId",
                         column: x => x.PostId,
@@ -557,6 +584,11 @@ namespace EVAuctionTrader.DataAccess.Migrations
                 column: "AuctionId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_WalletTransactions_PaymentId",
+                table: "WalletTransactions",
+                column: "PaymentId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_WalletTransactions_PostId",
                 table: "WalletTransactions",
                 column: "PostId");
@@ -574,10 +606,10 @@ namespace EVAuctionTrader.DataAccess.Migrations
                 name: "Bids");
 
             migrationBuilder.DropTable(
-                name: "Messages");
+                name: "Fees");
 
             migrationBuilder.DropTable(
-                name: "Payments");
+                name: "Messages");
 
             migrationBuilder.DropTable(
                 name: "PostComments");
@@ -590,6 +622,9 @@ namespace EVAuctionTrader.DataAccess.Migrations
 
             migrationBuilder.DropTable(
                 name: "Auctions");
+
+            migrationBuilder.DropTable(
+                name: "Payments");
 
             migrationBuilder.DropTable(
                 name: "Wallets");

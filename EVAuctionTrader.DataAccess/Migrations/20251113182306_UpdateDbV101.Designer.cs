@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EVAuctionTrader.DataAccess.Migrations
 {
     [DbContext(typeof(EVAuctionTraderDbContext))]
-    [Migration("20251113125048_UpdateDbV100")]
-    partial class UpdateDbV100
+    [Migration("20251113182306_UpdateDbV101")]
+    partial class UpdateDbV101
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -531,6 +531,9 @@ namespace EVAuctionTrader.DataAccess.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
+                    b.Property<Guid?>("ParentCommentId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid>("PostId")
                         .HasColumnType("uuid");
 
@@ -543,6 +546,8 @@ namespace EVAuctionTrader.DataAccess.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AuthorId");
+
+                    b.HasIndex("ParentCommentId");
 
                     b.HasIndex("PostId");
 
@@ -913,6 +918,11 @@ namespace EVAuctionTrader.DataAccess.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("EVAuctionTrader.DataAccess.Entities.PostComment", "ParentComment")
+                        .WithMany("Replies")
+                        .HasForeignKey("ParentCommentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("EVAuctionTrader.DataAccess.Entities.Post", "Post")
                         .WithMany("Comments")
                         .HasForeignKey("PostId")
@@ -920,6 +930,8 @@ namespace EVAuctionTrader.DataAccess.Migrations
                         .IsRequired();
 
                     b.Navigation("Author");
+
+                    b.Navigation("ParentComment");
 
                     b.Navigation("Post");
                 });
@@ -990,6 +1002,11 @@ namespace EVAuctionTrader.DataAccess.Migrations
             modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.Post", b =>
                 {
                     b.Navigation("Comments");
+                });
+
+            modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.PostComment", b =>
+                {
+                    b.Navigation("Replies");
                 });
 
             modelBuilder.Entity("EVAuctionTrader.DataAccess.Entities.User", b =>
