@@ -19,6 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="wwwroot\microsoft\" />
     <ProjectReference Include="..\EVAuctionTrader.BusinessObject\EVAuctionTrader.BusinessObject.csproj" />
     <ProjectReference Include="..\EVAuctionTrader.Business\EVAuctionTrader.Business.csproj" />
   </ItemGroup>

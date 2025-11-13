@@ -141,7 +141,9 @@ app.MapGet("/", () => Results.Redirect("/Home/LandingPage"));
 
 app.MapRazorPages();
 
+
 // Map SignalR Hub
 app.MapHub<AuctionHub>("/auctionHub");
+app.MapHub<ChatHub>("/chathub");
 
 app.Run();

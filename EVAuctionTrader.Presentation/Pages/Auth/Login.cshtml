@@ -90,4 +90,16 @@
             }
         }
     </script>
+
+    @if (Model.LoginSuccess)
+    {
+        <script>
+            // Lưu token vào sessionStorage cho SignalR
+            var authToken = '@HttpContext.Session.GetString("AuthToken")';
+            if (authToken) {
+                sessionStorage.setItem('AuthToken', authToken);
+                console.log('✅ Auth token saved to sessionStorage');
+            }
+        </script>
+    }
 }
