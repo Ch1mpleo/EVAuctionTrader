@@ -35,7 +35,12 @@ body {
 }
 
     .modern-header .navbar {
-        padding: 1rem 0;
+        padding: 1.25rem 0;
+    }
+
+    .modern-header .container-fluid {
+        padding-left: 2rem;
+        padding-right: 2rem;
     }
 
     .modern-header .navbar-brand {
@@ -43,6 +48,7 @@ body {
         color: var(--text-primary) !important;
         text-decoration: none;
         transition: all 0.3s ease;
+        margin-right: 2rem;
     }
 
         .modern-header .navbar-brand:hover {
@@ -52,9 +58,10 @@ body {
     .modern-header .nav-link {
         color: var(--text-primary) !important;
         font-weight: 400;
-        padding: 0.5rem 1rem !important;
+        padding: 0.5rem 1.25rem !important;
         transition: all 0.3s ease;
         position: relative;
+        white-space: nowrap;
     }
 
         .modern-header .nav-link:hover {
@@ -76,6 +83,10 @@ body {
         .modern-header .nav-link:hover::after {
             width: 80%;
         }
+
+    .modern-header .navbar-nav {
+        gap: 0.5rem;
+    }
 
 .btn-primary {
     background: var(--gradient-primary);

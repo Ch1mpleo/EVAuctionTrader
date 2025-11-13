@@ -18,46 +18,119 @@
     @RenderSection("Styles", required: false)
 
     <style>
+        .wallet-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-right: 15px;
+        }
+
         .wallet-balance {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
             color: white;
-            padding: 8px 16px;
+            padding: 10px 16px;
             border-radius: 8px;
-            margin-right: 15px;
+            margin-right: 20px;
             font-weight: 600;
             display: flex;
-            align-items: center;
-            gap: 8px;
+            flex-direction: column;
+            gap: 4px;
             transition: all 0.3s ease;
+            text-decoration: none;
+            min-width: 160px;
         }
 
             .wallet-balance:hover {
                 background: rgba(255, 255, 255, 0.1);
                 border-color: rgba(0, 102, 255, 0.3);
-                transform: translateY(-1px);               
+                transform: translateY(-1px);
+                color: white;
             }
 
-            .wallet-balance i {
-                font-size: 18px;
-                color: #0066ff;
-            }
+        .wallet-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .wallet-row i {
+            font-size: 16px;
+        }
+
+        .wallet-available-row i {
+            color: #22c55e;
+        }
+
+        .wallet-held-row {
+            padding-top: 4px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .wallet-held-row i {
+            color: #f59e0b;
+            font-size: 14px;
+        }
+
+        .wallet-label {
+            font-size: 11px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            min-width: 60px;
+        }
 
         .wallet-amount {
-            font-size: 16px;
-            letter-spacing: 0.5px;
+            font-size: 15px;
+            letter-spacing: 0.3px;
             color: #ffffff;
+            margin-left: auto;
+            font-weight: 700;
+        }
+
+        .wallet-held-row .wallet-label {
+            font-size: 10px;
+        }
+
+        .wallet-held-row .wallet-amount {
+            font-size: 13px;
+            color: #f59e0b;
         }
 
         /* Responsive */
-        @@media (max-width: 768px) {
+        @@media (max-width: 1200px) {
             .wallet-balance {
-                padding: 6px 12px;
-                font-size: 14px;
+                min-width: 140px;
+                padding: 8px 14px;
+            }
+
+            .wallet-label {
+                min-width: 55px;
+            }
+        }
+
+        @@media (max-width: 992px) {
+            .wallet-balance {
+                padding: 8px 12px;
+                min-width: 120px;
             }
 
             .wallet-amount {
                 font-size: 14px;
+            }
+
+            .wallet-held-row .wallet-amount {
+                font-size: 12px;
+            }
+
+            .wallet-label {
+                min-width: 50px;
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .wallet-balance {
+                display: none;
             }
         }
     </style>
@@ -83,23 +156,26 @@
 
         // Lấy số dư wallet
         decimal walletBalance = 0m;
+        decimal heldBalance = 0m;
         if (isAuthenticated)
         {
             try
             {
                 var walletService = Context.RequestServices.GetService<EVAuctionTrader.Business.Interfaces.IUserService>();
                 walletBalance = await walletService.GetMyBalanceAsync();
+                heldBalance = await walletService.GetMyHeldBalanceAsync();
             }
             catch
             {
                 walletBalance = 0m;
+                heldBalance = 0m;
             }
         }
     }
 
     <header class="modern-header">
         <nav class="navbar navbar-expand-lg navbar-dark">
-            <div class="container">
+            <div class="container-fluid" style="max-width: 1400px; margin: 0 auto;">
                 <a class="navbar-brand fw-bold" asp-area="" asp-page="/Home/LandingPage">
                     <i class="bi bi-lightning-charge-fill me-2"></i>
                     EV Auction Trader
@@ -147,10 +223,22 @@
                     <div class="navbar-nav">
                         @if (isAuthenticated)
                         {
-                            <!-- Hiển thị số dư wallet -->
-                            <a asp-page="/Wallet/Index" class="wallet-balance text-decoration-none">
-                                <i class="bi bi-wallet2"></i>
-                                <span class="wallet-amount">$@walletBalance.ToString("N2")</span>
+                            <!-- Wallet Balance (Combined) -->
+                            <a asp-page="/Wallet/Index" class="wallet-balance text-decoration-none" title="Your wallet balance">
+                                <div class="wallet-row wallet-available-row">
+                                    <i class="bi bi-wallet2"></i>
+                                    <span class="wallet-label">Available</span>
+                                    <span class="wallet-amount">$@walletBalance.ToString("N2")</span>
+                                </div>
+                                
+                                @if (heldBalance > 0)
+                                {
+                                    <div class="wallet-row wallet-held-row">
+                                        <i class="bi bi-lock-fill"></i>
+                                        <span class="wallet-label">On Hold</span>
+                                        <span class="wallet-amount">$@heldBalance.ToString("N2")</span>
+                                    </div>
+                                }
                             </a>
 
                             <div class="dropdown user-dropdown">

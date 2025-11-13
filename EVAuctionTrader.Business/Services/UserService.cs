@@ -1,6 +1,7 @@
 ﻿using EVAuctionTrader.Business.Interfaces;
 using EVAuctionTrader.Business.Utils;
 using EVAuctionTrader.BusinessObject.DTOs.UserDTOs;
+using EVAuctionTrader.BusinessObject.Enums;
 using EVAuctionTrader.DataAccess.Interfaces;
 using Microsoft.Extensions.Logging;
 using System;
@@ -44,6 +45,57 @@ namespace EVAuctionTrader.Business.Services
             catch (Exception ex)
             {
                 _logger.LogError($"GetMyBalanceAsync error: {ex.Message}");
+                throw;
+            }
+        }
+
+        public async Task<decimal> GetMyHeldBalanceAsync()
+        {
+            try
+            {
+                var userId = _claimsService.GetCurrentUserId;
+
+                if (userId == Guid.Empty)
+                {
+                    _logger.LogWarning("GetMyHeldBalanceAsync failed: Invalid user ID from claims.");
+                    return 0m;
+                }
+
+                var wallet = await _unitOfWork.Wallets.FirstOrDefaultAsync(w => w.UserId == userId && !w.IsDeleted);
+
+                if (wallet == null)
+                {
+                    _logger.LogWarning($"GetMyHeldBalanceAsync: Wallet not found for user {userId}");
+                    return 0m;
+                }
+
+                // Get all auction hold transactions
+                var holds = await _unitOfWork.WalletTransactions.GetAllAsync(
+                    predicate: t => t.WalletId == wallet.Id &&
+                                   t.Type == WalletTransactionType.AuctionHold &&
+                                   t.Status == WalletTransactionStatus.Succeeded &&
+                                   !t.IsDeleted
+                );
+
+                // Get all auction release transactions
+                var releases = await _unitOfWork.WalletTransactions.GetAllAsync(
+                    predicate: t => t.WalletId == wallet.Id &&
+                                   t.Type == WalletTransactionType.AuctionRelease &&
+                                   t.Status == WalletTransactionStatus.Succeeded &&
+                                   !t.IsDeleted
+                );
+
+                var totalHeld = holds.Sum(h => h.Amount);
+                var totalReleased = releases.Sum(r => r.Amount);
+                var netHeld = totalHeld - totalReleased;
+
+                _logger.LogInformation($"GetMyHeldBalanceAsync: User {userId} has {netHeld} held in auctions");
+
+                return netHeld > 0 ? netHeld : 0m;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"GetMyHeldBalanceAsync error: {ex.Message}");
                 throw;
             }
         }
