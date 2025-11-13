@@ -73,6 +73,13 @@ namespace EVAuctionTrader.DataAccess
                 .WithMany()
                 .HasForeignKey(pc => pc.AuthorId);
 
+            // Self-referencing relationship cho nested comments
+            modelBuilder.Entity<PostComment>()
+                .HasOne(pc => pc.ParentComment)
+                .WithMany(pc => pc.Replies)
+                .HasForeignKey(pc => pc.ParentCommentId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<Wallet>()
                 .HasOne(w => w.User)
                 .WithMany(u => u.Wallets)

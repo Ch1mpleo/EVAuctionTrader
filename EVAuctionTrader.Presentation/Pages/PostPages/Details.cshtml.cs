@@ -34,6 +34,9 @@ namespace EVAuctionTrader.Presentation.Pages.PostPages
         public bool IsAuthor { get; set; }
         public bool IsBanned { get; set; }
 
+        [BindProperty]
+        public PostCommentRequestDto NewComment { get; set; } = new();
+
         public async Task<IActionResult> OnGetAsync()
         {
             try
@@ -81,40 +84,79 @@ namespace EVAuctionTrader.Presentation.Pages.PostPages
             }
         }
 
-        // ✅ THÊM PAGE HANDLER MỚI
-        public async Task<IActionResult> OnPostCreateConversationAsync([FromBody] CreateConversationRequest request)
+        public async Task<IActionResult> OnPostAddCommentAsync()
         {
             try
             {
                 if (!User.Identity?.IsAuthenticated ?? true)
                 {
-                    return new JsonResult(new { error = "You must be logged in" }) { StatusCode = 401 };
+                    TempData["ErrorMessage"] = "You must be logged in to comment";
+                    return RedirectToPage(new { id = Id });
                 }
 
-                var dto = new CreateConversationDto
+                if (string.IsNullOrWhiteSpace(NewComment.Body))
                 {
-                    PostId = request.PostId,
-                    InitialMessage = string.IsNullOrWhiteSpace(request.InitialMessage)
-                        ? "Hi, I'm interested in this post."
-                        : request.InitialMessage
-                };
-
-                var conversation = await _chatService.CreateOrGetConversationAsync(dto);
-
-                if (conversation == null)
-                {
-                    return new JsonResult(new { error = "Cannot create conversation for your own post or post not found" })
-                    {
-                        StatusCode = 400
-                    };
+                    TempData["ErrorMessage"] = "Comment cannot be empty";
+                    return RedirectToPage(new { id = Id });
                 }
 
-                return new JsonResult(conversation);
+                // Set the PostId from the route
+                NewComment.PostId = Id;
+
+                var result = await _postService.CreateCommentAsync(NewComment);
+
+                if (result != null)
+                {
+                    TempData["SuccessMessage"] = "Comment added successfully!";
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Failed to add comment";
+                }
+
+                return RedirectToPage(new { id = Id });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating conversation");
-                return new JsonResult(new { error = ex.Message }) { StatusCode = 500 };
+                _logger.LogError(ex, $"Error adding comment to post {Id}");
+                TempData["ErrorMessage"] = "An error occurred while adding your comment";
+                return RedirectToPage(new { id = Id });
+            }
+        }
+
+        public async Task<IActionResult> OnPostDeleteCommentAsync(Guid commentId)
+        {
+            try
+            {
+                if (!User.Identity?.IsAuthenticated ?? true)
+                {
+                    TempData["ErrorMessage"] = "You must be logged in to delete comments";
+                    return RedirectToPage(new { id = Id });
+                }
+
+                var result = await _postService.DeleteCommentAsync(commentId);
+
+                if (result)
+                {
+                    TempData["SuccessMessage"] = "Comment deleted successfully!";
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Failed to delete comment";
+                }
+
+                return RedirectToPage(new { id = Id });
+            }
+            catch (UnauthorizedAccessException)
+            {
+                TempData["ErrorMessage"] = "You are not authorized to delete this comment";
+                return RedirectToPage(new { id = Id });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error deleting comment {commentId}");
+                TempData["ErrorMessage"] = "An error occurred while deleting the comment";
+                return RedirectToPage(new { id = Id });
             }
         }
     }

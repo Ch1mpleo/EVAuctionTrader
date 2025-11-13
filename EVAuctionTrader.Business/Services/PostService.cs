@@ -48,6 +48,55 @@ public sealed class PostService : IPostService
                 throw new InvalidOperationException("Author not found.");
             }
 
+        /// <summary>
+        /// Build hierarchical comment tree từ flat list
+        /// </summary>
+        private List<PostCommentResponseDto> BuildCommentTree(List<PostComment> allComments)
+        {
+            // Tạo dictionary để lookup nhanh
+            var commentDict = new Dictionary<Guid, PostCommentResponseDto>();
+            var rootComments = new List<PostCommentResponseDto>();
+
+            // Đầu tiên, convert tất cả entities sang DTOs
+            foreach (var comment in allComments)
+            {
+                var dto = new PostCommentResponseDto
+                {
+                    Id = comment.Id,
+                    PostId = comment.PostId,
+                    AuthorId = comment.AuthorId,
+                    AuthorName = comment.Author.FullName,
+                    Body = comment.Body,
+                    CreatedAt = comment.CreatedAt,
+                    ParentCommentId = comment.ParentCommentId,
+                    Replies = new List<PostCommentResponseDto>()
+                };
+                commentDict[comment.Id] = dto;
+            }
+
+            // Sau đó, build tree structure
+            foreach (var comment in allComments)
+            {
+                var dto = commentDict[comment.Id];
+                
+                if (comment.ParentCommentId == null)
+                {
+                    // Comment gốc
+                    rootComments.Add(dto);
+                }
+                else if (commentDict.ContainsKey(comment.ParentCommentId.Value))
+                {
+                    // Comment reply - thêm vào Replies của parent
+                    commentDict[comment.ParentCommentId.Value].Replies.Add(dto);
+                }
+            }
+
+            return rootComments;
+        }
+
+        public async Task<PostResponseDto?> CreatePostAsync(PostRequestDto createPostDto)
+        {
+            try
             // Check if creating VIP post and validate wallet balance
             if (createPostDto.Version == PostVersion.Vip)
             {
@@ -522,6 +571,35 @@ public sealed class PostService : IPostService
                         };
                     }
                 }
+
+                // Fetch comments for this post with Author included
+                var comments = await _unitOfWork.PostComments.GetAllAsync(
+                    predicate: c => c.PostId == postId && !c.IsDeleted,
+                    includes: c => c.Author
+                );
+
+                // ✅ KIỂM TRA: Nếu có comment nào có Author null, skip nó hoặc log warning
+                List<PostCommentResponseDto> commentDtos = new();
+                
+                if (comments != null && comments.Any())
+                {
+                    // Filter out comments with null Author để tránh crash
+                    var validComments = comments.Where(c => c.Author != null).OrderBy(c => c.CreatedAt).ToList();
+                    
+                    if (validComments.Count < comments.Count)
+                    {
+                        _logger.LogWarning($"Found {comments.Count - validComments.Count} comments with null Author for post {postId}");
+                    }
+                    
+                    commentDtos = BuildCommentTree(validComments);
+                }
+
+                _logger.LogInformation($"Retrieved {commentDtos.Count} root comments (with {comments?.Count() ?? 0} total) for post {postId}");
+
+                return new PostWithCommentResponseDto
+                {
+                    Id = postEntity.Id,
+                    AuthorId = postEntity.AuthorId,
                 postDtos.Add(new PostResponseDto
                 {
                     Id = post.Id,
@@ -1075,6 +1153,112 @@ public sealed class PostService : IPostService
         {
             _logger.LogError(ex, $"An error occurred while admin banning post with ID: {postId}");
             throw;
+        }
+
+        public async Task<PostCommentResponseDto?> CreateCommentAsync(PostCommentRequestDto commentDto)
+        {
+            try
+            {
+                _logger.LogInformation($"Creating comment for post {commentDto.PostId}");
+                
+                if (string.IsNullOrWhiteSpace(commentDto.Body))
+                {
+                    throw new ArgumentException("Comment body cannot be empty.");
+                }
+
+                // Kiểm tra post có tồn tại không
+                var post = await _unitOfWork.Posts.GetByIdAsync(commentDto.PostId);
+                if (post == null || post.IsDeleted)
+                {
+                    _logger.LogWarning($"CreateCommentAsync failed: Post {commentDto.PostId} not found.");
+                    throw new InvalidOperationException("Post not found.");
+                }
+
+                // Nếu có ParentCommentId, kiểm tra comment cha có tồn tại không
+                if (commentDto.ParentCommentId.HasValue)
+                {
+                    var parentComment = await _unitOfWork.PostComments.GetByIdAsync(commentDto.ParentCommentId.Value);
+                    if (parentComment == null || parentComment.IsDeleted || parentComment.PostId != commentDto.PostId)
+                    {
+                        _logger.LogWarning($"CreateCommentAsync failed: Parent comment {commentDto.ParentCommentId} not found or doesn't belong to this post.");
+                        throw new InvalidOperationException("Parent comment not found or doesn't belong to this post.");
+                    }
+                }
+
+                var currentUserId = _claimsService.GetCurrentUserId;
+                var author = await _unitOfWork.Users.GetByIdAsync(currentUserId);
+                if (author == null)
+                {
+                    throw new InvalidOperationException("User not found.");
+                }
+
+                var commentEntity = new PostComment
+                {
+                    PostId = commentDto.PostId,
+                    AuthorId = currentUserId,
+                    Body = commentDto.Body,
+                    ParentCommentId = commentDto.ParentCommentId
+                };
+
+                await _unitOfWork.PostComments.AddAsync(commentEntity);
+                await _unitOfWork.SaveChangesAsync();
+
+                _logger.LogInformation($"Comment created successfully with ID: {commentEntity.Id}");
+
+                return new PostCommentResponseDto
+                {
+                    Id = commentEntity.Id,
+                    PostId = commentEntity.PostId,
+                    AuthorId = commentEntity.AuthorId,
+                    AuthorName = author.FullName,
+                    Body = commentEntity.Body,
+                    CreatedAt = commentEntity.CreatedAt,
+                    ParentCommentId = commentEntity.ParentCommentId,
+                    Replies = new List<PostCommentResponseDto>()
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while creating comment.");
+                throw;
+            }
+        }
+
+        public async Task<bool> DeleteCommentAsync(Guid commentId)
+        {
+            try
+            {
+                _logger.LogInformation($"Deleting comment with ID: {commentId}");
+
+                var comment = await _unitOfWork.PostComments.GetByIdAsync(commentId);
+                if (comment == null || comment.IsDeleted)
+                {
+                    _logger.LogWarning($"DeleteCommentAsync failed: Comment {commentId} not found.");
+                    return false;
+                }
+
+                var currentUserId = _claimsService.GetCurrentUserId;
+                var currentUser = await _unitOfWork.Users.GetByIdAsync(currentUserId);
+
+                // Chỉ author hoặc admin mới có thể xóa comment
+                if (comment.AuthorId != currentUserId && currentUser?.Role != RoleType.Admin)
+                {
+                    _logger.LogWarning($"DeleteCommentAsync failed: User {currentUserId} is not authorized.");
+                    throw new UnauthorizedAccessException("You are not authorized to delete this comment.");
+                }
+
+                comment.IsDeleted = true;
+                await _unitOfWork.PostComments.Update(comment);
+                await _unitOfWork.SaveChangesAsync();
+
+                _logger.LogInformation($"Comment {commentId} deleted successfully.");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An error occurred while deleting comment {commentId}.");
+                throw;
+            }
         }
     }
 }
