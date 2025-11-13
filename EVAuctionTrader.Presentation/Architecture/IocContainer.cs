@@ -68,6 +68,7 @@ namespace EVAuctionTrader.Presentation.Architecture
             services.AddScoped<IPaymentService, PaymentService>();
             services.AddScoped<IFeeService, FeeService>();
             services.AddScoped<IWalletTransactionService, WalletTransactionService>();
+            services.AddScoped<IRevenueService, RevenueService>();
             services.AddHttpContextAccessor();
 
             return services;

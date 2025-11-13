@@ -1068,11 +1068,11 @@ namespace EVAuctionTrader.Presentation.Helper
                     Amount = 50000m,
                     BalanceAfter = member1Balance,
                     Status = WalletTransactionStatus.Succeeded,
-                    CreatedAt = DateTime.UtcNow.AddDays(-30),
+                    CreatedAt = DateTime.UtcNow.AddMonths(-6),
                     CreatedBy = member1.Id
                 });
 
-                // 2. VIP Post Fee for Post 1
+                // 2. VIP Post Fee - 6 months ago
                 if (posts.Count > 0)
                 {
                     member1Balance -= 5m;
@@ -1085,12 +1085,89 @@ namespace EVAuctionTrader.Presentation.Helper
                         BalanceAfter = member1Balance,
                         Status = WalletTransactionStatus.Succeeded,
                         PostId = posts[0].Id,
-                        CreatedAt = DateTime.UtcNow.AddDays(-28),
+                        CreatedAt = DateTime.UtcNow.AddMonths(-6).AddDays(2),
                         CreatedBy = member1.Id
                     });
                 }
 
-                // 3. Auction Deposit Hold
+                // 3. VIP Post Fee - 5 months ago
+                if (posts.Count > 1)
+                {
+                    member1Balance -= 5m;
+                    transactions.Add(new WalletTransaction
+                    {
+                        Id = Guid.NewGuid(),
+                        WalletId = wallet1.Id,
+                        Type = WalletTransactionType.PostFee,
+                        Amount = 5m,
+                        BalanceAfter = member1Balance,
+                        Status = WalletTransactionStatus.Succeeded,
+                        PostId = posts[1].Id,
+                        CreatedAt = DateTime.UtcNow.AddMonths(-5).AddDays(5),
+                        CreatedBy = member1.Id
+                    });
+                }
+
+                // 4. VIP Post Fee - 4 months ago
+                member1Balance -= 5m;
+                transactions.Add(new WalletTransaction
+                {
+                    Id = Guid.NewGuid(),
+                    WalletId = wallet1.Id,
+                    Type = WalletTransactionType.PostFee,
+                    Amount = 5m,
+                    BalanceAfter = member1Balance,
+                    Status = WalletTransactionStatus.Succeeded,
+                    PostId = posts.Count > 2 ? posts[2].Id : posts[0].Id,
+                    CreatedAt = DateTime.UtcNow.AddMonths(-4).AddDays(3),
+                    CreatedBy = member1.Id
+                });
+
+                // 5. Top-up - 4 months ago
+                member1Balance += 30000m;
+                transactions.Add(new WalletTransaction
+                {
+                    Id = Guid.NewGuid(),
+                    WalletId = wallet1.Id,
+                    Type = WalletTransactionType.Topup,
+                    Amount = 30000m,
+                    BalanceAfter = member1Balance,
+                    Status = WalletTransactionStatus.Succeeded,
+                    CreatedAt = DateTime.UtcNow.AddMonths(-4).AddDays(10),
+                    CreatedBy = member1.Id
+                });
+
+                // 6. VIP Post Fee - 3 months ago
+                member1Balance -= 5m;
+                transactions.Add(new WalletTransaction
+                {
+                    Id = Guid.NewGuid(),
+                    WalletId = wallet1.Id,
+                    Type = WalletTransactionType.PostFee,
+                    Amount = 5m,
+                    BalanceAfter = member1Balance,
+                    Status = WalletTransactionStatus.Succeeded,
+                    PostId = posts.Count > 3 ? posts[3].Id : posts[0].Id,
+                    CreatedAt = DateTime.UtcNow.AddMonths(-3).AddDays(7),
+                    CreatedBy = member1.Id
+                });
+
+                // 7. VIP Post Fee - 3 months ago (another one)
+                member1Balance -= 5m;
+                transactions.Add(new WalletTransaction
+                {
+                    Id = Guid.NewGuid(),
+                    WalletId = wallet1.Id,
+                    Type = WalletTransactionType.PostFee,
+                    Amount = 5m,
+                    BalanceAfter = member1Balance,
+                    Status = WalletTransactionStatus.Succeeded,
+                    PostId = posts.Count > 4 ? posts[4].Id : posts[0].Id,
+                    CreatedAt = DateTime.UtcNow.AddMonths(-3).AddDays(15),
+                    CreatedBy = member1.Id
+                });
+
+                // 8. Auction Deposit Hold - 2 months ago
                 if (auctions.Count > 0)
                 {
                     var depositAmount = auctions[0].StartPrice * auctions[0].DepositRate;
@@ -1104,44 +1181,27 @@ namespace EVAuctionTrader.Presentation.Helper
                         BalanceAfter = member1Balance,
                         Status = WalletTransactionStatus.Succeeded,
                         AuctionId = auctions[0].Id,
-                        CreatedAt = DateTime.UtcNow.AddDays(-25),
+                        CreatedAt = DateTime.UtcNow.AddMonths(-2).AddDays(5),
                         CreatedBy = member1.Id
                     });
                 }
 
-                // 4. Another Top-up
-                member1Balance += 30000m;
+                // 9. VIP Post Fee - 2 months ago
+                member1Balance -= 5m;
                 transactions.Add(new WalletTransaction
                 {
                     Id = Guid.NewGuid(),
                     WalletId = wallet1.Id,
-                    Type = WalletTransactionType.Topup,
-                    Amount = 30000m,
+                    Type = WalletTransactionType.PostFee,
+                    Amount = 5m,
                     BalanceAfter = member1Balance,
                     Status = WalletTransactionStatus.Succeeded,
-                    CreatedAt = DateTime.UtcNow.AddDays(-20),
+                    PostId = posts.Count > 0 ? posts[0].Id : null,
+                    CreatedAt = DateTime.UtcNow.AddMonths(-2).AddDays(12),
                     CreatedBy = member1.Id
                 });
 
-                // 5. VIP Post Fee for Post 2
-                if (posts.Count > 1)
-                {
-                    member1Balance -= 5m;
-                    transactions.Add(new WalletTransaction
-                    {
-                        Id = Guid.NewGuid(),
-                        WalletId = wallet1.Id,
-                        Type = WalletTransactionType.PostFee,
-                        Amount = 5m,
-                        BalanceAfter = member1Balance,
-                        Status = WalletTransactionStatus.Succeeded,
-                        PostId = posts[1].Id,
-                        CreatedAt = DateTime.UtcNow.AddDays(-18),
-                        CreatedBy = member1.Id
-                    });
-                }
-
-                // 6. Auction Deposit Release (didn't win)
+                // 10. Auction Deposit Release - 2 months ago
                 if (auctions.Count > 0)
                 {
                     var releaseAmount = auctions[0].StartPrice * auctions[0].DepositRate;
@@ -1155,81 +1215,104 @@ namespace EVAuctionTrader.Presentation.Helper
                         BalanceAfter = member1Balance,
                         Status = WalletTransactionStatus.Succeeded,
                         AuctionId = auctions[0].Id,
-                        CreatedAt = DateTime.UtcNow.AddDays(-15),
+                        CreatedAt = DateTime.UtcNow.AddMonths(-2).AddDays(20),
                         CreatedBy = member1.Id
                     });
                 }
 
-                // 7. Refund for cancelled post
-                member1Balance += 5m;
-                transactions.Add(new WalletTransaction
-                {
-                    Id = Guid.NewGuid(),
-                    WalletId = wallet1.Id,
-                    Type = WalletTransactionType.Refund,
-                    Amount = 5m,
-                    BalanceAfter = member1Balance,
-                    Status = WalletTransactionStatus.Succeeded,
-                    CreatedAt = DateTime.UtcNow.AddDays(-10),
-                    CreatedBy = SystemUserId
-                });
-
-                // 8. Another Auction Hold
-                if (auctions.Count > 1)
-                {
-                    var depositAmount = auctions[1].StartPrice * auctions[1].DepositRate;
-                    member1Balance -= depositAmount;
-                    transactions.Add(new WalletTransaction
-                    {
-                        Id = Guid.NewGuid(),
-                        WalletId = wallet1.Id,
-                        Type = WalletTransactionType.AuctionHold,
-                        Amount = depositAmount,
-                        BalanceAfter = member1Balance,
-                        Status = WalletTransactionStatus.Succeeded,
-                        AuctionId = auctions[1].Id,
-                        CreatedAt = DateTime.UtcNow.AddDays(-8),
-                        CreatedBy = member1.Id
-                    });
-                }
-
-                // 9. Auction Win - Capture Payment
-                if (auctions.Count > 1)
-                {
-                    var captureAmount = auctions[1].CurrentPrice;
-                    member1Balance -= captureAmount;
-                    transactions.Add(new WalletTransaction
-                    {
-                        Id = Guid.NewGuid(),
-                        WalletId = wallet1.Id,
-                        Type = WalletTransactionType.AuctionCapture,
-                        Amount = captureAmount,
-                        BalanceAfter = member1Balance,
-                        Status = WalletTransactionStatus.Succeeded,
-                        AuctionId = auctions[1].Id,
-                        CreatedAt = DateTime.UtcNow.AddDays(-5),
-                        CreatedBy = member1.Id
-                    });
-                }
-
-                // 10. Small Top-up
-                member1Balance += 10000m;
+                // 11. Top-up - 1 month ago
+                member1Balance += 20000m;
                 transactions.Add(new WalletTransaction
                 {
                     Id = Guid.NewGuid(),
                     WalletId = wallet1.Id,
                     Type = WalletTransactionType.Topup,
-                    Amount = 10000m,
+                    Amount = 20000m,
                     BalanceAfter = member1Balance,
                     Status = WalletTransactionStatus.Succeeded,
-                    CreatedAt = DateTime.UtcNow.AddDays(-3),
+                    CreatedAt = DateTime.UtcNow.AddMonths(-1).AddDays(3),
+                    CreatedBy = member1.Id
+                });
+
+                // 12. VIP Post Fee - 1 month ago
+                member1Balance -= 5m;
+                transactions.Add(new WalletTransaction
+                {
+                    Id = Guid.NewGuid(),
+                    WalletId = wallet1.Id,
+                    Type = WalletTransactionType.PostFee,
+                    Amount = 5m,
+                    BalanceAfter = member1Balance,
+                    Status = WalletTransactionStatus.Succeeded,
+                    PostId = posts.Count > 1 ? posts[1].Id : null,
+                    CreatedAt = DateTime.UtcNow.AddMonths(-1).AddDays(8),
+                    CreatedBy = member1.Id
+                });
+
+                // 13. VIP Post Fee - 1 month ago (another)
+                member1Balance -= 5m;
+                transactions.Add(new WalletTransaction
+                {
+                    Id = Guid.NewGuid(),
+                    WalletId = wallet1.Id,
+                    Type = WalletTransactionType.PostFee,
+                    Amount = 5m,
+                    BalanceAfter = member1Balance,
+                    Status = WalletTransactionStatus.Succeeded,
+                    PostId = posts.Count > 2 ? posts[2].Id : null,
+                    CreatedAt = DateTime.UtcNow.AddMonths(-1).AddDays(18),
+                    CreatedBy = member1.Id
+                });
+
+                // 14. VIP Post Fee - Current month
+                member1Balance -= 5m;
+                transactions.Add(new WalletTransaction
+                {
+                    Id = Guid.NewGuid(),
+                    WalletId = wallet1.Id,
+                    Type = WalletTransactionType.PostFee,
+                    Amount = 5m,
+                    BalanceAfter = member1Balance,
+                    Status = WalletTransactionStatus.Succeeded,
+                    PostId = posts.Count > 3 ? posts[3].Id : null,
+                    CreatedAt = DateTime.UtcNow.AddDays(-10),
+                    CreatedBy = member1.Id
+                });
+
+                // 15. VIP Post Fee - Current month (another)
+                member1Balance -= 5m;
+                transactions.Add(new WalletTransaction
+                {
+                    Id = Guid.NewGuid(),
+                    WalletId = wallet1.Id,
+                    Type = WalletTransactionType.PostFee,
+                    Amount = 5m,
+                    BalanceAfter = member1Balance,
+                    Status = WalletTransactionStatus.Succeeded,
+                    PostId = posts.Count > 4 ? posts[4].Id : null,
+                    CreatedAt = DateTime.UtcNow.AddDays(-5),
+                    CreatedBy = member1.Id
+                });
+
+                // 16. VIP Post Fee - Current month (third)
+                member1Balance -= 5m;
+                transactions.Add(new WalletTransaction
+                {
+                    Id = Guid.NewGuid(),
+                    WalletId = wallet1.Id,
+                    Type = WalletTransactionType.PostFee,
+                    Amount = 5m,
+                    BalanceAfter = member1Balance,
+                    Status = WalletTransactionStatus.Succeeded,
+                    PostId = posts.Count > 0 ? posts[0].Id : null,
+                    CreatedAt = DateTime.UtcNow.AddDays(-2),
                     CreatedBy = member1.Id
                 });
 
                 // Member 2 Transactions
                 var member2Balance = 75000m;
 
-                // 1. Initial balance (already set in seed)
+                // 1. Initial balance - 6 months ago
                 transactions.Add(new WalletTransaction
                 {
                     Id = Guid.NewGuid(),
@@ -1238,11 +1321,11 @@ namespace EVAuctionTrader.Presentation.Helper
                     Amount = 75000m,
                     BalanceAfter = member2Balance,
                     Status = WalletTransactionStatus.Succeeded,
-                    CreatedAt = DateTime.UtcNow.AddDays(-35),
+                    CreatedAt = DateTime.UtcNow.AddMonths(-6),
                     CreatedBy = member2.Id
                 });
 
-                // 2. VIP Post Fee
+                // 2. VIP Post Fee - 6 months ago
                 if (posts.Count > 2)
                 {
                     member2Balance -= 5m;
@@ -1255,12 +1338,74 @@ namespace EVAuctionTrader.Presentation.Helper
                         BalanceAfter = member2Balance,
                         Status = WalletTransactionStatus.Succeeded,
                         PostId = posts[2].Id,
-                        CreatedAt = DateTime.UtcNow.AddDays(-32),
+                        CreatedAt = DateTime.UtcNow.AddMonths(-6).AddDays(5),
                         CreatedBy = member2.Id
                     });
                 }
 
-                // 3. Auction Hold
+                // 3. VIP Post Fee - 5 months ago
+                if (posts.Count > 3)
+                {
+                    member2Balance -= 5m;
+                    transactions.Add(new WalletTransaction
+                    {
+                        Id = Guid.NewGuid(),
+                        WalletId = wallet2.Id,
+                        Type = WalletTransactionType.PostFee,
+                        Amount = 5m,
+                        BalanceAfter = member2Balance,
+                        Status = WalletTransactionStatus.Succeeded,
+                        PostId = posts[3].Id,
+                        CreatedAt = DateTime.UtcNow.AddMonths(-5).AddDays(8),
+                        CreatedBy = member2.Id
+                    });
+                }
+
+                // 4. Top-up - 5 months ago
+                member2Balance += 20000m;
+                transactions.Add(new WalletTransaction
+                {
+                    Id = Guid.NewGuid(),
+                    WalletId = wallet2.Id,
+                    Type = WalletTransactionType.Topup,
+                    Amount = 20000m,
+                    BalanceAfter = member2Balance,
+                    Status = WalletTransactionStatus.Succeeded,
+                    CreatedAt = DateTime.UtcNow.AddMonths(-5).AddDays(15),
+                    CreatedBy = member2.Id
+                });
+
+                // 5. VIP Post Fee - 4 months ago
+                member2Balance -= 5m;
+                transactions.Add(new WalletTransaction
+                {
+                    Id = Guid.NewGuid(),
+                    WalletId = wallet2.Id,
+                    Type = WalletTransactionType.PostFee,
+                    Amount = 5m,
+                    BalanceAfter = member2Balance,
+                    Status = WalletTransactionStatus.Succeeded,
+                    PostId = posts.Count > 4 ? posts[4].Id : posts[0].Id,
+                    CreatedAt = DateTime.UtcNow.AddMonths(-4).AddDays(6),
+                    CreatedBy = member2.Id
+                });
+
+                // 6. VIP Post Fee - 4 months ago (another)
+                member2Balance -= 5m;
+                transactions.Add(new WalletTransaction
+                {
+                    Id = Guid.NewGuid(),
+                    WalletId = wallet2.Id,
+                    Type = WalletTransactionType.PostFee,
+                    Amount = 5m,
+                    BalanceAfter = member2Balance,
+                    Status = WalletTransactionStatus.Succeeded,
+                    PostId = posts.Count > 0 ? posts[0].Id : null,
+                    CreatedAt = DateTime.UtcNow.AddMonths(-4).AddDays(14),
+                    CreatedBy = member2.Id
+                });
+
+                // 7. Auction Hold - 3 months ago
                 if (auctions.Count > 0)
                 {
                     var depositAmount = auctions[0].StartPrice * auctions[0].DepositRate;
@@ -1274,44 +1419,27 @@ namespace EVAuctionTrader.Presentation.Helper
                         BalanceAfter = member2Balance,
                         Status = WalletTransactionStatus.Succeeded,
                         AuctionId = auctions[0].Id,
-                        CreatedAt = DateTime.UtcNow.AddDays(-27),
+                        CreatedAt = DateTime.UtcNow.AddMonths(-3).AddDays(5),
                         CreatedBy = member2.Id
                     });
                 }
 
-                // 4. Top-up
-                member2Balance += 20000m;
+                // 8. VIP Post Fee - 3 months ago
+                member2Balance -= 5m;
                 transactions.Add(new WalletTransaction
                 {
                     Id = Guid.NewGuid(),
                     WalletId = wallet2.Id,
-                    Type = WalletTransactionType.Topup,
-                    Amount = 20000m,
+                    Type = WalletTransactionType.PostFee,
+                    Amount = 5m,
                     BalanceAfter = member2Balance,
                     Status = WalletTransactionStatus.Succeeded,
-                    CreatedAt = DateTime.UtcNow.AddDays(-22),
+                    PostId = posts.Count > 1 ? posts[1].Id : null,
+                    CreatedAt = DateTime.UtcNow.AddMonths(-3).AddDays(10),
                     CreatedBy = member2.Id
                 });
 
-                // 5. Another Post Fee
-                if (posts.Count > 3)
-                {
-                    member2Balance -= 5m;
-                    transactions.Add(new WalletTransaction
-                    {
-                        Id = Guid.NewGuid(),
-                        WalletId = wallet2.Id,
-                        Type = WalletTransactionType.PostFee,
-                        Amount = 5m,
-                        BalanceAfter = member2Balance,
-                        Status = WalletTransactionStatus.Succeeded,
-                        PostId = posts[3].Id,
-                        CreatedAt = DateTime.UtcNow.AddDays(-19),
-                        CreatedBy = member2.Id
-                    });
-                }
-
-                // 6. Auction Capture (Won auction)
+                // 9. Auction Capture - 3 months ago
                 if (auctions.Count > 0)
                 {
                     var captureAmount = auctions[0].CurrentPrice;
@@ -1325,12 +1453,56 @@ namespace EVAuctionTrader.Presentation.Helper
                         BalanceAfter = member2Balance,
                         Status = WalletTransactionStatus.Succeeded,
                         AuctionId = auctions[0].Id,
-                        CreatedAt = DateTime.UtcNow.AddDays(-14),
+                        CreatedAt = DateTime.UtcNow.AddMonths(-3).AddDays(18),
                         CreatedBy = member2.Id
                     });
                 }
 
-                // 7. Admin Adjustment (bonus)
+                // 10. Top-up - 2 months ago
+                member2Balance += 50000m;
+                transactions.Add(new WalletTransaction
+                {
+                    Id = Guid.NewGuid(),
+                    WalletId = wallet2.Id,
+                    Type = WalletTransactionType.Topup,
+                    Amount = 50000m,
+                    BalanceAfter = member2Balance,
+                    Status = WalletTransactionStatus.Succeeded,
+                    CreatedAt = DateTime.UtcNow.AddMonths(-2).AddDays(2),
+                    CreatedBy = member2.Id
+                });
+
+                // 11. VIP Post Fee - 2 months ago
+                member2Balance -= 5m;
+                transactions.Add(new WalletTransaction
+                {
+                    Id = Guid.NewGuid(),
+                    WalletId = wallet2.Id,
+                    Type = WalletTransactionType.PostFee,
+                    Amount = 5m,
+                    BalanceAfter = member2Balance,
+                    Status = WalletTransactionStatus.Succeeded,
+                    PostId = posts.Count > 2 ? posts[2].Id : null,
+                    CreatedAt = DateTime.UtcNow.AddMonths(-2).AddDays(9),
+                    CreatedBy = member2.Id
+                });
+
+                // 12. VIP Post Fee - 2 months ago (another)
+                member2Balance -= 5m;
+                transactions.Add(new WalletTransaction
+                {
+                    Id = Guid.NewGuid(),
+                    WalletId = wallet2.Id,
+                    Type = WalletTransactionType.PostFee,
+                    Amount = 5m,
+                    BalanceAfter = member2Balance,
+                    Status = WalletTransactionStatus.Succeeded,
+                    PostId = posts.Count > 3 ? posts[3].Id : null,
+                    CreatedAt = DateTime.UtcNow.AddMonths(-2).AddDays(16),
+                    CreatedBy = member2.Id
+                });
+
+                // 13. Admin Adjustment (bonus) - 1 month ago
                 member2Balance += 1000m;
                 transactions.Add(new WalletTransaction
                 {
@@ -1340,49 +1512,71 @@ namespace EVAuctionTrader.Presentation.Helper
                     Amount = 1000m,
                     BalanceAfter = member2Balance,
                     Status = WalletTransactionStatus.Succeeded,
-                    CreatedAt = DateTime.UtcNow.AddDays(-12),
+                    CreatedAt = DateTime.UtcNow.AddMonths(-1).AddDays(5),
                     CreatedBy = SystemUserId
                 });
 
-                // 8. Another Auction Hold
-                if (auctions.Count > 2)
+                // 14. VIP Post Fee - 1 month ago
+                member2Balance -= 5m;
+                transactions.Add(new WalletTransaction
                 {
-                    var depositAmount = auctions[2].StartPrice * auctions[2].DepositRate;
-                    member2Balance -= depositAmount;
-                    transactions.Add(new WalletTransaction
-                    {
-                        Id = Guid.NewGuid(),
-                        WalletId = wallet2.Id,
-                        Type = WalletTransactionType.AuctionHold,
-                        Amount = depositAmount,
-                        BalanceAfter = member2Balance,
-                        Status = WalletTransactionStatus.Succeeded,
-                        AuctionId = auctions[2].Id,
-                        CreatedAt = DateTime.UtcNow.AddDays(-7),
-                        CreatedBy = member2.Id
-                    });
-                }
+                    Id = Guid.NewGuid(),
+                    WalletId = wallet2.Id,
+                    Type = WalletTransactionType.PostFee,
+                    Amount = 5m,
+                    BalanceAfter = member2Balance,
+                    Status = WalletTransactionStatus.Succeeded,
+                    PostId = posts.Count > 4 ? posts[4].Id : null,
+                    CreatedAt = DateTime.UtcNow.AddMonths(-1).AddDays(12),
+                    CreatedBy = member2.Id
+                });
 
-                // 9. Deposit Release (didn't win)
-                if (auctions.Count > 2)
+                // 15. VIP Post Fee - 1 month ago (another)
+                member2Balance -= 5m;
+                transactions.Add(new WalletTransaction
                 {
-                    var releaseAmount = auctions[2].StartPrice * auctions[2].DepositRate;
-                    member2Balance += releaseAmount;
-                    transactions.Add(new WalletTransaction
-                    {
-                        Id = Guid.NewGuid(),
-                        WalletId = wallet2.Id,
-                        Type = WalletTransactionType.AuctionRelease,
-                        Amount = releaseAmount,
-                        BalanceAfter = member2Balance,
-                        Status = WalletTransactionStatus.Succeeded,
-                        AuctionId = auctions[2].Id,
-                        CreatedAt = DateTime.UtcNow.AddDays(-4),
-                        CreatedBy = member2.Id
-                    });
-                }
+                    Id = Guid.NewGuid(),
+                    WalletId = wallet2.Id,
+                    Type = WalletTransactionType.PostFee,
+                    Amount = 5m,
+                    BalanceAfter = member2Balance,
+                    Status = WalletTransactionStatus.Succeeded,
+                    PostId = posts.Count > 0 ? posts[0].Id : null,
+                    CreatedAt = DateTime.UtcNow.AddMonths(-1).AddDays(20),
+                    CreatedBy = member2.Id
+                });
 
-                // 10. Recent Top-up
+                // 16. VIP Post Fee - Current month
+                member2Balance -= 5m;
+                transactions.Add(new WalletTransaction
+                {
+                    Id = Guid.NewGuid(),
+                    WalletId = wallet2.Id,
+                    Type = WalletTransactionType.PostFee,
+                    Amount = 5m,
+                    BalanceAfter = member2Balance,
+                    Status = WalletTransactionStatus.Succeeded,
+                    PostId = posts.Count > 1 ? posts[1].Id : null,
+                    CreatedAt = DateTime.UtcNow.AddDays(-15),
+                    CreatedBy = member2.Id
+                });
+
+                // 17. VIP Post Fee - Current month (another)
+                member2Balance -= 5m;
+                transactions.Add(new WalletTransaction
+                {
+                    Id = Guid.NewGuid(),
+                    WalletId = wallet2.Id,
+                    Type = WalletTransactionType.PostFee,
+                    Amount = 5m,
+                    BalanceAfter = member2Balance,
+                    Status = WalletTransactionStatus.Succeeded,
+                    PostId = posts.Count > 2 ? posts[2].Id : null,
+                    CreatedAt = DateTime.UtcNow.AddDays(-8),
+                    CreatedBy = member2.Id
+                });
+
+                // 18. Top-up - Current month
                 member2Balance += 15000m;
                 transactions.Add(new WalletTransaction
                 {
@@ -1392,33 +1586,22 @@ namespace EVAuctionTrader.Presentation.Helper
                     Amount = 15000m,
                     BalanceAfter = member2Balance,
                     Status = WalletTransactionStatus.Succeeded,
-                    CreatedAt = DateTime.UtcNow.AddDays(-1),
+                    CreatedAt = DateTime.UtcNow.AddDays(-3),
                     CreatedBy = member2.Id
                 });
 
-                // 11. Pending transaction for Member 1
-                transactions.Add(new WalletTransaction
-                {
-                    Id = Guid.NewGuid(),
-                    WalletId = wallet1.Id,
-                    Type = WalletTransactionType.Topup,
-                    Amount = 5000m,
-                    BalanceAfter = null,
-                    Status = WalletTransactionStatus.Pending,
-                    CreatedAt = DateTime.UtcNow.AddHours(-2),
-                    CreatedBy = member1.Id
-                });
-
-                // 12. Failed transaction for Member 2
+                // 19. VIP Post Fee - Current month (recent)
+                member2Balance -= 5m;
                 transactions.Add(new WalletTransaction
                 {
                     Id = Guid.NewGuid(),
                     WalletId = wallet2.Id,
-                    Type = WalletTransactionType.Topup,
-                    Amount = 10000m,
-                    BalanceAfter = null,
-                    Status = WalletTransactionStatus.Failed,
-                    CreatedAt = DateTime.UtcNow.AddHours(-5),
+                    Type = WalletTransactionType.PostFee,
+                    Amount = 5m,
+                    BalanceAfter = member2Balance,
+                    Status = WalletTransactionStatus.Succeeded,
+                    PostId = posts.Count > 3 ? posts[3].Id : null,
+                    CreatedAt = DateTime.UtcNow.AddDays(-1),
                     CreatedBy = member2.Id
                 });
 

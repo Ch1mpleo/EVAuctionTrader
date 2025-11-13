@@ -1,0 +1,666 @@
+@page
+@model EVAuctionTrader.Presentation.Pages.Admin.RevenueModel
+@{
+    ViewData["Title"] = "Revenue Management";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/profile.css" />
+}
+
+<div class="staff-page-clean">
+    <div class="container">
+        <!-- Header -->
+        <div class="staff-header-clean">
+            <h1 class="staff-title-clean">
+                <i class="bi bi-graph-up-arrow"></i>
+                Revenue Management
+            </h1>
+            <p class="staff-subtitle-clean">Track and analyze post fee revenues</p>
+        </div>
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                @TempData["ErrorMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <!-- Filter Section -->
+        <div class="revenue-filter-card">
+            <form method="get" class="revenue-filter-form">
+                <div class="filter-group">
+                    <label for="yearSelect">
+                        <i class="bi bi-calendar"></i> Year
+                    </label>
+                    <select name="Year" id="yearSelect" class="filter-select" onchange="this.form.submit()">
+                        @foreach (var y in Model.AvailableYears)
+                        {
+                            <option value="@y" selected="@(y == Model.Year)">@y</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="monthSelect">
+                        <i class="bi bi-calendar-month"></i> Month
+                    </label>
+                    <select name="Month" id="monthSelect" class="filter-select" onchange="this.form.submit()">
+                        <option value="">All Months</option>
+                        @for (int m = 1; m <= 12; m++)
+                        {
+                            var monthName = System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(m);
+                            <option value="@m" selected="@(m == Model.Month)">@monthName</option>
+                        }
+                    </select>
+                </div>
+
+                @if (Model.Month.HasValue)
+                {
+                    <a asp-page="/Admin/Revenue" asp-route-year="@Model.Year" class="btn-clear-filter">
+                        <i class="bi bi-x-circle"></i> Clear Month Filter
+                    </a>
+                }
+            </form>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="stat-card stat-revenue">
+                    <div class="stat-icon">
+                        <i class="bi bi-currency-dollar"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-label">Total Revenue</div>
+                        <div class="stat-value">$@Model.RevenueSummary.TotalRevenue.ToString("N2")</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="stat-card stat-current-month">
+                    <div class="stat-icon">
+                        <i class="bi bi-calendar-check"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-label">Current Month</div>
+                        <div class="stat-value">$@Model.RevenueSummary.CurrentMonthRevenue.ToString("N2")</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="stat-card stat-growth">
+                    <div class="stat-icon">
+                        <i class="bi bi-graph-up"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-label">Growth</div>
+                        <div class="stat-value @(Model.RevenueSummary.GrowthPercentage >= 0 ? "text-success" : "text-danger")">
+                            @Model.RevenueSummary.GrowthPercentage.ToString("N2")%
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="stat-card stat-transactions">
+                    <div class="stat-icon">
+                        <i class="bi bi-receipt"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-label">Total Transactions</div>
+                        <div class="stat-value">@Model.RevenueSummary.TotalTransactions</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart Section -->
+        <div class="row g-4 mb-4">
+            <div class="col-lg-12">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title">
+                            <i class="bi bi-bar-chart-line"></i>
+                            @if (Model.Month.HasValue)
+                            {
+                                <text>Daily Revenue Trend - @System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(Model.Month.Value) @Model.Year</text>
+                            }
+                            else
+                            {
+                                <text>Monthly Revenue Trend - @Model.Year</text>
+                            }
+                        </h3>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Revenue Details Table -->
+        <div class="staff-card-clean">
+            <div class="table-header">
+                <h3 class="table-title">
+                    <i class="bi bi-list-ul"></i>
+                    Revenue Transactions
+                </h3>
+            </div>
+
+            @if (Model.RevenueDetails != null && Model.RevenueDetails.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table-clean">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>User</th>
+                                <th>Post</th>
+                                <th>Amount</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var detail in Model.RevenueDetails)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="date-cell">
+                                            <div class="date-primary">@detail.CreatedAt.ToString("MMM dd, yyyy")</div>
+                                            <div class="date-secondary">@detail.CreatedAt.ToString("hh:mm tt")</div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="user-cell">
+                                            <i class="bi bi-person-circle"></i>
+                                            <span>@detail.UserName</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="post-cell">
+                                            @(detail.PostTitle.Length > 50 ? detail.PostTitle.Substring(0, 50) + "..." : detail.PostTitle)
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="amount-badge">$@detail.Amount.ToString("N2")</span>
+                                    </td>
+                                    <td>
+                                        <a asp-page="/PostPages/Details" asp-route-id="@detail.PostId" 
+                                           class="btn-action" title="View Post">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                @if (Model.RevenueDetails.TotalPages > 1)
+                {
+                    <div class="pagination-clean">
+                        @if (Model.RevenueDetails.HasPrevious)
+                        {
+                            <a asp-page="/Admin/Revenue"
+                               asp-route-pageNumber="@(Model.RevenueDetails.CurrentPage - 1)"
+                               asp-route-year="@Model.Year"
+                               asp-route-month="@Model.Month"
+                               class="page-btn-clean">
+                                <i class="bi bi-chevron-left"></i> Previous
+                            </a>
+                        }
+
+                        <span class="page-info-clean">
+                            Page @Model.RevenueDetails.CurrentPage of @Model.RevenueDetails.TotalPages
+                        </span>
+
+                        @if (Model.RevenueDetails.HasNext)
+                        {
+                            <a asp-page="/Admin/Revenue"
+                               asp-route-pageNumber="@(Model.RevenueDetails.CurrentPage + 1)"
+                               asp-route-year="@Model.Year"
+                               asp-route-month="@Model.Month"
+                               class="page-btn-clean">
+                                Next <i class="bi bi-chevron-right"></i>
+                            </a>
+                        }
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="empty-state-clean">
+                    <i class="bi bi-inbox empty-icon-clean"></i>
+                    <h3 class="empty-title-clean">No Transactions Found</h3>
+                    <p class="empty-description-clean">There are no revenue transactions for the selected period.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        // Wait for Chart.js to load
+        (function() {
+            'use strict';
+            
+            // Check if Chart is available
+            if (typeof Chart === 'undefined') {
+                console.error('Chart.js library failed to load');
+                return;
+            }
+
+            // Get filter state
+            const isMonthFiltered = @(Model.Month.HasValue ? "true" : "false");
+            
+            // Revenue Chart Data with explicit camelCase serialization
+            const monthlyData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.RevenueSummary.MonthlyRevenues, new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase }));
+            const dailyData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.RevenueSummary.DailyRevenues, new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase }));
+            
+            console.log('Is Month Filtered:', isMonthFiltered);
+            console.log('Monthly Data:', monthlyData);
+            console.log('Daily Data:', dailyData);
+
+            // Check if chart container exists
+            const chartCanvas = document.getElementById('revenueChart');
+            if (!chartCanvas) {
+                console.error('Chart canvas element with id "revenueChart" not found');
+                return;
+            }
+
+            // Determine which data to use
+            let chartData = isMonthFiltered ? dailyData : monthlyData;
+            let dataType = isMonthFiltered ? 'daily' : 'monthly';
+
+            console.log('Using ' + dataType + ' data, count:', chartData ? chartData.length : 0);
+
+            // Check if we have data
+            if (!chartData || chartData.length === 0) {
+                console.warn('No ' + dataType + ' data available for chart');
+                chartCanvas.parentElement.innerHTML = '<div style="padding: 3rem; text-align: center; color: #888;"><i class="bi bi-info-circle" style="font-size: 3rem; margin-bottom: 1rem; display: block;"></i><p>No revenue data available for the selected period.</p></div>';
+                return;
+            }
+
+            try {
+                // Prepare chart data based on type
+                let labels, dataValues;
+                
+                if (isMonthFiltered) {
+                    // Daily view
+                    labels = dailyData.map(d => d.dateLabel || 'Unknown');
+                    dataValues = dailyData.map(d => d.totalRevenue || 0);
+                } else {
+                    // Monthly view
+                    labels = monthlyData.map(m => m.monthName || 'Unknown');
+                    dataValues = monthlyData.map(m => m.totalRevenue || 0);
+                }
+                
+                console.log('Chart Labels:', labels);
+                console.log('Chart Values:', dataValues);
+
+                // Create the chart
+                const revenueCtx = chartCanvas.getContext('2d');
+                const revenueChart = new Chart(revenueCtx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Revenue ($)',
+                            data: dataValues,
+                            borderColor: '#0070f3',
+                            backgroundColor: 'rgba(0, 112, 243, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            pointRadius: isMonthFiltered ? 3 : 5,
+                            pointHoverRadius: isMonthFiltered ? 5 : 7,
+                            pointBackgroundColor: '#0070f3',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                padding: 12,
+                                titleColor: '#fff',
+                                bodyColor: '#fff',
+                                borderColor: '#0070f3',
+                                borderWidth: 1,
+                                callbacks: {
+                                    label: function(context) {
+                                        return 'Revenue: $' + context.parsed.y.toFixed(2);
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return '$' + value.toFixed(0);
+                                    },
+                                    color: '#888'
+                                },
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.05)'
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    color: '#888',
+                                    maxRotation: isMonthFiltered ? 45 : 0,
+                                    minRotation: isMonthFiltered ? 45 : 0
+                                },
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.05)'
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                console.log('? Revenue chart (' + dataType + ') rendered successfully');
+            } catch (error) {
+                console.error('? Error creating chart:', error);
+                chartCanvas.parentElement.innerHTML = '<div style="padding: 3rem; text-align: center; color: #dc3545;"><i class="bi bi-exclamation-triangle" style="font-size: 3rem; margin-bottom: 1rem; display: block;"></i><p>Error rendering chart. Please check console for details.</p></div>';
+            }
+        })();
+    </script>
+}
+
+<style>
+    /* Revenue Filter Card */
+    .revenue-filter-card {
+        background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+        border: 1px solid #3a3a3a;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .revenue-filter-form {
+        display: flex;
+        align-items: flex-end;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        min-width: 200px;
+    }
+
+    .filter-group label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #aaa;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .filter-select {
+        padding: 0.75rem 1rem;
+        background: #0a0a0a;
+        border: 1px solid #2a2a2a;
+        border-radius: 8px;
+        color: #fff;
+        font-size: 0.9375rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .filter-select:focus {
+        outline: none;
+        border-color: #0070f3;
+        box-shadow: 0 0 0 3px rgba(0, 112, 243, 0.1);
+    }
+
+    .filter-select option {
+        background: #1a1a1a;
+        color: #fff;
+    }
+
+    .btn-clear-filter {
+        padding: 0.75rem 1.25rem;
+        background: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-clear-filter:hover {
+        background: #c82333;
+        transform: translateY(-2px);
+        color: white;
+    }
+
+    /* Stats Cards */
+    .stat-card {
+        background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+        border: 1px solid #3a3a3a;
+        border-radius: 12px;
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: all 0.3s;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0, 112, 243, 0.15);
+    }
+
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        font-size: 1.75rem;
+        flex-shrink: 0;
+    }
+
+    .stat-revenue .stat-icon {
+        background: linear-gradient(135deg, #00d4aa 0%, #00ab8a 100%);
+        color: white;
+    }
+
+    .stat-current-month .stat-icon {
+        background: linear-gradient(135deg, #0070f3 0%, #0051cc 100%);
+        color: white;
+    }
+
+    .stat-growth .stat-icon {
+        background: linear-gradient(135deg, #ffbb33 0%, #ff9933 100%);
+        color: white;
+    }
+
+    .stat-transactions .stat-icon {
+        background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+        color: white;
+    }
+
+    .stat-info {
+        flex: 1;
+    }
+
+    .stat-label {
+        font-size: 0.875rem;
+        color: #888;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .stat-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #fff;
+    }
+
+    /* Chart Card */
+    .chart-card {
+        background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+        border: 1px solid #3a3a3a;
+        border-radius: 12px;
+        overflow: hidden;
+        height: 100%;
+    }
+
+    .chart-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid #3a3a3a;
+    }
+
+    .chart-title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #fff;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .chart-title i {
+        color: #0070f3;
+    }
+
+    .chart-body {
+        padding: 1.5rem;
+    }
+
+    /* Table Styles */
+    .table-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid #2a2a2a;
+    }
+
+    .table-title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #fff;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .table-title i {
+        color: #0070f3;
+    }
+
+    .date-cell {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .date-primary {
+        font-weight: 600;
+        color: #fff;
+        font-size: 0.9375rem;
+    }
+
+    .date-secondary {
+        font-size: 0.8125rem;
+        color: #888;
+    }
+
+    .user-cell {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #fff;
+    }
+
+    .user-cell i {
+        font-size: 1.25rem;
+        color: #0070f3;
+    }
+
+    .post-cell {
+        color: #aaa;
+        font-size: 0.9375rem;
+    }
+
+    .amount-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.375rem 0.875rem;
+        background: linear-gradient(135deg, #00d4aa 0%, #00ab8a 100%);
+        color: white;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9375rem;
+    }
+
+    .btn-action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        background: #0070f3;
+        color: white;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .btn-action:hover {
+        background: #0088ff;
+        transform: translateY(-2px);
+        color: white;
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .revenue-filter-form {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .filter-group {
+            min-width: 100%;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            font-size: 1.5rem;
+        }
+    }
+</style>
