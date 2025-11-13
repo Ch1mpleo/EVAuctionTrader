@@ -19,6 +19,21 @@
     const backBtn = document.getElementById('backBtn');
     const conversationHeaderInfo = document.getElementById('conversationHeaderInfo');
 
+    // ✅ Get auth token from session (for SignalR only)
+    function getAuthToken() {
+        let token = sessionStorage.getItem('AuthToken');
+
+        if (!token) {
+            const metaToken = document.querySelector('meta[name="auth-token"]');
+            if (metaToken) {
+                token = metaToken.getAttribute('content');
+                sessionStorage.setItem('AuthToken', token);
+            }
+        }
+
+        return token || '';
+    }
+
     // ✅ Initialize SignalR connection
     async function initializeSignalR() {
         const token = getAuthToken();
@@ -68,24 +83,6 @@
         }
     }
 
-    // ✅ Get auth token from session
-    function getAuthToken() {
-        // Try sessionStorage first (for SignalR)
-        let token = sessionStorage.getItem('AuthToken');
-
-        // Fallback: try to get from a meta tag or cookie if needed
-        if (!token) {
-            // You might need to set this in your _Layout.cshtml
-            const metaToken = document.querySelector('meta[name="auth-token"]');
-            if (metaToken) {
-                token = metaToken.getAttribute('content');
-                sessionStorage.setItem('AuthToken', token);
-            }
-        }
-
-        return token || '';
-    }
-
     // ✅ Show connection status
     function showConnectionStatus(status) {
         console.log(`Chat status: ${status}`);
@@ -103,19 +100,57 @@
         }
     }
 
+    // ✅ Show authentication error
+    function showAuthError() {
+        if (conversationsList) {
+            conversationsList.innerHTML = `
+                <div class="empty-state error-state">
+                    <i class="bi bi-shield-exclamation text-danger"></i>
+                    <p>Authentication required</p>
+                    <a href="/Auth/Login" class="btn btn-sm btn-primary mt-2">Login</a>
+                </div>
+            `;
+        }
+    }
+
     // ✅ Expose reload function globally
     window.chatReloadConversations = loadConversations;
 
-    // ✅ Load conversations using Razor Pages handler
+    // ✅ Load conversations using Razor Pages handler (session cookie auth)
     async function loadConversations() {
         try {
-            const response = await fetch('/Chat/Conversations');
+            console.log('🔍 Loading conversations...');
+            
+            const response = await fetch('/Chat/Conversations', {
+                method: 'GET',
+                credentials: 'include',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+
+            console.log('📡 Response status:', response.status);
+            console.log('📡 Response headers:', response.headers.get('content-type'));
 
             if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
+                const contentType = response.headers.get('content-type');
+                
+                // ✅ Log the actual response for debugging
+                const responseText = await response.text();
+                console.error('❌ Response (first 500 chars):', responseText.substring(0, 500));
+                
+                if (contentType && contentType.includes('text/html')) {
+                    console.error('Received HTML instead of JSON - user might not be authenticated');
+                    showAuthError();
+                    return;
+                }
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
 
-            conversations = await response.json();
+            const responseText = await response.text();
+            console.log('✅ Response text (first 200 chars):', responseText.substring(0, 200));
+            
+            conversations = JSON.parse(responseText);
             renderConversations();
             updateUnreadCount();
         } catch (err) {
@@ -182,7 +217,6 @@
         const otherUser = getCurrentUserId() === conversation.buyerId ? conversation.sellerName : conversation.buyerName;
 
         if (conversationHeaderInfo) {
-            // ✅ Hiển thị thông tin chi tiết với hình ảnh sản phẩm
             const postImageHtml = conversation.postPhotoUrl 
                 ? `<img src="${escapeHtml(conversation.postPhotoUrl)}" alt="Product" class="post-image-header" onerror="this.style.display='none';">`
                 : '';
@@ -205,13 +239,24 @@
         await markAsRead(conversationId);
     }
 
-    // ✅ Load messages using Razor Pages handler
+    // ✅ Load messages using Razor Pages handler (session cookie auth)
     async function loadMessages(conversationId) {
         try {
-            const response = await fetch(`/Chat/Conversations?handler=Messages&id=${conversationId}`);
+            const response = await fetch(`/Chat/Conversations?handler=Messages&id=${conversationId}`, {
+                method: 'GET',
+                credentials: 'include',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
 
             if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('text/html')) {
+                    console.error('Received HTML instead of JSON when loading messages');
+                    return;
+                }
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
 
             const messages = await response.json();
@@ -303,7 +348,6 @@
     // ✅ SignalR event handlers
     function onReceiveMessage(message) {
         if (message.conversationId === currentConversationId) {
-            // ✅ FIX: Tự xác định isCurrentUser dựa trên senderId
             const currentUserId = getCurrentUserId();
             const isCurrentUserMessage = message.senderId === currentUserId;
 
@@ -324,14 +368,11 @@
                 messagesList.scrollTop = messagesList.scrollHeight;
             }
 
-            // Mark as read nếu tin nhắn từ người khác
             if (!isCurrentUserMessage) {
                 markAsRead(currentConversationId);
             }
         }
         
-        // ✅ FIX NOTIFICATION: Luôn reload conversations khi có tin nhắn mới
-        // Điều này đảm bảo badge và danh sách được cập nhật ngay lập tức
         loadConversations().then(() => {
             updateUnreadCount();
         });

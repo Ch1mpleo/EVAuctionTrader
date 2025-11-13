@@ -159,6 +159,48 @@ namespace EVAuctionTrader.Presentation.Pages.PostPages
                 return RedirectToPage(new { id = Id });
             }
         }
+
+        public async Task<IActionResult> OnPostCreateConversationAsync([FromBody] CreateConversationDto dto)
+        {
+            try
+            {
+                if (!User.Identity?.IsAuthenticated ?? true)
+                {
+                    return new JsonResult(new { error = "You must be logged in to contact the seller" })
+                    {
+                        StatusCode = 401
+                    };
+                }
+
+                if (dto == null || dto.PostId == Guid.Empty)
+                {
+                    return new JsonResult(new { error = "Invalid request data" })
+                    {
+                        StatusCode = 400
+                    };
+                }
+
+                var conversation = await _chatService.CreateOrGetConversationAsync(dto);
+
+                if (conversation == null)
+                {
+                    return new JsonResult(new { error = "Failed to create conversation. You may be trying to contact yourself." })
+                    {
+                        StatusCode = 400
+                    };
+                }
+
+                return new JsonResult(conversation);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating conversation for post {PostId}", dto?.PostId);
+                return new JsonResult(new { error = "An error occurred while creating the conversation" })
+                {
+                    StatusCode = 500
+                };
+            }
+        }
     }
 
     // DTO cho request
