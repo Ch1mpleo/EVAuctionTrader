@@ -16,8 +16,8 @@ Nền tảng đấu giá và mua bán xe điện (Electric Vehicle) và pin đã
 ```
 EVAuctionTrader/
 ├── EVAuctionTrader.Business/          # Business Logic & Services
-├── EVAuctionTrader.BusinessObject/    # DTOs & Entities
-├── EVAuctionTrader.DataAccess/        # Database Context & Repositories
+├── EVAuctionTrader.BusinessObject/    # DTOs & Enums
+├── EVAuctionTrader.DataAccess/        # Database Context & Repositories & Entities
 ├── EVAuctionTrader.Presentation/      # Razor Pages & UI
 └── docker-compose.yml                 # Docker configuration
 ```
