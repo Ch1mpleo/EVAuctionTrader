@@ -35,16 +35,16 @@ public sealed class PostService : IPostService
         try
         {
             _logger.LogInformation("Creating a new post.");
-            
+
             if (createPostDto == null)
             {
                 _logger.LogWarning("CreatePostAsync failed: createPostDto is null.");
                 throw new ArgumentNullException(nameof(createPostDto));
             }
-            
+
             var authorId = _claimsService.GetCurrentUserId;
             var author = await _unitOfWork.Users.GetByIdAsync(authorId, x => x.Wallets);
-            
+
             if (author == null)
             {
                 _logger.LogWarning($"CreatePostAsync failed: Author with ID {authorId} not found.");
@@ -95,7 +95,7 @@ public sealed class PostService : IPostService
                     v.ConditionGrade == createPostDto.Vehicle.ConditionGrade &&
                     !v.IsDeleted
                 );
-                
+
                 if (checkVehicle != null)
                 {
                     vehicleEntity = checkVehicle;
@@ -129,7 +129,7 @@ public sealed class PostService : IPostService
                     b.ConnectorType == createPostDto.Battery.ConnectorType &&
                     !b.IsDeleted
                 );
-                
+
                 if (checkBattery != null)
                 {
                     batteryEntity = checkBattery;
@@ -328,9 +328,14 @@ public sealed class PostService : IPostService
                 query = query.Where(p => p.Title.ToLower().Contains(search) || p.LocationAddress.ToLower().Contains(search));
             }
 
-            query = priceSort
-                ? query.OrderBy(p => p.Price)
-                : query.OrderByDescending(p => p.Price);
+            if (priceSort)
+            {
+                query = query.OrderByDescending(p => p.Version).ThenBy(p => p.Price);
+            }
+            else
+            {
+                query = query.OrderByDescending(p => p.Version).ThenByDescending(p => p.Price);
+            }
 
             var totalCount = await query.CountAsync();
 
@@ -430,11 +435,11 @@ public sealed class PostService : IPostService
         try
         {
             _logger.LogInformation("Retrieving paginated list of posts for member.");
-            
+
             var currentUserId = _claimsService.GetCurrentUserId;
             var query = _unitOfWork.Posts.GetQueryable()
                 .Where(q => !q.IsDeleted && q.AuthorId == currentUserId);
-            
+
             _logger.LogInformation($"Filtering posts by current user ID: {currentUserId}");
 
             if (postType.HasValue)
@@ -553,7 +558,7 @@ public sealed class PostService : IPostService
         try
         {
             _logger.LogInformation($"Retrieving post with ID: {postId}");
-            
+
             var postEntity = await _unitOfWork.Posts.GetByIdAsync(postId);
 
             if (postEntity == null || postEntity.IsDeleted)
@@ -661,7 +666,7 @@ public sealed class PostService : IPostService
         try
         {
             _logger.LogInformation($"Updating post with ID: {postId}");
-            
+
             if (updatePostDto == null)
             {
                 _logger.LogWarning("UpdatePostAsync failed: updatePostDto is null.");
@@ -940,7 +945,7 @@ public sealed class PostService : IPostService
         try
         {
             _logger.LogInformation($"Updating status of post with ID: {postId} to {newStatus}");
-            
+
             var postEntity = await _unitOfWork.Posts.GetByIdAsync(postId);
 
             if (postEntity == null || postEntity.IsDeleted || postEntity.Status == PostStatus.Removed)
